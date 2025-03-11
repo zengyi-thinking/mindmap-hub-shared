@@ -1,7 +1,6 @@
-
 import React, { useState } from 'react';
 import { cn } from '@/lib/utils';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { 
   LayoutDashboard, 
   Brain, 
@@ -13,10 +12,21 @@ import {
   Users, 
   ChevronLeft,
   ChevronRight,
-  Menu
+  Menu,
+  LogOut
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '@/components/ui/button';
+import { useAuth } from '@/lib/auth';
+import { 
+  DropdownMenu, 
+  DropdownMenuContent, 
+  DropdownMenuItem, 
+  DropdownMenuLabel, 
+  DropdownMenuSeparator, 
+  DropdownMenuTrigger 
+} from '@/components/ui/dropdown-menu';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 
 type NavItem = {
   title: string;
@@ -78,6 +88,8 @@ export function Sidebar({ className }: SidebarProps) {
   const [expanded, setExpanded] = useState(true);
   const [mobileOpen, setMobileOpen] = useState(false);
   const location = useLocation();
+  const navigate = useNavigate();
+  const { user, logout, isAdmin } = useAuth();
 
   const toggleSidebar = () => {
     setExpanded(!expanded);
@@ -87,8 +99,13 @@ export function Sidebar({ className }: SidebarProps) {
     setMobileOpen(!mobileOpen);
   };
 
-  // Show admin items for demo purposes - in a real app, you'd check user permissions
-  const showAdminItems = true;
+  const handleLogout = () => {
+    logout();
+    navigate('/login');
+  };
+
+  // 使用isAdmin函数检查用户是否为管理员
+  const showAdminItems = isAdmin();
 
   return (
     <>
@@ -231,6 +248,58 @@ export function Sidebar({ className }: SidebarProps) {
               })}
           </ul>
         </nav>
+        
+        {/* 用户个人信息和登出按钮 */}
+        <div className="border-t border-sidebar-border p-4">
+          {user && (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button 
+                  variant="ghost" 
+                  className={cn(
+                    "w-full flex items-center justify-start gap-2 px-3",
+                    !expanded && "justify-center"
+                  )}
+                >
+                  <Avatar className="h-8 w-8">
+                    <AvatarFallback className="bg-primary text-primary-foreground">
+                      {user.username.substring(0, 2).toUpperCase()}
+                    </AvatarFallback>
+                  </Avatar>
+                  
+                  <AnimatePresence>
+                    {expanded && (
+                      <motion.div 
+                        initial={{ opacity: 0, width: 0 }}
+                        animate={{ opacity: 1, width: "auto" }}
+                        exit={{ opacity: 0, width: 0 }}
+                        className="flex flex-col items-start overflow-hidden"
+                      >
+                        <span className="text-sm font-medium">{user.username}</span>
+                        <span className="text-xs text-muted-foreground">
+                          {user.role === 'admin' ? '管理员' : '用户'}
+                        </span>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </Button>
+              </DropdownMenuTrigger>
+              
+              <DropdownMenuContent align="end" className="w-56">
+                <DropdownMenuLabel>我的账户</DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={() => navigate('/profile')}>
+                  <User className="mr-2 h-4 w-4" />
+                  个人中心
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={handleLogout}>
+                  <LogOut className="mr-2 h-4 w-4" />
+                  退出登录
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          )}
+        </div>
       </motion.aside>
     </>
   );
