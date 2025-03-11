@@ -11,9 +11,10 @@ import { tagHierarchy } from '@/data/tagHierarchy';
 interface TagSelectorProps {
   selectedTags: string[];
   onTagsChange: (tags: string[]) => void;
+  disabled?: boolean;
 }
 
-const TagSelector: React.FC<TagSelectorProps> = ({ selectedTags, onTagsChange }) => {
+const TagSelector: React.FC<TagSelectorProps> = ({ selectedTags, onTagsChange, disabled = false }) => {
   const [selectedLevel1, setSelectedLevel1] = React.useState<string | null>(null);
   const [selectedLevel2, setSelectedLevel2] = React.useState<string | null>(null);
   const [customTag, setCustomTag] = React.useState('');
@@ -65,7 +66,7 @@ const TagSelector: React.FC<TagSelectorProps> = ({ selectedTags, onTagsChange })
     <div className="grid w-full gap-3">
       <Label className="mb-1">添加分级标签</Label>
       
-      <div className="border rounded-md p-4 space-y-4">
+      <div className={`border rounded-md p-4 space-y-4 ${disabled ? 'opacity-70' : ''}`}>
         <div>
           <Label className="text-xs text-muted-foreground mb-2 block">第一级标签</Label>
           <div className="flex flex-wrap gap-2">
@@ -73,8 +74,9 @@ const TagSelector: React.FC<TagSelectorProps> = ({ selectedTags, onTagsChange })
               <Badge
                 key={tag}
                 variant={selectedLevel1 === tag ? "default" : "outline"}
-                className="cursor-pointer hover:bg-primary hover:text-primary-foreground transition-colors"
+                className={`cursor-pointer hover:bg-primary hover:text-primary-foreground transition-colors ${disabled ? 'pointer-events-none' : ''}`}
                 onClick={() => {
+                  if (disabled) return;
                   setSelectedLevel1(selectedLevel1 === tag ? null : tag);
                   setSelectedLevel2(null);
                 }}
@@ -93,8 +95,9 @@ const TagSelector: React.FC<TagSelectorProps> = ({ selectedTags, onTagsChange })
                 <Badge
                   key={tag}
                   variant={selectedLevel2 === tag ? "default" : "outline"}
-                  className="cursor-pointer hover:bg-primary hover:text-primary-foreground transition-colors"
+                  className={`cursor-pointer hover:bg-primary hover:text-primary-foreground transition-colors ${disabled ? 'pointer-events-none' : ''}`}
                   onClick={() => {
+                    if (disabled) return;
                     setSelectedLevel2(selectedLevel2 === tag ? null : tag);
                   }}
                 >
@@ -113,8 +116,9 @@ const TagSelector: React.FC<TagSelectorProps> = ({ selectedTags, onTagsChange })
                 <Badge
                   key={tag}
                   variant={selectedTags.includes(getTagPath(tag)) ? "default" : "outline"}
-                  className="cursor-pointer hover:bg-primary hover:text-primary-foreground transition-colors"
+                  className={`cursor-pointer hover:bg-primary hover:text-primary-foreground transition-colors ${disabled ? 'pointer-events-none' : ''}`}
                   onClick={() => {
+                    if (disabled) return;
                     const fullTag = getTagPath(tag);
                     if (selectedTags.includes(fullTag)) {
                       removeTag(fullTag);
@@ -124,7 +128,7 @@ const TagSelector: React.FC<TagSelectorProps> = ({ selectedTags, onTagsChange })
                   }}
                 >
                   {tag}
-                  {selectedTags.includes(getTagPath(tag)) && (
+                  {selectedTags.includes(getTagPath(tag)) && !disabled && (
                     <X className="ml-1 h-3 w-3" />
                   )}
                 </Badge>
@@ -139,12 +143,15 @@ const TagSelector: React.FC<TagSelectorProps> = ({ selectedTags, onTagsChange })
             {selectedTags.map(tag => (
               <Badge key={tag} variant="secondary" className="flex items-center gap-1">
                 {tag}
-                <button
-                  onClick={() => removeTag(tag)}
-                  className="ml-1 rounded-full hover:bg-accent p-0.5"
-                >
-                  <X className="h-3 w-3" />
-                </button>
+                {!disabled && (
+                  <button
+                    onClick={() => removeTag(tag)}
+                    className="ml-1 rounded-full hover:bg-accent p-0.5"
+                    disabled={disabled}
+                  >
+                    <X className="h-3 w-3" />
+                  </button>
+                )}
               </Badge>
             ))}
             {selectedTags.length === 0 && (
@@ -166,11 +173,13 @@ const TagSelector: React.FC<TagSelectorProps> = ({ selectedTags, onTagsChange })
                   handleAddCustomTag();
                 }
               }}
+              disabled={disabled}
             />
             <Button
               type="button"
               variant="secondary"
               onClick={handleAddCustomTag}
+              disabled={disabled}
             >
               添加
             </Button>

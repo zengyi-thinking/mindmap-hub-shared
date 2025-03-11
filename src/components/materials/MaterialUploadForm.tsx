@@ -5,10 +5,11 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { Upload } from 'lucide-react';
+import { Upload, Check, AlertCircle } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import TagSelector from './TagSelector';
 import FileUploader from './FileUploader';
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 const MaterialUploadForm: React.FC = () => {
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
@@ -17,21 +18,26 @@ const MaterialUploadForm: React.FC = () => {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [isUploading, setIsUploading] = useState(false);
+  const [uploadSuccess, setUploadSuccess] = useState(false);
+  const [uploadError, setUploadError] = useState<string | null>(null);
   
   const simulateUpload = () => {
     setIsUploading(true);
     setUploadProgress(0);
+    setUploadSuccess(false);
+    setUploadError(null);
     
     const interval = setInterval(() => {
       setUploadProgress(prev => {
         if (prev >= 100) {
           clearInterval(interval);
           setIsUploading(false);
+          setUploadSuccess(true);
           return 100;
         }
-        return prev + 10;
+        return prev + 5;
       });
-    }, 300);
+    }, 200);
   };
   
   const handleUpload = () => {
@@ -59,22 +65,52 @@ const MaterialUploadForm: React.FC = () => {
       return;
     }
     
+    // Validate file size (max 50MB)
+    if (selectedFile.size > 50 * 1024 * 1024) {
+      toast({
+        title: "文件过大",
+        description: "上传文件大小不能超过50MB",
+        variant: "destructive"
+      });
+      return;
+    }
+    
     // Simulate file upload
     simulateUpload();
     
     // Here we would handle the actual upload
     setTimeout(() => {
-      toast({
-        title: "上传成功",
-        description: "您的资料已成功上传，正在等待审核",
-      });
-      
-      // Reset form
-      setTitle('');
-      setDescription('');
-      setSelectedTags([]);
-      setSelectedFile(null);
+      // 95% chance of success, 5% chance of failure (for demo purposes)
+      if (Math.random() > 0.05) {
+        toast({
+          title: "上传成功",
+          description: "您的资料已成功上传，正在等待审核",
+        });
+        
+        // Reset form
+        setTitle('');
+        setDescription('');
+        setSelectedTags([]);
+        setSelectedFile(null);
+      } else {
+        setUploadError("网络错误，请稍后重试");
+        setUploadSuccess(false);
+        toast({
+          title: "上传失败",
+          description: "网络错误，请稍后重试",
+          variant: "destructive"
+        });
+      }
     }, 3500);
+  };
+  
+  const resetForm = () => {
+    setTitle('');
+    setDescription('');
+    setSelectedTags([]);
+    setSelectedFile(null);
+    setUploadSuccess(false);
+    setUploadError(null);
   };
   
   return (
@@ -86,6 +122,26 @@ const MaterialUploadForm: React.FC = () => {
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
+        {uploadSuccess && (
+          <Alert className="border-green-500 text-green-500">
+            <Check className="h-4 w-4" />
+            <AlertTitle>上传成功</AlertTitle>
+            <AlertDescription>
+              您的资料已成功上传，正在等待审核通过
+            </AlertDescription>
+          </Alert>
+        )}
+        
+        {uploadError && (
+          <Alert variant="destructive">
+            <AlertCircle className="h-4 w-4" />
+            <AlertTitle>上传失败</AlertTitle>
+            <AlertDescription>
+              {uploadError}
+            </AlertDescription>
+          </Alert>
+        )}
+        
         <div className="grid w-full gap-1.5">
           <Label htmlFor="title">资料标题</Label>
           <Input
@@ -93,6 +149,7 @@ const MaterialUploadForm: React.FC = () => {
             placeholder="输入资料标题"
             value={title}
             onChange={(e) => setTitle(e.target.value)}
+            disabled={isUploading}
           />
         </div>
         
@@ -104,12 +161,14 @@ const MaterialUploadForm: React.FC = () => {
             value={description}
             onChange={(e) => setDescription(e.target.value)}
             rows={4}
+            disabled={isUploading}
           />
         </div>
         
         <TagSelector 
           selectedTags={selectedTags} 
-          onTagsChange={setSelectedTags} 
+          onTagsChange={setSelectedTags}
+          disabled={isUploading}
         />
         
         <FileUploader 
@@ -118,29 +177,53 @@ const MaterialUploadForm: React.FC = () => {
         />
         
         {isUploading && (
-          <div className="w-full bg-secondary rounded-full h-2.5 mt-2">
-            <div 
-              className="bg-primary h-2.5 rounded-full transition-all duration-300"
-              style={{ width: `${uploadProgress}%` }}
-            ></div>
-          </div>
+          <>
+            <div className="flex justify-between text-sm mb-1">
+              <span>上传中...</span>
+              <span>{uploadProgress}%</span>
+            </div>
+            <div className="w-full bg-secondary rounded-full h-2.5">
+              <div 
+                className="bg-primary h-2.5 rounded-full transition-all duration-300"
+                style={{ width: `${uploadProgress}%` }}
+              ></div>
+            </div>
+          </>
         )}
       </CardContent>
-      <CardFooter className="flex justify-end">
-        <Button 
-          onClick={handleUpload} 
-          className="flex items-center gap-2"
-          disabled={isUploading}
-        >
-          {isUploading ? (
-            <>上传中...({uploadProgress}%)</>
-          ) : (
-            <>
-              <Upload className="h-4 w-4" />
-              上传资料
-            </>
-          )}
-        </Button>
+      <CardFooter className="flex justify-between">
+        {uploadSuccess ? (
+          <Button 
+            onClick={resetForm} 
+            variant="outline"
+          >
+            上传新资料
+          </Button>
+        ) : (
+          <>
+            <Button 
+              variant="outline" 
+              onClick={resetForm}
+              disabled={isUploading}
+            >
+              重置表单
+            </Button>
+            <Button 
+              onClick={handleUpload} 
+              className="flex items-center gap-2"
+              disabled={isUploading}
+            >
+              {isUploading ? (
+                <>上传中...({uploadProgress}%)</>
+              ) : (
+                <>
+                  <Upload className="h-4 w-4" />
+                  上传资料
+                </>
+              )}
+            </Button>
+          </>
+        )}
       </CardFooter>
     </Card>
   );
