@@ -32,7 +32,7 @@ const navItems: NavItem[] = [
     path: '/dashboard',
   },
   {
-    title: '我的思维导图',
+    title: '资料思维化搜索',
     icon: Brain,
     path: '/mindmaps',
   },

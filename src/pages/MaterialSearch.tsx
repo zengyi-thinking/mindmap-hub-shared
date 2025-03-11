@@ -19,7 +19,9 @@ const MaterialSearch = () => {
     '计算机科学', '软件工程', '人工智能', '机器学习', 
     '数据结构', '算法', '操作系统', '计算机网络',
     '数据库', '前端开发', '后端开发', '移动开发',
-    '云计算', '分布式系统', '网络安全', '编程语言'
+    '云计算', '分布式系统', '网络安全', '编程语言',
+    '比赛', '数学建模', '比赛规则', '历年真题',
+    '获奖作品', '比赛注意事项', '程序设计', '创新创业'
   ];
 
   const toggleTag = (tag: string) => {
@@ -46,9 +48,9 @@ const MaterialSearch = () => {
   const generateMindMap = (): { nodes: Node[], edges: Edge[] } => {
     const tags = selectedTags.length > 0 
       ? selectedTags 
-      : ['计算机科学', '软件工程', '数据结构', '算法']; // Default tags if none selected
+      : ['比赛', '数学建模', '程序设计', '创新创业']; // Default tags if none selected
     
-    const query = searchQuery || '学习资料';
+    const query = searchQuery || '比赛资料';
     
     // Central node (search query)
     const nodes: Node[] = [
@@ -94,7 +96,7 @@ const MaterialSearch = () => {
         data: { label: tag },
         position: { x, y },
         style: {
-          background: 'hsl(var(--accent))',
+          background: tag === '数学建模' ? 'hsl(180, 70%, 85%)' : 'hsl(var(--accent))',
           border: '1px solid hsl(var(--accent-foreground) / 0.2)',
           borderRadius: '16px',
           padding: '8px 16px',
@@ -118,48 +120,115 @@ const MaterialSearch = () => {
       });
       
       // Add resource nodes for each tag
-      const resourceCount = Math.floor(Math.random() * 2) + 2; // 2-3 resources per tag
-      
-      for (let j = 0; j < resourceCount; j++) {
-        const resourceAngle = angle - 0.2 + (j / resourceCount) * 0.4; // Spread resources within a smaller arc
-        const resourceRadius = radius + 120;
-        const resourceX = 250 + resourceRadius * Math.cos(resourceAngle);
-        const resourceY = 150 + resourceRadius * Math.sin(resourceAngle);
+      // For "数学建模" tag, create specific subnodes as in the example image
+      if (tag === '数学建模') {
+        const subTags = ['比赛规则', '历年真题', '获奖作品', '比赛注意事项'];
         
-        const resourceId = `resource-${i}-${j}`;
-        const resourceNames = [
-          `${tag}学习指南`,
-          `${tag}实战教程`,
-          `${tag}基础入门`,
-          `${tag}高级技巧`,
-          `${tag}案例分析`,
-        ];
-        
-        // Add resource node
-        nodes.push({
-          id: resourceId,
-          data: { label: resourceNames[j % resourceNames.length] },
-          position: { x: resourceX, y: resourceY },
-          style: {
-            background: 'white',
-            border: '1px solid hsl(var(--border))',
-            borderRadius: '8px',
-            padding: '8px',
-            fontSize: '12px',
-            width: 100,
-            textAlign: 'center',
-            boxShadow: '0 2px 4px rgba(0,0,0,0.05)',
-          },
+        subTags.forEach((subTag, j) => {
+          const subAngle = angle - 0.4 + (j / (subTags.length - 1)) * 0.8;
+          const subRadius = radius + 120;
+          const subX = 250 + subRadius * Math.cos(subAngle);
+          const subY = 150 + subRadius * Math.sin(subAngle);
+          
+          const subNodeId = `subtag-${i}-${j}`;
+          
+          // Add subtag node
+          nodes.push({
+            id: subNodeId,
+            data: { label: subTag },
+            position: { x: subX, y: subY },
+            style: {
+              background: 'white',
+              border: '1px solid hsl(var(--border))',
+              borderRadius: '16px',
+              padding: '8px 16px',
+              fontSize: '12px',
+            },
+          });
+          
+          // Connect subtag to parent tag
+          edges.push({
+            id: `edge-${nodeId}-${subNodeId}`,
+            source: nodeId,
+            target: subNodeId,
+            style: { stroke: 'hsl(var(--border))' },
+            type: 'smoothstep',
+          });
+          
+          // For the first subtag "比赛规则", add a specific resource
+          if (subTag === '比赛规则') {
+            const resourceId = `resource-${subNodeId}`;
+            
+            nodes.push({
+              id: resourceId,
+              data: { label: '其他（内含资料）' },
+              position: { x: subX + 150, y: subY },
+              style: {
+                background: 'white',
+                border: '1px solid hsl(var(--border))',
+                borderRadius: '8px',
+                padding: '8px',
+                fontSize: '12px',
+                width: 150,
+                textAlign: 'center',
+                boxShadow: '0 2px 4px rgba(0,0,0,0.05)',
+              },
+            });
+            
+            edges.push({
+              id: `edge-${subNodeId}-${resourceId}`,
+              source: subNodeId,
+              target: resourceId,
+              style: { stroke: 'hsl(var(--border))' },
+              type: 'smoothstep',
+            });
+          }
         });
+      } else {
+        // Regular resource nodes for other tags
+        const resourceCount = Math.floor(Math.random() * 2) + 2; // 2-3 resources per tag
         
-        // Connect resource to tag
-        edges.push({
-          id: `edge-${nodeId}-${resourceId}`,
-          source: nodeId,
-          target: resourceId,
-          style: { stroke: 'hsl(var(--border))' },
-          type: 'smoothstep',
-        });
+        for (let j = 0; j < resourceCount; j++) {
+          const resourceAngle = angle - 0.2 + (j / resourceCount) * 0.4; // Spread resources within a smaller arc
+          const resourceRadius = radius + 120;
+          const resourceX = 250 + resourceRadius * Math.cos(resourceAngle);
+          const resourceY = 150 + resourceRadius * Math.sin(resourceAngle);
+          
+          const resourceId = `resource-${i}-${j}`;
+          const resourceNames = [
+            `${tag}学习指南`,
+            `${tag}实战教程`,
+            `${tag}基础入门`,
+            `${tag}高级技巧`,
+            `${tag}案例分析`,
+          ];
+          
+          // Add resource node
+          nodes.push({
+            id: resourceId,
+            data: { label: resourceNames[j % resourceNames.length] },
+            position: { x: resourceX, y: resourceY },
+            style: {
+              background: 'white',
+              border: '1px solid hsl(var(--border))',
+              borderRadius: '8px',
+              padding: '8px',
+              fontSize: '12px',
+              width: 100,
+              textAlign: 'center',
+              boxShadow: '0 2px 4px rgba(0,0,0,0.05)',
+            },
+          });
+          
+          // Connect resource to tag
+          edges.push({
+            id: `edge-${nodeId}-${resourceId}`,
+            source: nodeId,
+            target: resourceId,
+            style: { stroke: 'hsl(var(--border))' },
+            type: 'smoothstep',
+          });
+        }
       }
     });
     
@@ -298,7 +367,11 @@ const MaterialSearch = () => {
             </div>
             
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-              {['数据结构学习指南', '算法实战教程', '计算机网络基础入门'].map((title, i) => (
+              {[
+                '数学建模竞赛指南', 
+                '全国大学生数学建模竞赛历年真题', 
+                '数学建模获奖作品集锦'
+              ].map((title, i) => (
                 <Card key={i} className="glass-card subtle-hover">
                   <CardHeader className="p-4 pb-2">
                     <CardTitle className="text-base">{title}</CardTitle>
@@ -306,9 +379,9 @@ const MaterialSearch = () => {
                   <CardContent className="p-4 pt-2">
                     <div className="flex justify-between items-center">
                       <div className="flex gap-1">
-                        {(i === 0 ? ['数据结构', '计算机科学'] : 
-                          i === 1 ? ['算法', '编程语言'] : 
-                          ['计算机网络', '网络安全']).map(tag => (
+                        {(i === 0 ? ['比赛', '数学建模', '比赛规则'] : 
+                          i === 1 ? ['比赛', '数学建模', '历年真题'] : 
+                          ['比赛', '数学建模', '获奖作品']).map(tag => (
                           <Badge key={tag} variant="outline" className="text-xs">
                             {tag}
                           </Badge>
