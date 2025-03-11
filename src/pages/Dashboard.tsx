@@ -1,6 +1,6 @@
-
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
+import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
@@ -16,7 +16,8 @@ import {
   UserCircle2, 
   Users, 
   MessageSquare, 
-  BookOpen 
+  BookOpen,
+  Search
 } from 'lucide-react';
 
 // Define proper interface for content items
@@ -29,6 +30,10 @@ interface ContentItem {
 }
 
 const Dashboard = () => {
+  const navigate = useNavigate();
+  const [activeTab, setActiveTab] = useState('recent');
+  
+  // 模拟数据 - 在实际应用中，这些数据应该从API或状态管理中获取
   const recentContent: ContentItem[] = [
     {
       id: 1,
@@ -50,17 +55,81 @@ const Dashboard = () => {
       type: "思维导图",
       date: "2023-06-05",
       starred: true
-    },
-    {
-      id: 4,
-      title: "Python编程入门指南",
-      type: "学习资料",
-      date: "2023-06-01",
-      starred: false
-    },
+    }
   ];
+  
+  const starredContent = recentContent.filter(item => item.starred);
 
-  const starredContent: ContentItem[] = recentContent.filter(item => item.starred);
+  // 功能：导航到不同页面
+  const navigateTo = (path: string) => {
+    navigate(path);
+  };
+  
+  // 功能：切换收藏状态
+  const toggleStarred = (id: number, e: React.MouseEvent) => {
+    e.stopPropagation(); // 防止触发父元素的点击事件
+    // 在实际应用中，这里应该调用API来更新收藏状态
+    console.log(`切换收藏状态：${id}`);
+  };
+
+  // 功能：打开创建思维导图对话框或页面
+  const createMindMap = () => {
+    navigate('/mindmaps', { state: { openCreateDialog: true } });
+  };
+
+  // 功能：上传学习资料
+  const uploadMaterial = () => {
+    navigate('/upload');
+  };
+  
+  // 功能：渲染内容列表
+  const renderContentItems = (items: ContentItem[]) => {
+    return items.map(item => (
+      <motion.div
+        key={item.id}
+        whileHover={{ scale: 1.02 }}
+        whileTap={{ scale: 0.98 }}
+        className="cursor-pointer"
+        onClick={() => {
+          // 根据内容类型导航到不同页面
+          if (item.type === "思维导图") {
+            navigateTo('/mindmaps');
+          } else if (item.type === "学习资料") {
+            navigateTo('/search');
+          }
+        }}
+      >
+        <Card className="mb-3 hover:border-primary/50 transition-colors">
+          <CardContent className="p-4 flex justify-between items-center">
+            <div className="flex items-center gap-3">
+              <div className="p-2 rounded-full bg-muted">
+                {item.type === "思维导图" ? (
+                  <Brain className="h-5 w-5 text-primary" />
+                ) : (
+                  <FileText className="h-5 w-5 text-primary" />
+                )}
+              </div>
+              <div>
+                <h4 className="font-medium">{item.title}</h4>
+                <p className="text-sm text-muted-foreground flex items-center gap-1">
+                  <Clock className="h-3 w-3" /> {item.date}
+                </p>
+              </div>
+            </div>
+            <div className="flex items-center gap-2">
+              <button 
+                onClick={(e) => toggleStarred(item.id, e)} 
+                className="p-1 rounded-full hover:bg-muted transition-colors"
+              >
+                <Star className={`h-4 w-4 ${item.starred ? 'fill-yellow-400 text-yellow-400' : 'text-muted-foreground'}`} />
+              </button>
+              <ChevronRight className="h-5 w-5 text-muted-foreground" />
+            </div>
+          </CardContent>
+        </Card>
+      </motion.div>
+    ));
+  };
 
   // Stats data for the quick stats cards
   const stats = [
@@ -93,40 +162,6 @@ const Dashboard = () => {
       color: "bg-purple-500"
     }
   ];
-
-  // Type-safe render function for content items
-  const renderContentItems = (items: ContentItem[]) => {
-    return items.map((item) => (
-      <motion.div
-        key={item.id}
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.3 }}
-        className="group"
-      >
-        <Card className="cursor-pointer hover:bg-accent/50 transition-colors">
-          <CardContent className="p-4 flex justify-between items-center">
-            <div className="flex items-center gap-4">
-              <div className={`p-2 rounded-full ${item.type === "思维导图" ? "bg-blue-100 text-blue-600" : "bg-emerald-100 text-emerald-600"}`}>
-                {item.type === "思维导图" ? <Brain className="h-5 w-5" /> : <FileText className="h-5 w-5" />}
-              </div>
-              <div>
-                <p className="font-medium">{item.title}</p>
-                <div className="flex items-center text-sm text-muted-foreground">
-                  <Clock className="mr-1 h-3 w-3" />
-                  {item.date}
-                </div>
-              </div>
-            </div>
-            <div className="flex items-center gap-2">
-              {item.starred && <Star className="h-4 w-4 fill-amber-400 text-amber-400" />}
-              <ChevronRight className="h-4 w-4 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
-            </div>
-          </CardContent>
-        </Card>
-      </motion.div>
-    ));
-  };
 
   return (
     <div className="w-full max-w-6xl mx-auto space-y-8">

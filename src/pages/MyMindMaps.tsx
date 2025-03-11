@@ -1,5 +1,4 @@
-
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -7,21 +6,73 @@ import { Input } from '@/components/ui/input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
-import { Plus, Search, MoreVertical, Calendar, Brain, Edit, Trash2, Star, Share2 } from 'lucide-react';
+import { Plus, Search, MoreVertical, Calendar, Brain, Edit, Trash2, Star, Share2, Users, Lock, Globe, FileText } from 'lucide-react';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { useLocation, useNavigate } from 'react-router-dom';
+import { Textarea } from '@/components/ui/textarea';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Badge } from '@/components/ui/badge';
+
+// 思维导图接口
+interface MindMap {
+  id: number;
+  title: string;
+  updatedAt: string;
+  starred: boolean;
+  shared?: boolean;
+  creator?: string;
+  description?: string;
+  tags?: string[];
+}
+
+// 共享思维导图接口
+interface SharedMindMap {
+  id: number;
+  title: string;
+  creator: string;
+  createdAt: string;
+  likes: number;
+  views: number;
+  tags: string[];
+}
 
 const MyMindMaps = () => {
-  const [mindMaps, setMindMaps] = useState([
-    { id: 1, title: '期末复习计划', updatedAt: '2023-06-10', starred: true },
-    { id: 2, title: '项目开发思路', updatedAt: '2023-06-08', starred: false },
-    { id: 3, title: '数据结构与算法复习', updatedAt: '2023-06-05', starred: true },
-    { id: 4, title: '产品设计灵感', updatedAt: '2023-06-01', starred: false },
-    { id: 5, title: '计算机网络概念图', updatedAt: '2023-05-20', starred: true },
-    { id: 6, title: '个人职业规划', updatedAt: '2023-05-15', starred: false },
+  const location = useLocation();
+  const navigate = useNavigate();
+  const [mindMaps, setMindMaps] = useState<MindMap[]>([
+    { id: 1, title: '期末复习计划', updatedAt: '2023-06-10', starred: true, shared: true, tags: ['学习', '考试'] },
+    { id: 2, title: '项目开发思路', updatedAt: '2023-06-08', starred: false, shared: false, tags: ['编程', '项目管理'] },
+    { id: 3, title: '数据结构与算法复习', updatedAt: '2023-06-05', starred: true, shared: true, tags: ['计算机科学', '算法'] },
+    { id: 4, title: '产品设计灵感', updatedAt: '2023-06-01', starred: false, shared: false, tags: ['设计', '创意'] },
+    { id: 5, title: '计算机网络概念图', updatedAt: '2023-05-20', starred: true, shared: true, tags: ['计算机科学', '网络'] },
+    { id: 6, title: '个人职业规划', updatedAt: '2023-05-15', starred: false, shared: false, tags: ['职业', '规划'] },
+  ]);
+  
+  const [sharedMindMaps, setSharedMindMaps] = useState<SharedMindMap[]>([
+    { id: 101, title: '机器学习概念图谱', creator: '张三', createdAt: '2023-06-12', likes: 45, views: 128, tags: ['AI', '机器学习'] },
+    { id: 102, title: '前端开发技术栈', creator: '李四', createdAt: '2023-06-09', likes: 32, views: 96, tags: ['前端', 'Web开发'] },
+    { id: 103, title: '英语学习路线图', creator: '王五', createdAt: '2023-06-07', likes: 28, views: 87, tags: ['语言学习', '英语'] },
+    { id: 104, title: '高等数学知识梳理', creator: '赵六', createdAt: '2023-06-04', likes: 39, views: 112, tags: ['数学', '学习方法'] },
   ]);
   
   const [searchQuery, setSearchQuery] = useState('');
   const [newMindMapName, setNewMindMapName] = useState('');
+  const [newMindMapDescription, setNewMindMapDescription] = useState('');
+  const [newMindMapTags, setNewMindMapTags] = useState('');
+  const [privacyOption, setPrivacyOption] = useState('private');
+  const [createDialogOpen, setCreateDialogOpen] = useState(false);
+  const [shareDialogOpen, setShareDialogOpen] = useState(false);
+  const [selectedMindMap, setSelectedMindMap] = useState<MindMap | null>(null);
+  const [currentTab, setCurrentTab] = useState('all');
+  
+  useEffect(() => {
+    // 检查是否需要打开创建对话框（从仪表盘跳转过来）
+    if (location.state && location.state.openCreateDialog) {
+      setCreateDialogOpen(true);
+      // 清除状态，防止再次渲染时重新打开对话框
+      navigate(location.pathname, { replace: true, state: {} });
+    }
+  }, [location, navigate]);
   
   const container = {
     hidden: { opacity: 0 },
@@ -45,18 +96,33 @@ const MyMindMaps = () => {
   const handleCreateMindMap = () => {
     if (!newMindMapName.trim()) return;
     
-    const newMindMap = {
-      id: mindMaps.length + 1,
+    const newMindMap: MindMap = {
+      id: Math.max(...mindMaps.map(m => m.id), 0) + 1,
       title: newMindMapName,
       updatedAt: new Date().toISOString().split('T')[0],
-      starred: false
+      starred: false,
+      shared: privacyOption === 'public',
+      description: newMindMapDescription,
+      tags: newMindMapTags.split(',').map(tag => tag.trim()).filter(tag => tag)
     };
     
     setMindMaps([newMindMap, ...mindMaps]);
     setNewMindMapName('');
+    setNewMindMapDescription('');
+    setNewMindMapTags('');
+    setPrivacyOption('private');
+    setCreateDialogOpen(false);
+    
+    // 模拟跳转到思维导图编辑页面
+    console.log(`创建新思维导图: ${newMindMapName}，准备跳转到编辑页面`);
+    
+    // 在实际应用中，这里应该导航到思维导图编辑器
+    // navigate(`/mindmap-editor/${newMindMap.id}`);
   };
   
-  const toggleStarred = (id: number) => {
+  const toggleStarred = (id: number, e?: React.MouseEvent) => {
+    if (e) e.stopPropagation();
+    
     setMindMaps(
       mindMaps.map(mindMap => 
         mindMap.id === id 
@@ -66,8 +132,56 @@ const MyMindMaps = () => {
     );
   };
   
+  const toggleShared = (id: number, e?: React.MouseEvent) => {
+    if (e) e.stopPropagation();
+    
+    setMindMaps(
+      mindMaps.map(mindMap => 
+        mindMap.id === id 
+          ? { ...mindMap, shared: !mindMap.shared } 
+          : mindMap
+      )
+    );
+  };
+  
+  const handleDeleteMindMap = (id: number, e?: React.MouseEvent) => {
+    if (e) e.stopPropagation();
+    
+    if (window.confirm('确定要删除这个思维导图吗？此操作不可撤销。')) {
+      setMindMaps(mindMaps.filter(mindMap => mindMap.id !== id));
+    }
+  };
+  
+  const handleShareMindMap = (mindMap: MindMap, e?: React.MouseEvent) => {
+    if (e) e.stopPropagation();
+    setSelectedMindMap(mindMap);
+    setShareDialogOpen(true);
+  };
+  
+  const handleEditMindMap = (id: number) => {
+    console.log(`编辑思维导图: ${id}`);
+    // 在实际应用中，这里应该导航到思维导图编辑器
+    // navigate(`/mindmap-editor/${id}`);
+  };
+  
+  const handleViewSharedMindMap = (id: number) => {
+    console.log(`查看共享思维导图: ${id}`);
+    // 在实际应用中，这里应该导航到思维导图查看页面
+    // navigate(`/shared-mindmap/${id}`);
+  };
+  
   const filteredMindMaps = mindMaps.filter(mindMap => 
     mindMap.title.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+  
+  const filteredByTabMindMaps = currentTab === 'all' 
+    ? filteredMindMaps 
+    : currentTab === 'recent' 
+      ? [...filteredMindMaps].sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()).slice(0, 5)
+      : filteredMindMaps.filter(mindMap => mindMap.starred);
+  
+  const filteredSharedMindMaps = sharedMindMaps.filter(
+    mindMap => mindMap.title.toLowerCase().includes(searchQuery.toLowerCase())
   );
   
   const starredMindMaps = filteredMindMaps.filter(mindMap => mindMap.starred);
