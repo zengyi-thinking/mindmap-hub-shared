@@ -6,6 +6,15 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 import { Brain, Clock, FileText, Star, Plus, ChevronRight } from 'lucide-react';
 
+// Define interfaces for the items
+interface ContentItem {
+  id: number;
+  title: string;
+  type: 'mindmap' | 'material' | 'discussion';
+  date: string;
+  starred: boolean;
+}
+
 const Dashboard = () => {
   const container = {
     hidden: { opacity: 0 },
@@ -22,14 +31,14 @@ const Dashboard = () => {
     show: { opacity: 1, y: 0 }
   };
 
-  const recentItems = [
+  const recentItems: ContentItem[] = [
     { id: 1, title: '期末复习计划', type: 'mindmap', date: '2023-06-10', starred: true },
     { id: 2, title: '项目开发思路', type: 'mindmap', date: '2023-06-08', starred: false },
     { id: 3, title: '电子工程学习资料', type: 'material', date: '2023-06-05', starred: true },
     { id: 4, title: '软件工程讨论', type: 'discussion', date: '2023-06-03', starred: false },
   ];
 
-  const favoriteItems = [
+  const favoriteItems: ContentItem[] = [
     { id: 1, title: '期末复习计划', type: 'mindmap', date: '2023-06-10', starred: true },
     { id: 3, title: '电子工程学习资料', type: 'material', date: '2023-06-05', starred: true },
     { id: 5, title: '计算机网络概念图', type: 'mindmap', date: '2023-05-20', starred: true },

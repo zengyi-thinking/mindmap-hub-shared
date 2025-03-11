@@ -29,12 +29,13 @@ const Index = () => {
     }
   };
 
+  // Fix the float animation to use proper type for repeatType
   const float = {
     y: [0, -10, 0],
     transition: {
       duration: 3,
       repeat: Infinity,
-      repeatType: "reverse",
+      repeatType: "mirror", // Changed from string to specific allowed value
       ease: "easeInOut"
     }
   };
