@@ -8,12 +8,19 @@ import { Button } from '@/components/ui/button';
 interface FileUploaderProps {
   selectedFile: File | null;
   onFileChange: (file: File | null) => void;
+  disabled?: boolean;
 }
 
-const FileUploader: React.FC<FileUploaderProps> = ({ selectedFile, onFileChange }) => {
+const FileUploader: React.FC<FileUploaderProps> = ({ 
+  selectedFile, 
+  onFileChange,
+  disabled = false 
+}) => {
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (disabled) return;
+    
     if (e.target.files && e.target.files[0]) {
       const file = e.target.files[0];
       onFileChange(file);
@@ -32,6 +39,7 @@ const FileUploader: React.FC<FileUploaderProps> = ({ selectedFile, onFileChange 
   };
 
   const removeFile = () => {
+    if (disabled) return;
     onFileChange(null);
     setPreviewUrl(null);
   };
@@ -66,7 +74,7 @@ const FileUploader: React.FC<FileUploaderProps> = ({ selectedFile, onFileChange 
   };
 
   return (
-    <div className="grid w-full gap-1.5">
+    <div className={`grid w-full gap-1.5 ${disabled ? 'opacity-70' : ''}`}>
       <Label>上传文件</Label>
       
       {selectedFile ? (
@@ -99,6 +107,7 @@ const FileUploader: React.FC<FileUploaderProps> = ({ selectedFile, onFileChange 
               size="icon"
               onClick={removeFile}
               className="text-muted-foreground hover:text-destructive"
+              disabled={disabled}
             >
               <X className="h-5 w-5" />
             </Button>
@@ -106,19 +115,20 @@ const FileUploader: React.FC<FileUploaderProps> = ({ selectedFile, onFileChange 
         </div>
       ) : (
         <div 
-          className="border-2 border-dashed rounded-lg p-8 text-center cursor-pointer hover:bg-accent/50 transition-colors"
-          onClick={() => document.getElementById('file-upload')?.click()}
+          className={`border-2 border-dashed rounded-lg p-8 text-center ${!disabled ? 'cursor-pointer hover:bg-accent/50 transition-colors' : ''}`}
+          onClick={() => !disabled && document.getElementById('file-upload')?.click()}
         >
           <input 
             id="file-upload" 
             type="file" 
             className="hidden" 
             onChange={handleFileChange}
+            disabled={disabled}
           />
           <div className="flex flex-col items-center gap-2">
             <Upload className="h-10 w-10 text-muted-foreground" />
             <p className="font-medium">
-              点击或拖拽文件到此处上传
+              {disabled ? '上传功能已禁用' : '点击或拖拽文件到此处上传'}
             </p>
             <p className="text-xs text-muted-foreground">
               支持的文件类型: PDF, DOCX, PPTX, ZIP, RAR, JPG, PNG (最大50MB)

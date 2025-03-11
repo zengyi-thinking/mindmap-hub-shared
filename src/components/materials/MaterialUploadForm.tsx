@@ -20,6 +20,12 @@ const MaterialUploadForm: React.FC = () => {
   const [isUploading, setIsUploading] = useState(false);
   const [uploadSuccess, setUploadSuccess] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
+  const [recentUploads, setRecentUploads] = useState<{
+    id: number;
+    title: string;
+    date: string;
+    tags: string[];
+  }[]>([]);
   
   const simulateUpload = () => {
     setIsUploading(true);
@@ -86,6 +92,16 @@ const MaterialUploadForm: React.FC = () => {
           title: "上传成功",
           description: "您的资料已成功上传，正在等待审核",
         });
+        
+        // Add to recent uploads
+        const newUpload = {
+          id: Date.now(),
+          title: title,
+          date: new Date().toISOString().split('T')[0],
+          tags: selectedTags
+        };
+        
+        setRecentUploads(prev => [newUpload, ...prev]);
         
         // Reset form
         setTitle('');
@@ -174,6 +190,7 @@ const MaterialUploadForm: React.FC = () => {
         <FileUploader 
           selectedFile={selectedFile} 
           onFileChange={setSelectedFile} 
+          disabled={isUploading}
         />
         
         {isUploading && (
@@ -189,6 +206,37 @@ const MaterialUploadForm: React.FC = () => {
               ></div>
             </div>
           </>
+        )}
+        
+        {recentUploads.length > 0 && !isUploading && !uploadSuccess && (
+          <div className="mt-6">
+            <h3 className="text-sm font-medium mb-2">最近上传记录</h3>
+            <div className="border rounded-md divide-y">
+              {recentUploads.slice(0, 3).map((upload) => (
+                <div key={upload.id} className="p-3 flex justify-between items-center">
+                  <div>
+                    <p className="font-medium">{upload.title}</p>
+                    <div className="flex items-center gap-2 mt-1">
+                      <span className="text-xs text-muted-foreground">{upload.date}</span>
+                      <div className="flex gap-1">
+                        {upload.tags.slice(0, 2).map((tag, i) => (
+                          <Badge key={i} variant="outline" className="text-xs">
+                            {tag}
+                          </Badge>
+                        ))}
+                        {upload.tags.length > 2 && (
+                          <Badge variant="outline" className="text-xs">
+                            +{upload.tags.length - 2}
+                          </Badge>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                  <Badge>已上传</Badge>
+                </div>
+              ))}
+            </div>
+          </div>
         )}
       </CardContent>
       <CardFooter className="flex justify-between">
