@@ -1,4 +1,3 @@
-
 import React, { useState, useCallback, useRef, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
@@ -16,7 +15,6 @@ import { userFilesService, materialsService, mindMapsService } from '@/lib/stora
 import { useAuth } from '@/lib/auth';
 import { tagHierarchy } from '@/data/tagHierarchy';
 
-// Define hierarchical tag structure
 interface TagCategory {
   id: string;
   name: string;
@@ -43,18 +41,15 @@ const MaterialSearch = () => {
   const [materialListDialogOpen, setMaterialListDialogOpen] = useState(false);
   const [selectedTagForList, setSelectedTagForList] = useState('');
 
-  // Load materials from storage on component mount
   useEffect(() => {
     loadMaterials();
   }, []);
 
   const loadMaterials = () => {
-    // 从storage获取材料数据，而不是使用硬编码的示例数据
     const approvedFiles = userFilesService.getApprovedFiles();
     setMaterialsData(approvedFiles);
   };
 
-  // Extract all unique tags from the hierarchy for filtering
   const flattenTags = (categories: TagCategory[]): string[] => {
     let tags: string[] = [];
     
@@ -95,7 +90,6 @@ const MaterialSearch = () => {
     setEdges((eds) => addEdge(params, eds));
   }, [setEdges]);
 
-  // Find the complete path for a tag in the hierarchy
   const findTagPath = (tagName: string): string[] => {
     for (const level1 of tagHierarchy) {
       if (level1.name === tagName) {
@@ -122,12 +116,10 @@ const MaterialSearch = () => {
     return [];
   };
 
-  // Generate mind map based on selected tags and search query
   const generateMindMap = () => {
     const newNodes: Node[] = [];
     const newEdges: Edge[] = [];
     
-    // Set up the central search node
     const centralNode: Node = {
       id: 'central',
       type: 'input',
@@ -152,20 +144,16 @@ const MaterialSearch = () => {
     
     newNodes.push(centralNode);
     
-    // Tags to process (either selected tags or default ones if none selected)
     const tagsToProcess = selectedTags.length > 0 
       ? selectedTags 
       : materialsData.length > 0 && materialsData[0]?.tags 
         ? materialsData[0].tags.slice(0, 3) 
         : ['比赛', '数学建模', '比赛规则'];
     
-    // Process each selected tag
     tagsToProcess.forEach((tag, tagIndex) => {
-      // Find the complete path for this tag in the hierarchy
       const tagPath = findTagPath(tag);
       
       if (tagPath.length === 0) {
-        // 如果在分层结构中找不到标签，将其作为自定义标签处理
         const customTagNode: Node = {
           id: `custom-${tagIndex}`,
           data: { label: tag, tagName: tag, isLastLevel: true },
@@ -185,7 +173,6 @@ const MaterialSearch = () => {
         
         newNodes.push(customTagNode);
         
-        // 连接到中心节点
         newEdges.push({
           id: `edge-central-custom-${tagIndex}`,
           source: 'central',
@@ -200,12 +187,10 @@ const MaterialSearch = () => {
           },
         });
         
-        // 查找具有此自定义标签的材料
         const relatedMaterials = materialsData.filter(m => 
           m.tags && m.tags.includes(tag)
         );
         
-        // 添加材料节点
         relatedMaterials.forEach((material, materialIndex) => {
           const materialNode: Node = {
             id: `material-custom-${tagIndex}-${materialIndex}`,
@@ -232,7 +217,6 @@ const MaterialSearch = () => {
           
           newNodes.push(materialNode);
           
-          // 将材料连接到标签
           newEdges.push({
             id: `edge-custom-${tagIndex}-material-${materialIndex}`,
             source: `custom-${tagIndex}`,
@@ -242,16 +226,13 @@ const MaterialSearch = () => {
           });
         });
       } else {
-        // 分层标签处理
         let lastNodeId = 'central';
         let lastLevelNodeIds: string[] = ['central'];
         
-        // Create nodes for each level in the path
         tagPath.forEach((pathTag, pathIndex) => {
           const isLastLevel = pathIndex === tagPath.length - 1;
           const levelNodeId = `level-${tagIndex}-${pathIndex}`;
           
-          // Create node for this level
           const levelNode: Node = {
             id: levelNodeId,
             data: { 
@@ -277,7 +258,6 @@ const MaterialSearch = () => {
           
           newNodes.push(levelNode);
           
-          // Connect to previous level
           lastLevelNodeIds.forEach(sourceId => {
             newEdges.push({
               id: `edge-${sourceId}-${levelNodeId}`,
@@ -294,15 +274,12 @@ const MaterialSearch = () => {
             });
           });
           
-          // If this is the last level, add related materials
           if (isLastLevel) {
-            // Find materials with this tag path
             const relatedMaterials = materialsData.filter(m => {
               if (!m.tags || m.tags.length === 0) return false;
               return m.tags.includes(pathTag);
             });
             
-            // Add material nodes
             relatedMaterials.forEach((material, materialIndex) => {
               const materialNode: Node = {
                 id: `material-${tagIndex}-${pathIndex}-${materialIndex}`,
@@ -329,7 +306,6 @@ const MaterialSearch = () => {
               
               newNodes.push(materialNode);
               
-              // Connect material to tag
               newEdges.push({
                 id: `edge-${levelNodeId}-material-${materialIndex}`,
                 source: levelNodeId,
@@ -353,18 +329,15 @@ const MaterialSearch = () => {
   const handleSearch = () => {
     setSearchPerformed(true);
     
-    // 如果有搜索查询或标签，根据条件过滤材料
     if (searchQuery || selectedTags.length > 0) {
       let filtered = materialsData;
       
-      // 按标签筛选
       if (selectedTags.length > 0) {
         filtered = filtered.filter(material => 
           material.tags && selectedTags.some(tag => material.tags.includes(tag))
         );
       }
       
-      // 按搜索关键词筛选
       if (searchQuery) {
         const query = searchQuery.toLowerCase();
         filtered = filtered.filter(material => 
@@ -375,17 +348,13 @@ const MaterialSearch = () => {
         );
       }
       
-      // 更新材料数据
       setMaterialsData(filtered);
     } else {
-      // 如果没有搜索条件，重新加载所有材料
       loadMaterials();
     }
     
-    // 生成思维导图
     generateMindMap();
     
-    // 选择第一个标签路径作为默认路径（如果有）
     if (selectedTags.length > 0) {
       const firstTag = selectedTags[0];
       const tagPath = findTagPath(firstTag);
@@ -399,42 +368,32 @@ const MaterialSearch = () => {
     setFilterVisible(!filterVisible);
   };
 
-  // Filter materials based on the selected tag path
   const filteredMaterials = materialsData.filter(material => {
     if (selectedTagPath.length === 0) return true;
     
-    // Check if the material tags contain all the tags in the selected path
     return material.tags && selectedTagPath.every(tag => material.tags.includes(tag));
   });
 
   const onNodeClick = (event, node) => {
-    // 如果点击的是材料节点
     if (node.id.startsWith('material-') && node.data.materialId) {
-      // 查找材料并显示预览
       const material = materialsData.find(m => m.id === node.data.materialId);
       if (material) {
         setSelectedMaterial(material);
         setPreviewDialogOpen(true);
-        // 增加查看次数
         userFilesService.incrementViews(material.id);
       }
-    }
-    // 如果点击的是最后一级标签节点
-    else if (node.data.isLastLevel && node.data.tagName) {
+    } else if (node.data.isLastLevel && node.data.tagName) {
       const tagName = node.data.tagName;
       
-      // 查找具有此标签的所有材料
       const taggedMaterials = materialsData.filter(m => 
         m.tags && m.tags.includes(tagName)
       );
       
       if (taggedMaterials.length === 1) {
-        // 如果只有一个材料，直接显示预览
         setSelectedMaterial(taggedMaterials[0]);
         setPreviewDialogOpen(true);
         userFilesService.incrementViews(taggedMaterials[0].id);
       } else if (taggedMaterials.length > 1) {
-        // 如果有多个材料，显示材料列表对话框
         setMaterialsListByTag(taggedMaterials);
         setSelectedTagForList(tagName);
         setMaterialListDialogOpen(true);
@@ -448,7 +407,6 @@ const MaterialSearch = () => {
     }
   };
 
-  // 保存思维导图到localStorage
   const saveMindMap = () => {
     if (!mindMapTitle.trim()) {
       toast({
@@ -468,7 +426,6 @@ const MaterialSearch = () => {
       return;
     }
     
-    // 创建思维导图对象
     const mindMapData = {
       id: Date.now(),
       title: mindMapTitle,
@@ -480,12 +437,11 @@ const MaterialSearch = () => {
       },
       tags: selectedTags,
       updatedAt: new Date().toISOString(),
-      creator: user.name,
+      creator: user.username || 'Unknown',
       starred: false,
       shared: true
     };
     
-    // 保存到localStorage
     mindMapsService.add(mindMapData);
     
     toast({
@@ -498,14 +454,11 @@ const MaterialSearch = () => {
     setMindMapDescription('');
   };
 
-  // 下载材料
   const downloadMaterial = (material) => {
     if (!material || !material.file) return;
     
-    // 增加下载计数
     userFilesService.incrementDownloads(material.id);
     
-    // 创建下载链接
     const link = document.createElement('a');
     link.href = material.file.content || material.file.dataUrl;
     link.download = material.file.name;
@@ -677,9 +630,10 @@ const MaterialSearch = () => {
                   nodesDraggable={true}
                   elementsSelectable={true}
                   proOptions={{ hideAttribution: true }}
+                  backgroundVariant="grid"
                 >
                   <Background 
-                    variant="dots" 
+                    variant="grid" 
                     gap={20} 
                     size={1} 
                     color="hsl(var(--muted-foreground) / 0.3)"
@@ -792,7 +746,6 @@ const MaterialSearch = () => {
         )}
       </motion.div>
 
-      {/* 保存思维导图对话框 */}
       <Dialog open={saveDialogOpen} onOpenChange={setSaveDialogOpen}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
@@ -842,7 +795,6 @@ const MaterialSearch = () => {
         </DialogContent>
       </Dialog>
 
-      {/* 资料预览对话框 */}
       <Dialog open={previewDialogOpen} onOpenChange={setPreviewDialogOpen}>
         <DialogContent className="sm:max-w-3xl max-h-[90vh] overflow-y-auto">
           {selectedMaterial && (
@@ -850,7 +802,7 @@ const MaterialSearch = () => {
               <DialogHeader>
                 <DialogTitle>{selectedMaterial.title || selectedMaterial.file?.name}</DialogTitle>
                 <DialogDescription>
-                  上传者: {selectedMaterial.username || "未知用户"} · 
+                  上传者: {selectedMaterial.uploaderName || user?.username || 'Unknown'} · 
                   上传时间: {new Date(selectedMaterial.uploadTime).toLocaleDateString()}
                 </DialogDescription>
               </DialogHeader>
@@ -862,7 +814,7 @@ const MaterialSearch = () => {
                 <div className="flex flex-wrap gap-1">
                   <div className="text-sm font-medium mr-2">标签:</div>
                   {selectedMaterial.tags && selectedMaterial.tags.map((tag, index) => (
-                    <Badge key={index} variant="outline">
+                    <Badge key={index} variant="outline" className="text-xs">
                       {tag}
                     </Badge>
                   ))}
@@ -918,7 +870,6 @@ const MaterialSearch = () => {
         </DialogContent>
       </Dialog>
 
-      {/* 材料列表对话框 */}
       <Dialog open={materialListDialogOpen} onOpenChange={setMaterialListDialogOpen}>
         <DialogContent className="sm:max-w-2xl max-h-[80vh] overflow-y-auto">
           <DialogHeader>

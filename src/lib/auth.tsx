@@ -9,6 +9,7 @@ export interface User {
   username: string;
   email?: string;
   role: UserRole;
+  avatar?: string;
 }
 
 // 身份验证上下文接口
@@ -134,4 +135,4 @@ export const useAuth = () => {
     throw new Error('useAuth must be used within an AuthProvider');
   }
   return context;
-}; 
+};
