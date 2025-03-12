@@ -1,15 +1,17 @@
-
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Upload, Check, AlertCircle } from 'lucide-react';
-import { toast } from '@/hooks/use-toast';
+import { toast } from '@/components/ui/use-toast';
 import TagSelector from './TagSelector';
 import FileUploader from './FileUploader';
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Badge } from '@/components/ui/badge';
+import { userFilesService } from '@/lib/storage';
+import { useAuth } from '@/lib/auth';
 
 const MaterialUploadForm: React.FC = () => {
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
@@ -26,6 +28,7 @@ const MaterialUploadForm: React.FC = () => {
     date: string;
     tags: string[];
   }[]>([]);
+  const { user } = useAuth();
   
   const simulateUpload = () => {
     setIsUploading(true);
@@ -84,16 +87,34 @@ const MaterialUploadForm: React.FC = () => {
     // Simulate file upload
     simulateUpload();
     
-    // Here we would handle the actual upload
-    setTimeout(() => {
-      // 95% chance of success, 5% chance of failure (for demo purposes)
-      if (Math.random() > 0.05) {
-        toast({
-          title: "上传成功",
-          description: "您的资料已成功上传，正在等待审核",
-        });
+    // 将文件转换为Data URL以存储在localStorage
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      if (event.target && event.target.result) {
+        const dataUrl = event.target.result.toString();
         
-        // Add to recent uploads
+        // 创建要保存的文件对象
+        const fileToSave = {
+          file: {
+            name: selectedFile.name,
+            type: selectedFile.type,
+            size: selectedFile.size,
+            lastModified: selectedFile.lastModified,
+            dataUrl: dataUrl
+          },
+          title: title,
+          description: description || '',
+          tags: selectedTags,
+          uploadTime: new Date().toISOString(),
+          userId: user?.id || 0,
+          username: user?.username || 'Guest',
+          approved: user?.role === 'admin' // 如果是管理员上传，自动批准
+        };
+        
+        // 保存到localStorage
+        userFilesService.add(fileToSave);
+        
+        // 添加到recent uploads
         const newUpload = {
           id: Date.now(),
           title: title,
@@ -103,21 +124,23 @@ const MaterialUploadForm: React.FC = () => {
         
         setRecentUploads(prev => [newUpload, ...prev]);
         
+        toast({
+          title: "上传成功",
+          description: user?.role === 'admin' 
+            ? "您的资料已成功上传并发布" 
+            : "您的资料已成功上传，正在等待审核",
+        });
+        
         // Reset form
         setTitle('');
         setDescription('');
         setSelectedTags([]);
         setSelectedFile(null);
-      } else {
-        setUploadError("网络错误，请稍后重试");
-        setUploadSuccess(false);
-        toast({
-          title: "上传失败",
-          description: "网络错误，请稍后重试",
-          variant: "destructive"
-        });
+        setUploadSuccess(true);
       }
-    }, 3500);
+    };
+    
+    reader.readAsDataURL(selectedFile);
   };
   
   const resetForm = () => {
@@ -220,14 +243,14 @@ const MaterialUploadForm: React.FC = () => {
                       <span className="text-xs text-muted-foreground">{upload.date}</span>
                       <div className="flex gap-1">
                         {upload.tags.slice(0, 2).map((tag, i) => (
-                          <Badge key={i} variant="outline" className="text-xs">
+                          <span key={i} className="text-xs px-2 py-1 bg-secondary text-secondary-foreground rounded-full text-xs">
                             {tag}
-                          </Badge>
+                          </span>
                         ))}
                         {upload.tags.length > 2 && (
-                          <Badge variant="outline" className="text-xs">
+                          <span className="text-xs px-2 py-1 bg-secondary text-secondary-foreground rounded-full text-xs">
                             +{upload.tags.length - 2}
-                          </Badge>
+                          </span>
                         )}
                       </div>
                     </div>

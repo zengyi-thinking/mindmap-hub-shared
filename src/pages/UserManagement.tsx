@@ -165,10 +165,10 @@ const UserManagement = () => {
         animate={{ opacity: 1, y: 0 }}
         className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4"
       >
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">用户管理</h1>
-          <p className="text-muted-foreground">管理平台用户和权限</p>
-        </div>
+      <div>
+        <h1 className="text-3xl font-bold tracking-tight">用户管理</h1>
+        <p className="text-muted-foreground">管理平台用户和权限</p>
+      </div>
         
         <div className="flex items-center gap-2">
           <Badge>管理员专用</Badge>

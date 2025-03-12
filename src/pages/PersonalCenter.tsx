@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -10,6 +10,8 @@ import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
 import { Separator } from '@/components/ui/separator';
 import { Badge } from '@/components/ui/badge';
+import { AvatarUpload } from '@/components/ui/avatar-upload';
+import { useToast } from '@/components/ui/use-toast';
 import { 
   User, 
   Lock, 
@@ -50,6 +52,55 @@ const PersonalCenter = () => {
     totalMindMaps: 12,
     totalComments: 45
   });
+  
+  const { toast } = useToast();
+  
+  // 从localStorage加载用户数据
+  useEffect(() => {
+    const storedProfile = localStorage.getItem('user_profile');
+    if (storedProfile) {
+      setUserProfile(JSON.parse(storedProfile));
+    }
+  }, []);
+  
+  // 保存用户数据到localStorage
+  const saveUserProfile = (updatedProfile) => {
+    localStorage.setItem('user_profile', JSON.stringify(updatedProfile));
+    
+    // 同时更新用户头像信息到user_profiles存储中，供其他组件使用
+    const userProfiles = JSON.parse(localStorage.getItem('user_profiles') || '{}');
+    userProfiles[updatedProfile.username] = {
+      ...userProfiles[updatedProfile.username],
+      avatar: updatedProfile.avatar || ''
+    };
+    localStorage.setItem('user_profiles', JSON.stringify(userProfiles));
+  };
+  
+  // 处理头像更新
+  const handleAvatarChange = (dataUrl) => {
+    const updatedProfile = {
+      ...userProfile,
+      avatar: dataUrl
+    };
+    setUserProfile(updatedProfile);
+    saveUserProfile(updatedProfile);
+    
+    // 如果用户已登录，同时更新当前用户的头像信息
+    if (userProfile.username) {
+      const userProfiles = JSON.parse(localStorage.getItem('user_profiles') || '{}');
+      userProfiles[userProfile.username] = {
+        ...userProfiles[userProfile.username],
+        avatar: dataUrl || ''
+      };
+      localStorage.setItem('user_profiles', JSON.stringify(userProfiles));
+    }
+    
+    toast({
+      title: "头像已更新",
+      description: "您的个人头像已成功更新"
+    });
+  };
+
   
   const [formData, setFormData] = useState({
     username: userProfile.username,
@@ -117,15 +168,21 @@ const PersonalCenter = () => {
   };
   
   const handleProfileUpdate = () => {
-    // 实际应用中，这里应该调用API更新用户个人资料
-    setUserProfile({
+    // 更新用户个人资料并保存到localStorage
+    const updatedProfile = {
       ...userProfile,
       username: formData.username,
       email: formData.email,
       bio: formData.bio
-    });
+    };
     
-    alert('个人资料已更新');
+    setUserProfile(updatedProfile);
+    saveUserProfile(updatedProfile);
+    
+    toast({
+      title: "个人资料已更新",
+      description: "您的个人信息已成功保存"
+    });
   };
   
   const handlePasswordChange = () => {
@@ -177,8 +234,8 @@ const PersonalCenter = () => {
                   <p className="text-xs text-muted-foreground mt-1">
                     加入时间：{userProfile.joinDate}
                   </p>
-                </div>
-                
+      </div>
+      
                 <div className="w-full border rounded-lg p-4 mt-4 space-y-2">
                   <div className="flex justify-between items-center">
                     <div className="flex items-center gap-2">
@@ -267,15 +324,11 @@ const PersonalCenter = () => {
                       placeholder="介绍一下你自己..."
                     />
                   </div>
-                  <div className="space-y-2">
-                    <Label>头像</Label>
-                    <div className="flex items-center gap-4">
-                      <Avatar className="h-16 w-16">
-                        <AvatarFallback>{formData.username[0]}</AvatarFallback>
-                      </Avatar>
-                      <Button variant="outline">更换头像</Button>
-                    </div>
-                  </div>
+                  <AvatarUpload
+                    currentAvatar={userProfile.avatar}
+                    username={userProfile.username}
+                    onAvatarChange={handleAvatarChange}
+                  />
                 </CardContent>
                 <CardFooter className="flex justify-end">
                   <Button className="gap-2" onClick={handleProfileUpdate}>
@@ -341,12 +394,12 @@ const PersonalCenter = () => {
             </TabsContent>
             
             <TabsContent value="activity">
-              <Card>
-                <CardHeader>
+      <Card>
+        <CardHeader>
                   <CardTitle>活动历史</CardTitle>
                   <CardDescription>您最近的活动记录</CardDescription>
-                </CardHeader>
-                <CardContent>
+        </CardHeader>
+        <CardContent>
                   <div className="space-y-6">
                     {activities.map((activity) => (
                       <div key={activity.id} className="flex items-start gap-4">
@@ -422,14 +475,14 @@ const PersonalCenter = () => {
                       onCheckedChange={(checked) => handleSwitchChange('notifyOnUpdate', checked)}
                     />
                   </div>
-                </CardContent>
+        </CardContent>
                 <CardFooter className="flex justify-end">
                   <Button className="gap-2">
                     <Save className="h-4 w-4" />
                     保存设置
                   </Button>
                 </CardFooter>
-              </Card>
+      </Card>
             </TabsContent>
           </Tabs>
         </motion.div>

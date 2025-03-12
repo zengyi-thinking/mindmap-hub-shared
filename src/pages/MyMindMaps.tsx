@@ -6,47 +6,23 @@ import { Input } from '@/components/ui/input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
-import { Plus, Search, MoreVertical, Calendar, Brain, Edit, Trash2, Star, Share2, Users, Lock, Globe, FileText } from 'lucide-react';
+import { Plus, Search, MoreVertical, Calendar, Brain, Edit, Trash2, Star, Share2, Users, Lock, Globe, FileText, Save } from 'lucide-react';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
+import { mindmapService } from '@/lib/mindmapStorage';
+import { useToast } from '@/components/ui/use-toast';
 
-// 思维导图接口
-interface MindMap {
-  id: number;
-  title: string;
-  updatedAt: string;
-  starred: boolean;
-  shared?: boolean;
-  creator?: string;
-  description?: string;
-  tags?: string[];
-}
-
-// 共享思维导图接口
-interface SharedMindMap {
-  id: number;
-  title: string;
-  creator: string;
-  createdAt: string;
-  likes: number;
-  views: number;
-  tags: string[];
-}
+// 使用从types导入的接口
+import { MindMap, SharedMindMap } from '@/types/mindmap';
 
 const MyMindMaps = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const [mindMaps, setMindMaps] = useState<MindMap[]>([
-    { id: 1, title: '期末复习计划', updatedAt: '2023-06-10', starred: true, shared: true, tags: ['学习', '考试'] },
-    { id: 2, title: '项目开发思路', updatedAt: '2023-06-08', starred: false, shared: false, tags: ['编程', '项目管理'] },
-    { id: 3, title: '数据结构与算法复习', updatedAt: '2023-06-05', starred: true, shared: true, tags: ['计算机科学', '算法'] },
-    { id: 4, title: '产品设计灵感', updatedAt: '2023-06-01', starred: false, shared: false, tags: ['设计', '创意'] },
-    { id: 5, title: '计算机网络概念图', updatedAt: '2023-05-20', starred: true, shared: true, tags: ['计算机科学', '网络'] },
-    { id: 6, title: '个人职业规划', updatedAt: '2023-05-15', starred: false, shared: false, tags: ['职业', '规划'] },
-  ]);
+  const [mindMaps, setMindMaps] = useState<MindMap[]>([]);
+  const { toast } = useToast();
   
   const [sharedMindMaps, setSharedMindMaps] = useState<SharedMindMap[]>([
     { id: 101, title: '机器学习概念图谱', creator: '张三', createdAt: '2023-06-12', likes: 45, views: 128, tags: ['AI', '机器学习'] },
@@ -66,6 +42,14 @@ const MyMindMaps = () => {
   const [currentTab, setCurrentTab] = useState('all');
   
   useEffect(() => {
+    // 从localStorage加载思维导图数据
+    const loadMindMaps = () => {
+      const storedMindMaps = mindmapService.getAll();
+      setMindMaps(storedMindMaps);
+    };
+    
+    loadMindMaps();
+    
     // 检查是否需要打开创建对话框（从仪表盘跳转过来）
     if (location.state && location.state.openCreateDialog) {
       setCreateDialogOpen(true);
@@ -96,8 +80,7 @@ const MyMindMaps = () => {
   const handleCreateMindMap = () => {
     if (!newMindMapName.trim()) return;
     
-    const newMindMap: MindMap = {
-      id: Math.max(...mindMaps.map(m => m.id), 0) + 1,
+    const newMindMapData = {
       title: newMindMapName,
       updatedAt: new Date().toISOString().split('T')[0],
       starred: false,
@@ -106,6 +89,10 @@ const MyMindMaps = () => {
       tags: newMindMapTags.split(',').map(tag => tag.trim()).filter(tag => tag)
     };
     
+    // 使用mindmapService添加新思维导图
+    const newMindMap = mindmapService.add(newMindMapData);
+    
+    // 更新状态
     setMindMaps([newMindMap, ...mindMaps]);
     setNewMindMapName('');
     setNewMindMapDescription('');
@@ -113,44 +100,76 @@ const MyMindMaps = () => {
     setPrivacyOption('private');
     setCreateDialogOpen(false);
     
-    // 模拟跳转到思维导图编辑页面
-    console.log(`创建新思维导图: ${newMindMapName}，准备跳转到编辑页面`);
+    // 显示成功提示
+    toast({
+      title: "创建成功",
+      description: `思维导图「${newMindMap.title}」已创建`,
+    });
     
     // 在实际应用中，这里应该导航到思维导图编辑器
     // navigate(`/mindmap-editor/${newMindMap.id}`);
   };
+
   
   const toggleStarred = (id: number, e?: React.MouseEvent) => {
     if (e) e.stopPropagation();
     
-    setMindMaps(
-      mindMaps.map(mindMap => 
-        mindMap.id === id 
-          ? { ...mindMap, starred: !mindMap.starred } 
-          : mindMap
-      )
-    );
+    // 使用mindmapService切换收藏状态
+    const updatedMindMap = mindmapService.toggleStarred(id);
+    
+    if (updatedMindMap) {
+      setMindMaps(
+        mindMaps.map(mindMap => 
+          mindMap.id === id ? updatedMindMap : mindMap
+        )
+      );
+      
+      toast({
+        title: updatedMindMap.starred ? "已收藏" : "已取消收藏",
+        description: `思维导图「${updatedMindMap.title}」${updatedMindMap.starred ? "已添加到收藏" : "已从收藏中移除"}`,
+      });
+    }
   };
   
   const toggleShared = (id: number, e?: React.MouseEvent) => {
     if (e) e.stopPropagation();
     
-    setMindMaps(
-      mindMaps.map(mindMap => 
-        mindMap.id === id 
-          ? { ...mindMap, shared: !mindMap.shared } 
-          : mindMap
-      )
-    );
+    // 使用mindmapService切换共享状态
+    const updatedMindMap = mindmapService.toggleShared(id);
+    
+    if (updatedMindMap) {
+      setMindMaps(
+        mindMaps.map(mindMap => 
+          mindMap.id === id ? updatedMindMap : mindMap
+        )
+      );
+      
+      toast({
+        title: updatedMindMap.shared ? "已共享" : "已取消共享",
+        description: `思维导图「${updatedMindMap.title}」${updatedMindMap.shared ? "现在可以被其他用户查看" : "已设为私密"}`
+      });
+    }
   };
+
   
   const handleDeleteMindMap = (id: number, e?: React.MouseEvent) => {
     if (e) e.stopPropagation();
     
     if (window.confirm('确定要删除这个思维导图吗？此操作不可撤销。')) {
-      setMindMaps(mindMaps.filter(mindMap => mindMap.id !== id));
+      // 使用mindmapService删除思维导图
+      const success = mindmapService.delete(id);
+      
+      if (success) {
+        setMindMaps(mindMaps.filter(mindMap => mindMap.id !== id));
+        
+        toast({
+          title: "删除成功",
+          description: "思维导图已永久删除",
+        });
+      }
     }
   };
+
   
   const handleShareMindMap = (mindMap: MindMap, e?: React.MouseEvent) => {
     if (e) e.stopPropagation();
