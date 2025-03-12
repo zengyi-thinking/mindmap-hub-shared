@@ -1,12 +1,8 @@
-
-import React, { useState, useRef } from 'react';
+import React, { useRef } from 'react';
 import { motion } from 'framer-motion';
 import { toast } from '@/components/ui/use-toast';
-import { ReactFlow } from '@xyflow/react';
-import '@xyflow/react/dist/style.css';
-import { userFilesService } from '@/lib/storage';
-import { useAuth } from '@/lib/auth';
 import { tagHierarchy } from '@/data/tagHierarchy';
+import { useAuth } from '@/lib/auth';
 
 // Import components
 import MaterialSearchHeader from '@/components/material-search/MaterialSearchHeader';
@@ -18,7 +14,7 @@ import MaterialPreviewDialog from '@/components/material-search/dialogs/Material
 import MaterialListDialog from '@/components/material-search/dialogs/MaterialListDialog';
 
 // Import utilities
-import { flattenTags, findTagPath } from '@/components/material-search/utils/TagUtils';
+import { flattenTags } from '@/components/material-search/utils/TagUtils';
 
 // Import custom hooks
 import { useMaterialSearch } from '@/hooks/useMaterialSearch';

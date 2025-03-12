@@ -1,5 +1,5 @@
 
-import { useState, useCallback, useRef } from 'react';
+import { useState, useCallback } from 'react';
 import { 
   useNodesState, 
   useEdgesState, 
@@ -9,7 +9,6 @@ import { mindMapsService } from '@/lib/storage';
 import { toast } from '@/components/ui/use-toast';
 import { generateMindMap } from '@/components/material-search/MindMapGenerator';
 import { useAuth } from '@/lib/auth';
-import { TagCategory } from '@/types/materials';
 
 export const useMindMap = (materialsData, selectedTags, searchQuery, tagHierarchy) => {
   const { user } = useAuth();

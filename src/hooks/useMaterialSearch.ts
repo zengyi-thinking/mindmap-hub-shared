@@ -1,6 +1,8 @@
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { userFilesService } from '@/lib/storage';
+import { findTagPath } from '@/components/material-search/utils/TagUtils';
+import { tagHierarchy } from '@/data/tagHierarchy';
 
 export const useMaterialSearch = () => {
   const [searchQuery, setSearchQuery] = useState('');
@@ -8,6 +10,7 @@ export const useMaterialSearch = () => {
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [materialsData, setMaterialsData] = useState([]);
   const [selectedTagPath, setSelectedTagPath] = useState<string[]>([]);
+  const tagHierarchyRef = useRef(tagHierarchy);
 
   // Initialize data
   useEffect(() => {
@@ -36,9 +39,9 @@ export const useMaterialSearch = () => {
   const handleSearch = () => {
     setSearchPerformed(true);
     
+    let filtered = materialsData;
+    
     if (searchQuery || selectedTags.length > 0) {
-      let filtered = materialsData;
-      
       if (selectedTags.length > 0) {
         filtered = filtered.filter(material => 
           material.tags && selectedTags.some(tag => material.tags.includes(tag))
@@ -64,8 +67,8 @@ export const useMaterialSearch = () => {
       const firstTag = selectedTags[0];
       const tagPath = findTagPath(tagHierarchyRef.current, firstTag);
       setSelectedTagPath(tagPath.length > 0 ? tagPath : [firstTag]);
-    } else if (materialsData.length > 0 && materialsData[0]?.tags) {
-      setSelectedTagPath([materialsData[0].tags[0]]);
+    } else if (filtered.length > 0 && filtered[0]?.tags) {
+      setSelectedTagPath([filtered[0].tags[0]]);
     }
 
     return filtered;
