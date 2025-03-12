@@ -9,7 +9,18 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogD
 import { toast } from '@/components/ui/use-toast';
 import { Textarea } from '@/components/ui/textarea';
 import { Search, Download, ArrowRight, Filter, X, Eye, Tag, FileText, PlusCircle, Circle, Save } from 'lucide-react';
-import { ReactFlow, Background, Controls, Node, Edge, MarkerType, useNodesState, useEdgesState, addEdge } from '@xyflow/react';
+import { 
+  ReactFlow, 
+  Background, 
+  Controls, 
+  Node, 
+  Edge, 
+  MarkerType, 
+  useNodesState, 
+  useEdgesState, 
+  addEdge, 
+  BackgroundVariant 
+} from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 import { userFilesService, materialsService, mindMapsService } from '@/lib/storage';
 import { useAuth } from '@/lib/auth';
@@ -632,7 +643,7 @@ const MaterialSearch = () => {
                   proOptions={{ hideAttribution: true }}
                 >
                   <Background 
-                    variant="dots" 
+                    variant={"dots" as BackgroundVariant}
                     gap={20} 
                     size={1} 
                     color="hsl(var(--muted-foreground) / 0.3)"
@@ -924,4 +935,3 @@ const MaterialSearch = () => {
 };
 
 export default MaterialSearch;
-
