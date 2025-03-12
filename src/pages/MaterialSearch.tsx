@@ -630,10 +630,9 @@ const MaterialSearch = () => {
                   nodesDraggable={true}
                   elementsSelectable={true}
                   proOptions={{ hideAttribution: true }}
-                  backgroundVariant="grid"
                 >
                   <Background 
-                    variant="grid" 
+                    variant="dots" 
                     gap={20} 
                     size={1} 
                     color="hsl(var(--muted-foreground) / 0.3)"
@@ -925,3 +924,4 @@ const MaterialSearch = () => {
 };
 
 export default MaterialSearch;
+
