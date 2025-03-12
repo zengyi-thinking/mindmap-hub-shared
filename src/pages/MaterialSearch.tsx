@@ -1,15 +1,10 @@
 
-import React, { useState, useCallback, useEffect } from 'react';
+import React, { useState, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { toast } from '@/components/ui/use-toast';
-import { 
-  ReactFlow, 
-  useNodesState, 
-  useEdgesState, 
-  addEdge, 
-} from '@xyflow/react';
+import { ReactFlow } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
-import { userFilesService, materialsService, mindMapsService } from '@/lib/storage';
+import { userFilesService } from '@/lib/storage';
 import { useAuth } from '@/lib/auth';
 import { tagHierarchy } from '@/data/tagHierarchy';
 
@@ -24,109 +19,68 @@ import MaterialListDialog from '@/components/material-search/dialogs/MaterialLis
 
 // Import utilities
 import { flattenTags, findTagPath } from '@/components/material-search/utils/TagUtils';
-import { generateMindMap } from '@/components/material-search/MindMapGenerator';
+
+// Import custom hooks
+import { useMaterialSearch } from '@/hooks/useMaterialSearch';
+import { useMindMap } from '@/hooks/useMindMap';
+import { useMaterialPreview } from '@/hooks/useMaterialPreview';
 
 const MaterialSearch = () => {
   const { user } = useAuth();
-  const [searchQuery, setSearchQuery] = useState('');
-  const [searchPerformed, setSearchPerformed] = useState(false);
-  const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [filterVisible, setFilterVisible] = useState(false);
-  const [nodes, setNodes, onNodesChange] = useNodesState([]);
-  const [edges, setEdges, onEdgesChange] = useEdgesState([]);
-  const [selectedTagPath, setSelectedTagPath] = useState<string[]>([]);
-  const [reactFlowInstance, setReactFlowInstance] = useState(null);
-  const [saveDialogOpen, setSaveDialogOpen] = useState(false);
-  const [selectedMaterial, setSelectedMaterial] = useState(null);
-  const [previewDialogOpen, setPreviewDialogOpen] = useState(false);
-  const [mindMapTitle, setMindMapTitle] = useState('');
-  const [mindMapDescription, setMindMapDescription] = useState('');
-  const [materialsData, setMaterialsData] = useState([]);
-  const [materialsListByTag, setMaterialsListByTag] = useState([]);
-  const [materialListDialogOpen, setMaterialListDialogOpen] = useState(false);
-  const [selectedTagForList, setSelectedTagForList] = useState('');
+  const tagHierarchyRef = useRef(tagHierarchy);
+  
+  // Initialize custom hooks
+  const {
+    searchQuery,
+    setSearchQuery,
+    searchPerformed,
+    setSearchPerformed,
+    selectedTags,
+    setSelectedTags,
+    materialsData,
+    setMaterialsData,
+    selectedTagPath,
+    setSelectedTagPath,
+    toggleTag,
+    clearAllTags,
+    handleSearch,
+    loadMaterials
+  } = useMaterialSearch();
+  
+  const {
+    nodes,
+    edges,
+    onNodesChange,
+    onEdgesChange,
+    reactFlowInstance,
+    setReactFlowInstance,
+    saveDialogOpen,
+    setSaveDialogOpen,
+    mindMapTitle,
+    setMindMapTitle,
+    mindMapDescription,
+    setMindMapDescription,
+    createMindMap,
+    saveMindMap
+  } = useMindMap(materialsData, selectedTags, searchQuery, tagHierarchyRef.current);
+  
+  const {
+    selectedMaterial,
+    setSelectedMaterial,
+    previewDialogOpen,
+    setPreviewDialogOpen,
+    materialsListByTag,
+    setMaterialsListByTag,
+    materialListDialogOpen,
+    setMaterialListDialogOpen,
+    selectedTagForList,
+    setSelectedTagForList,
+    handleMaterialSelect,
+    downloadMaterial
+  } = useMaterialPreview();
 
-  // Initialize data
-  useEffect(() => {
-    loadMaterials();
-  }, []);
-
-  const loadMaterials = () => {
-    const approvedFiles = userFilesService.getApprovedFiles();
-    setMaterialsData(approvedFiles);
-  };
-
-  const popularTags = flattenTags(tagHierarchy);
-
-  // Tag handling
-  const toggleTag = (tag: string) => {
-    if (selectedTags.includes(tag)) {
-      setSelectedTags(selectedTags.filter(t => t !== tag));
-    } else {
-      setSelectedTags([...selectedTags, tag]);
-    }
-  };
-
-  const clearAllTags = () => {
-    setSelectedTags([]);
-  };
-
-  // ReactFlow handlers
-  const onConnect = useCallback((params) => {
-    setEdges((eds) => addEdge(params, eds));
-  }, [setEdges]);
-
-  // Create mindmap
-  const createMindMap = () => {
-    const { nodes: newNodes, edges: newEdges } = generateMindMap({
-      searchQuery,
-      selectedTags,
-      materialsData,
-      tagHierarchy
-    });
-    
-    setNodes(newNodes);
-    setEdges(newEdges);
-  };
-
-  // Search and filter
-  const handleSearch = () => {
-    setSearchPerformed(true);
-    
-    if (searchQuery || selectedTags.length > 0) {
-      let filtered = materialsData;
-      
-      if (selectedTags.length > 0) {
-        filtered = filtered.filter(material => 
-          material.tags && selectedTags.some(tag => material.tags.includes(tag))
-        );
-      }
-      
-      if (searchQuery) {
-        const query = searchQuery.toLowerCase();
-        filtered = filtered.filter(material => 
-          (material.title && material.title.toLowerCase().includes(query)) ||
-          (material.description && material.description.toLowerCase().includes(query)) ||
-          (material.file && material.file.name.toLowerCase().includes(query)) ||
-          (material.tags && material.tags.some(tag => tag.toLowerCase().includes(query)))
-        );
-      }
-      
-      setMaterialsData(filtered);
-    } else {
-      loadMaterials();
-    }
-    
-    createMindMap();
-    
-    if (selectedTags.length > 0) {
-      const firstTag = selectedTags[0];
-      const tagPath = findTagPath(tagHierarchy, firstTag);
-      setSelectedTagPath(tagPath.length > 0 ? tagPath : [firstTag]);
-    } else if (materialsData.length > 0 && materialsData[0]?.tags) {
-      setSelectedTagPath([materialsData[0].tags[0]]);
-    }
-  };
+  const popularTags = flattenTags(tagHierarchyRef.current);
 
   const toggleFilter = () => {
     setFilterVisible(!filterVisible);
@@ -138,6 +92,12 @@ const MaterialSearch = () => {
     
     return material.tags && selectedTagPath.every(tag => material.tags.includes(tag));
   });
+
+  // Unified search function
+  const handleSearchAndCreateMindMap = () => {
+    handleSearch();
+    createMindMap();
+  };
 
   // Node click handler
   const onNodeClick = (event, node) => {
@@ -173,81 +133,6 @@ const MaterialSearch = () => {
     }
   };
 
-  // Save mindmap
-  const saveMindMap = () => {
-    if (!mindMapTitle.trim()) {
-      toast({
-        title: "请输入标题",
-        description: "思维导图需要一个标题才能保存",
-        variant: "destructive"
-      });
-      return;
-    }
-    
-    if (!user) {
-      toast({
-        title: "请先登录",
-        description: "您需要登录后才能保存思维导图",
-        variant: "destructive"
-      });
-      return;
-    }
-    
-    const mindMapData = {
-      id: Date.now(),
-      title: mindMapTitle,
-      description: mindMapDescription,
-      content: {
-        nodes: nodes,
-        edges: edges,
-        version: "1.0"
-      },
-      tags: selectedTags,
-      updatedAt: new Date().toISOString(),
-      creator: user.username || 'Unknown',
-      starred: false,
-      shared: true
-    };
-    
-    mindMapsService.add(mindMapData);
-    
-    toast({
-      title: "保存成功",
-      description: "思维导图已成功保存"
-    });
-    
-    setSaveDialogOpen(false);
-    setMindMapTitle('');
-    setMindMapDescription('');
-  };
-
-  // Download material
-  const downloadMaterial = (material) => {
-    if (!material || !material.file) return;
-    
-    userFilesService.incrementDownloads(material.id);
-    
-    const link = document.createElement('a');
-    link.href = material.file.content || material.file.dataUrl;
-    link.download = material.file.name;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    
-    toast({
-      title: "下载开始",
-      description: `${material.file.name} 下载已开始`
-    });
-  };
-
-  // Handle material selection for previewing
-  const handleMaterialSelect = (material) => {
-    setSelectedMaterial(material);
-    setPreviewDialogOpen(true);
-    setMaterialListDialogOpen(false);
-    userFilesService.incrementViews(material.id);
-  };
-
   return (
     <div className="w-full max-w-6xl mx-auto space-y-8">
       <MaterialSearchHeader 
@@ -261,7 +146,7 @@ const MaterialSearch = () => {
         className="flex flex-col gap-4"
       >
         <SearchForm 
-          onSearch={handleSearch}
+          onSearch={handleSearchAndCreateMindMap}
           onFilterToggle={toggleFilter}
           onTagToggle={toggleTag}
           onClearTags={clearAllTags}
