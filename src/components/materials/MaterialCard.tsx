@@ -1,25 +1,33 @@
-
 import React from 'react';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
-import { Download, ThumbsUp, Heart, Star, Clock, Tag, ChevronRight } from 'lucide-react';
+import { Download, ThumbsUp, Heart, Star, Clock, Tag, ChevronRight, ExternalLink } from 'lucide-react';
 import { Material } from '@/types/materials';
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { motion } from 'framer-motion';
+import { useNavigate } from 'react-router-dom';
 
 interface MaterialCardProps {
   material: Material;
 }
 
 const MaterialCard: React.FC<MaterialCardProps> = ({ material }) => {
+  const navigate = useNavigate();
+
+  const goToDetail = () => {
+    navigate(`/material/${material.id}`);
+  };
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -20 }}
       transition={{ duration: 0.3 }}
+      className="cursor-pointer"
+      onClick={goToDetail}
     >
       <Card className="glass-card subtle-hover h-full">
         <CardHeader className="pb-2">
@@ -61,12 +69,12 @@ const MaterialCard: React.FC<MaterialCardProps> = ({ material }) => {
           <div className="flex gap-2 ml-auto">
             <Popover>
               <PopoverTrigger asChild>
-                <Button size="sm" variant="outline">
+                <Button size="sm" variant="outline" onClick={(e) => e.stopPropagation()}>
                   <Tag className="h-4 w-4 mr-1" />
                   查看标签
                 </Button>
               </PopoverTrigger>
-              <PopoverContent className="w-64">
+              <PopoverContent className="w-64" onClick={(e) => e.stopPropagation()}>
                 <div className="space-y-2">
                   <h4 className="font-medium">标签路径</h4>
                   <div className="text-sm">
@@ -80,13 +88,17 @@ const MaterialCard: React.FC<MaterialCardProps> = ({ material }) => {
                 </div>
               </PopoverContent>
             </Popover>
-            <Button size="sm" variant="ghost">
+            <Button size="sm" variant="ghost" onClick={(e) => e.stopPropagation()}>
               <Heart className="h-4 w-4 mr-1" />
               收藏
             </Button>
-            <Button size="sm">
+            <Button size="sm" onClick={(e) => e.stopPropagation()}>
               <Download className="h-4 w-4 mr-1" />
               下载
+            </Button>
+            <Button size="sm" variant="default" onClick={(e) => {e.stopPropagation(); goToDetail();}}>
+              <ExternalLink className="h-4 w-4 mr-1" />
+              详情
             </Button>
           </div>
         </CardFooter>

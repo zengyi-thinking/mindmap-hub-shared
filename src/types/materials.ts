@@ -1,6 +1,5 @@
-
 export interface Material {
-  id: number;
+  id: number | string;
   title: string;
   description: string;
   uploadTime: string;
@@ -11,19 +10,28 @@ export interface Material {
   favorites: number;
   fileType?: string;
   fileSize?: number;
+  fileName?: string;
+  fileUrl?: string;
   previewUrl?: string;
   comments?: Comment[];
   viewCount?: number;
+  userId?: number | string;
+  status?: string;
 }
 
 export interface Comment {
-  id: number;
-  userId: number;
+  id: number | string;
+  materialId?: number | string;
+  parentId?: number | string;
+  userId: number | string;
   userName: string;
   userAvatar?: string;
   content: string;
   timestamp: string;
   likes: number;
+  liked?: boolean;
+  replies?: Comment[];
+  createdAt?: string;
 }
 
 export interface TagCategory {

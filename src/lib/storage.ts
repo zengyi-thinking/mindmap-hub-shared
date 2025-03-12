@@ -1,4 +1,3 @@
-
 import { SharedMindMap, MindMapComment } from "@/types/mindmap";
 // Don't import DiscussionTopic and DiscussionComment to avoid conflicts
 // import { DiscussionTopic, DiscussionComment } from "@/types/discussion";
@@ -334,6 +333,9 @@ export const commentsService = {
       id: Date.now(),
       ...commentData,
       likes: commentData.likes || 0,
+      liked: false,
+      createdAt: commentData.createdAt || new Date().toISOString(),
+      replies: commentData.replies || [], // 支持回复
     };
     
     comments.push(newComment);
@@ -353,6 +355,46 @@ export const commentsService = {
     
     const comments = JSON.parse(localStorage.getItem('discussionComments') || '[]');
     return comments.filter(comment => comment.topicId === topicId);
+  },
+
+  getByMaterialId: (materialId) => {
+    if (typeof localStorage === 'undefined') return [];
+    
+    const comments = JSON.parse(localStorage.getItem('discussionComments') || '[]');
+    return comments.filter(comment => comment.materialId === materialId);
+  },
+
+  getNestedCommentsByMaterialId: (materialId) => {
+    if (typeof localStorage === 'undefined') return [];
+    
+    const allComments = JSON.parse(localStorage.getItem('discussionComments') || '[]');
+    const materialComments = allComments.filter(comment => comment.materialId === materialId);
+    
+    // 获取顶级评论
+    const topLevelComments = materialComments.filter(comment => !comment.parentId);
+    
+    // 构建评论树
+    const buildCommentTree = (comments) => {
+      return comments.map(comment => {
+        // 获取当前评论的所有回复
+        const replies = materialComments
+          .filter(reply => reply.parentId === comment.id)
+          .sort((a, b) => new Date(a.createdAt || a.timestamp).getTime() - new Date(b.createdAt || b.timestamp).getTime());
+          
+        // 递归构建回复的回复
+        return {
+          ...comment,
+          replies: replies.length > 0 ? buildCommentTree(replies) : []
+        };
+      });
+    };
+    
+    // 按创建时间排序顶级评论
+    const sortedTopLevelComments = topLevelComments.sort(
+      (a, b) => new Date(b.createdAt || b.timestamp).getTime() - new Date(a.createdAt || a.timestamp).getTime()
+    );
+    
+    return buildCommentTree(sortedTopLevelComments);
   },
   
   update: (id, updateData) => {

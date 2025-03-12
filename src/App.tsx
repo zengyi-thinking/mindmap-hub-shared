@@ -14,6 +14,7 @@ import Dashboard from "./pages/Dashboard";
 import MyMindMaps from "./pages/MyMindMaps";
 import MaterialUpload from "./pages/MaterialUpload";
 import MaterialSearch from "./pages/MaterialSearch";
+import MaterialDetail from "./pages/MaterialDetail";
 import DiscussionCenter from "./pages/DiscussionCenter";
 import PersonalCenter from "./pages/PersonalCenter";
 import MaterialManagement from "./pages/MaterialManagement";
@@ -54,6 +55,7 @@ function App() {
                   <Route path="/mindmaps" element={<MyMindMaps />} />
                   <Route path="/upload" element={<MaterialUpload />} />
                   <Route path="/search" element={<MaterialSearch />} />
+                  <Route path="/material/:id" element={<MaterialDetail />} />
                   <Route path="/discussion" element={<DiscussionCenter />} />
                   <Route path="/profile" element={<PersonalCenter />} />
                 </Route>
