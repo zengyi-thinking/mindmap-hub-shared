@@ -1,3 +1,4 @@
+
 import React, { useState, useCallback, useRef, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
@@ -13,6 +14,7 @@ import { ReactFlow, Background, Controls, Node, Edge, MarkerType, useNodesState,
 import '@xyflow/react/dist/style.css';
 import { userFilesService, materialsService, mindMapsService } from '@/lib/storage';
 import { useAuth } from '@/lib/auth';
+import { tagHierarchy } from '@/data/tagHierarchy';
 
 // Define hierarchical tag structure
 interface TagCategory {
@@ -37,6 +39,9 @@ const MaterialSearch = () => {
   const [mindMapTitle, setMindMapTitle] = useState('');
   const [mindMapDescription, setMindMapDescription] = useState('');
   const [materialsData, setMaterialsData] = useState([]);
+  const [materialsListByTag, setMaterialsListByTag] = useState([]);
+  const [materialListDialogOpen, setMaterialListDialogOpen] = useState(false);
+  const [selectedTagForList, setSelectedTagForList] = useState('');
 
   // Load materials from storage on component mount
   useEffect(() => {
@@ -48,112 +53,6 @@ const MaterialSearch = () => {
     const approvedFiles = userFilesService.getApprovedFiles();
     setMaterialsData(approvedFiles);
   };
-
-  // Hierarchical tag system
-  const tagHierarchy: TagCategory[] = [
-    {
-      id: "contests",
-      name: "比赛",
-      children: [
-        {
-          id: "math-modeling",
-          name: "数学建模",
-          children: [
-            { id: "rules", name: "比赛规则" },
-            { id: "previous-problems", name: "历年真题" },
-            { id: "winning-works", name: "获奖作品" },
-            { id: "notices", name: "比赛注意事项" }
-          ]
-        },
-        {
-          id: "programming",
-          name: "程序设计",
-          children: [
-            { id: "algorithms", name: "算法" },
-            { id: "languages", name: "编程语言" },
-            { id: "frameworks", name: "开发框架" }
-          ]
-        },
-        {
-          id: "innovation",
-          name: "创新创业",
-          children: [
-            { id: "business-plans", name: "商业计划书" },
-            { id: "case-studies", name: "案例分析" },
-            { id: "pitches", name: "路演材料" }
-          ]
-        }
-      ]
-    },
-    {
-      id: "cs",
-      name: "计算机科学",
-      children: [
-        {
-          id: "basics",
-          name: "基础理论",
-          children: [
-            { id: "data-structures", name: "数据结构" },
-            { id: "algorithms", name: "算法" },
-            { id: "operating-systems", name: "操作系统" },
-            { id: "computer-networks", name: "计算机网络" }
-          ]
-        },
-        {
-          id: "development",
-          name: "开发技术",
-          children: [
-            { id: "frontend", name: "前端开发" },
-            { id: "backend", name: "后端开发" },
-            { id: "mobile", name: "移动开发" },
-            { id: "database", name: "数据库" }
-          ]
-        },
-        {
-          id: "advanced",
-          name: "高级主题",
-          children: [
-            { id: "ai", name: "人工智能" },
-            { id: "ml", name: "机器学习" },
-            { id: "cloud", name: "云计算" },
-            { id: "security", name: "网络安全" }
-          ]
-        }
-      ]
-    },
-    {
-      id: "education",
-      name: "教育资源",
-      children: [
-        {
-          id: "textbooks",
-          name: "教材",
-          children: [
-            { id: "undergraduate", name: "本科教材" },
-            { id: "graduate", name: "研究生教材" },
-            { id: "mooc", name: "在线课程" }
-          ]
-        },
-        {
-          id: "notes",
-          name: "笔记",
-          children: [
-            { id: "lecture-notes", name: "课堂笔记" },
-            { id: "summary", name: "总结归纳" }
-          ]
-        },
-        {
-          id: "exercises",
-          name: "习题",
-          children: [
-            { id: "practice", name: "练习题" },
-            { id: "exams", name: "考试题" },
-            { id: "solutions", name: "解答" }
-          ]
-        }
-      ]
-    }
-  ];
 
   // Extract all unique tags from the hierarchy for filtering
   const flattenTags = (categories: TagCategory[]): string[] => {
@@ -256,7 +155,7 @@ const MaterialSearch = () => {
     // Tags to process (either selected tags or default ones if none selected)
     const tagsToProcess = selectedTags.length > 0 
       ? selectedTags 
-      : materialsData.length > 0 && materialsData[0].tags 
+      : materialsData.length > 0 && materialsData[0]?.tags 
         ? materialsData[0].tags.slice(0, 3) 
         : ['比赛', '数学建模', '比赛规则'];
     
@@ -269,7 +168,7 @@ const MaterialSearch = () => {
         // 如果在分层结构中找不到标签，将其作为自定义标签处理
         const customTagNode: Node = {
           id: `custom-${tagIndex}`,
-          data: { label: tag },
+          data: { label: tag, tagName: tag, isLastLevel: true },
           position: { 
             x: 400 + 250 * Math.cos(tagIndex * (2 * Math.PI / tagsToProcess.length)), 
             y: 300 + 250 * Math.sin(tagIndex * (2 * Math.PI / tagsToProcess.length)) 
@@ -280,6 +179,7 @@ const MaterialSearch = () => {
             borderRadius: '16px',
             padding: '8px 16px',
             fontSize: '13px',
+            cursor: 'pointer',
           },
         };
         
@@ -326,6 +226,7 @@ const MaterialSearch = () => {
               width: 120,
               textAlign: 'center',
               boxShadow: '0 2px 4px rgba(0,0,0,0.05)',
+              cursor: 'pointer',
             },
           };
           
@@ -353,7 +254,12 @@ const MaterialSearch = () => {
           // Create node for this level
           const levelNode: Node = {
             id: levelNodeId,
-            data: { label: pathTag },
+            data: { 
+              label: pathTag, 
+              tagName: pathTag, 
+              isLastLevel: isLastLevel,
+              fullPath: tagPath.slice(0, pathIndex + 1),
+            },
             position: { 
               x: 400 + (pathIndex + 1) * 180 * Math.cos(tagIndex * (2 * Math.PI / tagsToProcess.length)), 
               y: 300 + (pathIndex + 1) * 180 * Math.sin(tagIndex * (2 * Math.PI / tagsToProcess.length)) 
@@ -365,6 +271,7 @@ const MaterialSearch = () => {
               padding: '8px 16px',
               fontSize: '13px',
               fontWeight: isLastLevel ? 'bold' : 'normal',
+              cursor: 'pointer',
             },
           };
           
@@ -390,15 +297,19 @@ const MaterialSearch = () => {
           // If this is the last level, add related materials
           if (isLastLevel) {
             // Find materials with this tag path
-            const relatedMaterials = materialsData.filter(m => 
-              tagPath.every((pathItem, idx) => m.tags[idx] === pathItem)
-            );
+            const relatedMaterials = materialsData.filter(m => {
+              if (!m.tags || m.tags.length === 0) return false;
+              return m.tags.includes(pathTag);
+            });
             
             // Add material nodes
             relatedMaterials.forEach((material, materialIndex) => {
               const materialNode: Node = {
                 id: `material-${tagIndex}-${pathIndex}-${materialIndex}`,
-                data: { label: material.title },
+                data: { 
+                  label: material.title || material.file?.name,
+                  materialId: material.id
+                },
                 position: { 
                   x: 400 + (pathIndex + 1) * 180 * Math.cos(tagIndex * (2 * Math.PI / tagsToProcess.length)) + 150 * Math.cos((materialIndex + 0.5) * Math.PI / 2), 
                   y: 300 + (pathIndex + 1) * 180 * Math.sin(tagIndex * (2 * Math.PI / tagsToProcess.length)) + 150 * Math.sin((materialIndex + 0.5) * Math.PI / 2) 
@@ -412,6 +323,7 @@ const MaterialSearch = () => {
                   width: 120,
                   textAlign: 'center',
                   boxShadow: '0 2px 4px rgba(0,0,0,0.05)',
+                  cursor: 'pointer',
                 },
               };
               
@@ -478,7 +390,7 @@ const MaterialSearch = () => {
       const firstTag = selectedTags[0];
       const tagPath = findTagPath(firstTag);
       setSelectedTagPath(tagPath.length > 0 ? tagPath : [firstTag]);
-    } else if (materialsData.length > 0 && materialsData[0].tags) {
+    } else if (materialsData.length > 0 && materialsData[0]?.tags) {
       setSelectedTagPath([materialsData[0].tags[0]]);
     }
   };
@@ -503,6 +415,35 @@ const MaterialSearch = () => {
       if (material) {
         setSelectedMaterial(material);
         setPreviewDialogOpen(true);
+        // 增加查看次数
+        userFilesService.incrementViews(material.id);
+      }
+    }
+    // 如果点击的是最后一级标签节点
+    else if (node.data.isLastLevel && node.data.tagName) {
+      const tagName = node.data.tagName;
+      
+      // 查找具有此标签的所有材料
+      const taggedMaterials = materialsData.filter(m => 
+        m.tags && m.tags.includes(tagName)
+      );
+      
+      if (taggedMaterials.length === 1) {
+        // 如果只有一个材料，直接显示预览
+        setSelectedMaterial(taggedMaterials[0]);
+        setPreviewDialogOpen(true);
+        userFilesService.incrementViews(taggedMaterials[0].id);
+      } else if (taggedMaterials.length > 1) {
+        // 如果有多个材料，显示材料列表对话框
+        setMaterialsListByTag(taggedMaterials);
+        setSelectedTagForList(tagName);
+        setMaterialListDialogOpen(true);
+      } else {
+        toast({
+          title: "没有找到相关资料",
+          description: `没有找到标签为 "${tagName}" 的资料`,
+          variant: "destructive"
+        });
       }
     }
   };
@@ -529,19 +470,19 @@ const MaterialSearch = () => {
     
     // 创建思维导图对象
     const mindMapData = {
+      id: Date.now(),
       title: mindMapTitle,
       description: mindMapDescription,
-      nodes: nodes,
-      edges: edges,
+      content: {
+        nodes: nodes,
+        edges: edges,
+        version: "1.0"
+      },
       tags: selectedTags,
-      searchQuery: searchQuery,
-      createdAt: new Date().toISOString(),
-      userId: user.id,
-      username: user.name,
-      isPublic: true,
-      views: 0,
-      likes: 0,
-      downloads: 0
+      updatedAt: new Date().toISOString(),
+      creator: user.name,
+      starred: false,
+      shared: true
     };
     
     // 保存到localStorage
@@ -566,7 +507,7 @@ const MaterialSearch = () => {
     
     // 创建下载链接
     const link = document.createElement('a');
-    link.href = material.file.content;
+    link.href = material.file.content || material.file.dataUrl;
     link.download = material.file.name;
     document.body.appendChild(link);
     link.click();
@@ -716,7 +657,7 @@ const MaterialSearch = () => {
                 </div>
                 <CardDescription className="text-xs flex gap-2 items-center mt-1">
                   <Circle className="h-2 w-2 fill-primary stroke-none" />
-                  点击节点可以查看相关资料
+                  点击最终标签节点可以查看相关资料
                   <Circle className="h-2 w-2 fill-accent stroke-none ml-2" />
                   拖动可以移动思维导图
                 </CardDescription>
@@ -789,10 +730,11 @@ const MaterialSearch = () => {
                         onClick={() => {
                           setSelectedMaterial(material);
                           setPreviewDialogOpen(true);
+                          userFilesService.incrementViews(material.id);
                         }}
                       >
                         <CardHeader className="p-4 pb-2">
-                          <CardTitle className="text-base">{material.title || material.file.name}</CardTitle>
+                          <CardTitle className="text-base">{material.title || material.file?.name}</CardTitle>
                         </CardHeader>
                         <CardContent className="p-4 pt-2">
                           <p className="text-xs text-muted-foreground mb-3 line-clamp-2">
@@ -906,7 +848,7 @@ const MaterialSearch = () => {
           {selectedMaterial && (
             <>
               <DialogHeader>
-                <DialogTitle>{selectedMaterial.title || selectedMaterial.file.name}</DialogTitle>
+                <DialogTitle>{selectedMaterial.title || selectedMaterial.file?.name}</DialogTitle>
                 <DialogDescription>
                   上传者: {selectedMaterial.username || "未知用户"} · 
                   上传时间: {new Date(selectedMaterial.uploadTime).toLocaleDateString()}
@@ -929,7 +871,7 @@ const MaterialSearch = () => {
                 <div className="grid grid-cols-3 gap-4 text-sm">
                   <div className="flex flex-col items-center p-3 border rounded-md">
                     <p className="text-muted-foreground">文件大小</p>
-                    <p className="font-medium">{(selectedMaterial.file.size / 1024 / 1024).toFixed(2)} MB</p>
+                    <p className="font-medium">{(selectedMaterial.file?.size / 1024 / 1024).toFixed(2)} MB</p>
                   </div>
                   <div className="flex flex-col items-center p-3 border rounded-md">
                     <p className="text-muted-foreground">查看次数</p>
@@ -941,10 +883,10 @@ const MaterialSearch = () => {
                   </div>
                 </div>
                 
-                {selectedMaterial.file && selectedMaterial.file.type.startsWith('image/') && (
+                {selectedMaterial.file && selectedMaterial.file.type?.startsWith('image/') && (
                   <div className="border rounded-md p-2 overflow-hidden">
                     <img 
-                      src={selectedMaterial.file.content} 
+                      src={selectedMaterial.file.content || selectedMaterial.file.dataUrl} 
                       alt={selectedMaterial.title || selectedMaterial.file.name}
                       className="w-full h-auto object-contain max-h-[400px]"
                     />
@@ -954,7 +896,7 @@ const MaterialSearch = () => {
                 {selectedMaterial.file && selectedMaterial.file.type === 'application/pdf' && (
                   <div className="border rounded-md p-2 flex justify-center">
                     <object
-                      data={selectedMaterial.file.content}
+                      data={selectedMaterial.file.content || selectedMaterial.file.dataUrl}
                       type="application/pdf"
                       width="100%"
                       height="500px"
@@ -973,6 +915,58 @@ const MaterialSearch = () => {
               </DialogFooter>
             </>
           )}
+        </DialogContent>
+      </Dialog>
+
+      {/* 材料列表对话框 */}
+      <Dialog open={materialListDialogOpen} onOpenChange={setMaterialListDialogOpen}>
+        <DialogContent className="sm:max-w-2xl max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>标签"{selectedTagForList}"的相关资料</DialogTitle>
+            <DialogDescription>
+              以下是与该标签相关的所有资料，点击卡片查看详情
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 py-4">
+            {materialsListByTag.map((material, index) => (
+              <Card 
+                key={index}
+                className="cursor-pointer hover:shadow-md transition-shadow"
+                onClick={() => {
+                  setSelectedMaterial(material);
+                  setMaterialListDialogOpen(false);
+                  setPreviewDialogOpen(true);
+                  userFilesService.incrementViews(material.id);
+                }}
+              >
+                <CardHeader className="p-4 pb-2">
+                  <CardTitle className="text-base line-clamp-1">{material.title || material.file?.name}</CardTitle>
+                </CardHeader>
+                <CardContent className="p-4 pt-2">
+                  <p className="text-xs text-muted-foreground mb-2 line-clamp-2">
+                    {material.description || "没有描述"}
+                  </p>
+                  <div className="flex flex-wrap gap-1 mt-2">
+                    {material.tags && material.tags.slice(0, 3).map((tag, tagIndex) => (
+                      <Badge key={tagIndex} variant="outline" className="text-xs">
+                        {tag}
+                      </Badge>
+                    ))}
+                    {material.tags && material.tags.length > 3 && (
+                      <Badge variant="outline" className="text-xs">+{material.tags.length - 3}</Badge>
+                    )}
+                  </div>
+                </CardContent>
+                <CardFooter className="px-4 py-2 flex justify-between text-xs text-muted-foreground">
+                  <span>上传者: {material.username || "未知"}</span>
+                  <span>查看: {material.views || 0}</span>
+                </CardFooter>
+              </Card>
+            ))}
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setMaterialListDialogOpen(false)}>关闭</Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
     </div>
