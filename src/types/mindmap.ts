@@ -43,6 +43,12 @@ export interface MindMapNode {
     fontSize?: string;
     padding?: string;
     boxShadow?: string;
+    borderColor?: string;
+    borderWidth?: number;
+    width?: number;
+    height?: number;
+    color?: string;
+    fontWeight?: string;
   };
 }
 

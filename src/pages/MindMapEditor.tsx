@@ -1,3 +1,4 @@
+
 import React, { useState, useCallback, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { toast } from '@/components/ui/use-toast';
@@ -54,7 +55,8 @@ import { mindmapService } from '@/lib/mindmapStorage';
 import { userFilesService } from '@/lib/storage';
 import { useAuth } from '@/lib/auth';
 import MaterialNode from '@/components/mindmap/MaterialNode';
-import { MindMap, MindMapNode } from '@/types/mindmap';
+import NodeEditForm from '@/components/mindmap/NodeEditForm';
+import { MindMap, MindMapNode, MindMapEdge } from '@/types/mindmap';
 import { Material } from '@/types/materials';
 import AttachMaterialDialog from '@/components/mindmap/AttachMaterialDialog';
 import NodeIconSelector from '@/components/mindmap/NodeIconSelector';
@@ -74,7 +76,7 @@ const MindMapEditor: React.FC = () => {
   
   // State for the mindmap
   const [nodes, setNodes, onNodesChange] = useNodesState<MindMapNode['data']>([]);
-  const [edges, setEdges, onEdgesChange] = useEdgesState([]);
+  const [edges, setEdges, onEdgesChange] = useEdgesState<MindMapEdge>([]);
   const [reactFlowInstance, setReactFlowInstance] = useState<any>(null);
   
   // State for the node edit
@@ -137,9 +139,8 @@ const MindMapEditor: React.FC = () => {
         position: { x: 400, y: 300 },
         style: {
           background: '#f0f4ff',
-          borderColor: 'hsl(var(--primary))',
+          border: '2px solid hsl(var(--primary))',
           color: 'hsl(var(--primary))',
-          borderWidth: 2,
           width: 150,
           height: 80,
           padding: '10px',
@@ -229,8 +230,7 @@ const MindMapEditor: React.FC = () => {
       position,
       style: {
         background: '#ffffff',
-        borderColor: 'hsl(var(--border))',
-        borderWidth: 1,
+        border: '1px solid hsl(var(--border))',
         width: 120,
         height: 60,
         padding: '8px',
