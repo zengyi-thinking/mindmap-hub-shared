@@ -1,12 +1,14 @@
+
 import React from 'react';
 import { Navigate, Outlet } from 'react-router-dom';
 import { useAuth } from '../lib/auth';
 
 interface ProtectedRouteProps {
   requireAdmin?: boolean;
+  children?: React.ReactNode;
 }
 
-const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ requireAdmin = false }) => {
+const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ requireAdmin = false, children }) => {
   const { user, isLoading } = useAuth();
   
   // 如果正在加载身份验证信息，显示加载中
@@ -31,8 +33,8 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ requireAdmin = false })
     return <Navigate to="/dashboard" replace />;
   }
   
-  // 如果满足所有条件，渲染子路由
-  return <Outlet />;
+  // 如果有子元素，返回子元素，否则返回Outlet
+  return children ? <>{children}</> : <Outlet />;
 };
 
 export default ProtectedRoute; 

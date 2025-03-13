@@ -1,3 +1,4 @@
+
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -76,7 +77,11 @@ function App() {
               <Route path="/app" element={<Navigate to="/dashboard" replace />} />
               
               {/* 新增的路由 */}
-              <Route path="/mindmap-editor/:id" element={<ProtectedRoute><MindMapEditor /></ProtectedRoute>} />
+              <Route path="/mindmap-editor/:id" element={
+                <ProtectedRoute>
+                  <MindMapEditor />
+                </ProtectedRoute>
+              } />
               <Route path="/mindmap-view/:id" element={<MindMapView />} />
               <Route path="/mindmap-materials/:mapId/:nodeId" element={<MindMapMaterials />} />
               

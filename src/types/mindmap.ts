@@ -1,3 +1,4 @@
+
 // 思维导图接口定义
 export interface MindMap {
   id: number;
@@ -9,6 +10,7 @@ export interface MindMap {
   description?: string;
   tags?: string[];
   content?: MindMapContent;
+  viewCount?: number;
 }
 
 // 思维导图内容接口
@@ -31,6 +33,7 @@ export interface MindMapNode {
     notes?: string;
     color?: string;
     icon?: string;
+    materials?: any[];
   };
 }
 
