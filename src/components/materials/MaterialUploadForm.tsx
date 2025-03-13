@@ -1,22 +1,24 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { Upload, Check, AlertCircle, FileText, Tag, Clock, User } from 'lucide-react';
+import { Upload, Check, AlertCircle, FileText, Tag, Clock, User, Folder } from 'lucide-react';
 import { toast } from '@/components/ui/use-toast';
 import TagSelector from './TagSelector';
 import FileUploader from './FileUploader';
+import FolderSelector from './FolderSelector';
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Badge } from '@/components/ui/badge';
 import { userFilesService } from '@/lib/storage';
 import { useAuth } from '@/lib/auth';
 import { motion } from 'framer-motion';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 const MaterialUploadForm: React.FC = () => {
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
+  const [selectedFolderPath, setSelectedFolderPath] = useState<string[]>([]);
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -24,11 +26,13 @@ const MaterialUploadForm: React.FC = () => {
   const [isUploading, setIsUploading] = useState(false);
   const [uploadSuccess, setUploadSuccess] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
+  const [uploadMethod, setUploadMethod] = useState<'tags' | 'folder'>('tags');
   const [recentUploads, setRecentUploads] = useState<{
     id: number;
     title: string;
     date: string;
     tags: string[];
+    folderPath?: string[];
   }[]>([]);
   const { user } = useAuth();
   
@@ -40,7 +44,8 @@ const MaterialUploadForm: React.FC = () => {
       id: file.id || Date.now(),
       title: file.title,
       date: new Date(file.uploadTime).toLocaleDateString(),
-      tags: file.tags || []
+      tags: file.tags || [],
+      folderPath: file.folderPath || []
     }));
     setRecentUploads(recentFiles);
   }, [user?.id]);
@@ -73,9 +78,17 @@ const MaterialUploadForm: React.FC = () => {
       return;
     }
     
-    if (selectedTags.length === 0) {
+    if (uploadMethod === 'tags' && selectedTags.length === 0) {
       toast({
         title: "请至少选择一个标签",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    if (uploadMethod === 'folder' && selectedFolderPath.length === 0) {
+      toast({
+        title: "请选择上传文件夹",
         variant: "destructive"
       });
       return;
@@ -108,6 +121,20 @@ const MaterialUploadForm: React.FC = () => {
       if (event.target && event.target.result) {
         const dataUrl = event.target.result.toString();
         
+        // 根据上传方法设置标签和文件夹路径
+        const tags = uploadMethod === 'tags' ? selectedTags : [];
+        const folderPath = uploadMethod === 'folder' ? selectedFolderPath : [];
+        
+        // 如果使用文件夹上传，将文件夹路径也添加到标签中，以便搜索
+        if (uploadMethod === 'folder' && folderPath.length > 0) {
+          // 将文件夹路径的每个部分也作为标签
+          folderPath.forEach(folder => {
+            if (!tags.includes(folder)) {
+              tags.push(folder);
+            }
+          });
+        }
+        
         // 创建要保存的文件对象
         const fileToSave = {
           file: {
@@ -119,7 +146,8 @@ const MaterialUploadForm: React.FC = () => {
           },
           title: title,
           description: description || '',
-          tags: selectedTags,
+          tags: tags,
+          folderPath: folderPath,
           uploadTime: new Date().toISOString(),
           userId: user?.id || 0,
           username: user?.username || 'Guest',
@@ -138,7 +166,8 @@ const MaterialUploadForm: React.FC = () => {
           id: Date.now(),
           title: title,
           date: new Date().toISOString().split('T')[0],
-          tags: selectedTags
+          tags: tags,
+          folderPath: folderPath
         };
         
         setRecentUploads(prev => [newUpload, ...prev]);
@@ -154,6 +183,7 @@ const MaterialUploadForm: React.FC = () => {
         setTitle('');
         setDescription('');
         setSelectedTags([]);
+        setSelectedFolderPath([]);
         setSelectedFile(null);
         setUploadSuccess(true);
       }
@@ -166,6 +196,7 @@ const MaterialUploadForm: React.FC = () => {
     setTitle('');
     setDescription('');
     setSelectedTags([]);
+    setSelectedFolderPath([]);
     setSelectedFile(null);
     setUploadSuccess(false);
     setUploadError(null);
@@ -234,17 +265,48 @@ const MaterialUploadForm: React.FC = () => {
             />
           </div>
           
-          <TagSelector 
-            selectedTags={selectedTags} 
-            onTagsChange={setSelectedTags}
-            disabled={isUploading}
-          />
-          
           <FileUploader 
             selectedFile={selectedFile} 
             onFileChange={setSelectedFile} 
             disabled={isUploading}
           />
+          
+          <div className="space-y-3">
+            <Label className="text-sm font-medium">上传方式</Label>
+            <Tabs 
+              defaultValue="tags" 
+              value={uploadMethod} 
+              onValueChange={(val) => setUploadMethod(val as 'tags' | 'folder')}
+              className="w-full"
+            >
+              <TabsList className="grid grid-cols-2 mb-4">
+                <TabsTrigger value="tags" className="flex items-center gap-1.5">
+                  <Tag className="h-4 w-4" />
+                  使用标签上传
+                </TabsTrigger>
+                <TabsTrigger value="folder" className="flex items-center gap-1.5">
+                  <Folder className="h-4 w-4" />
+                  上传到文件夹
+                </TabsTrigger>
+              </TabsList>
+              
+              <TabsContent value="tags">
+                <TagSelector 
+                  selectedTags={selectedTags} 
+                  onTagsChange={setSelectedTags}
+                  disabled={isUploading}
+                />
+              </TabsContent>
+              
+              <TabsContent value="folder">
+                <FolderSelector 
+                  selectedFolderPath={selectedFolderPath}
+                  onFolderPathChange={setSelectedFolderPath}
+                  disabled={isUploading}
+                />
+              </TabsContent>
+            </Tabs>
+          </div>
           
           {isUploading && (
             <div className="bg-slate-50 dark:bg-slate-900/60 p-3 rounded-lg">
@@ -267,35 +329,35 @@ const MaterialUploadForm: React.FC = () => {
                 <Clock className="h-4 w-4 text-muted-foreground" />
                 最近上传记录
               </h3>
-              <div className="border rounded-md divide-y">
-                {recentUploads.map((upload) => (
-                  <div key={upload.id} className="p-3 flex justify-between items-center hover:bg-slate-100 dark:hover:bg-slate-800/60 transition-colors">
-                    <div>
-                      <p className="font-medium flex items-center gap-1.5">
-                        <FileText className="h-4 w-4 text-primary/70" />
-                        {upload.title}
-                      </p>
-                      <div className="flex items-center gap-2 mt-1">
-                        <span className="text-xs text-muted-foreground">
-                          {upload.date}
-                        </span>
-                        <div className="flex gap-1">
-                          {upload.tags.slice(0, 2).map((tag, i) => (
-                            <span key={i} className="text-xs px-2 py-0.5 bg-primary/10 text-primary rounded-full text-xs">
-                              {tag}
-                            </span>
-                          ))}
-                          {upload.tags.length > 2 && (
-                            <span className="text-xs px-2 py-0.5 bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-200 rounded-full text-xs">
-                              +{upload.tags.length - 2}
-                            </span>
-                          )}
-                        </div>
-                      </div>
+              <div className="divide-y divide-gray-100 dark:divide-gray-800">
+                {recentUploads.map(upload => (
+                  <div key={upload.id} className="py-2 first:pt-0 last:pb-0">
+                    <div className="flex items-center justify-between">
+                      <div className="font-medium text-sm">{upload.title}</div>
+                      <div className="text-xs text-muted-foreground">{upload.date}</div>
                     </div>
-                    <Badge variant="outline" className="bg-green-50 dark:bg-green-900/30 text-green-600 dark:text-green-400 border-green-200 dark:border-green-800">
-                      已上传
-                    </Badge>
+                    <div className="mt-1 flex flex-wrap gap-1">
+                      {upload.tags && upload.tags.slice(0, 3).map((tag, idx) => (
+                        <Badge key={idx} variant="outline" className="text-xs">
+                          {tag}
+                        </Badge>
+                      ))}
+                      {upload.tags && upload.tags.length > 3 && (
+                        <Badge variant="outline" className="text-xs">
+                          +{upload.tags.length - 3}
+                        </Badge>
+                      )}
+                      
+                      {upload.folderPath && upload.folderPath.length > 0 && (
+                        <Badge variant="secondary" className="text-xs flex items-center gap-1">
+                          <Folder className="h-3 w-3" />
+                          {upload.folderPath.length > 2 
+                            ? `${upload.folderPath[0]} → ... → ${upload.folderPath[upload.folderPath.length-1]}`
+                            : upload.folderPath.join(' → ')
+                          }
+                        </Badge>
+                      )}
+                    </div>
                   </div>
                 ))}
               </div>

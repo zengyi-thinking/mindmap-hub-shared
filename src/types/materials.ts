@@ -17,6 +17,7 @@ export interface Material {
   viewCount?: number;
   userId?: number | string;
   status?: string;
+  folderPath?: string[];
 }
 
 export interface Comment {
@@ -57,4 +58,10 @@ export interface UserProfile {
   uploadCount: number;
   downloadCount: number;
   favoriteCount: number;
+}
+
+export interface FolderPath {
+  path: string[];
+  name: string;
+  fullPath: string;
 }

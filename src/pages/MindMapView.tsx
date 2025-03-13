@@ -1,10 +1,9 @@
-
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
-import { ArrowLeft, Calendar, Brain, Eye, FileText, Download } from 'lucide-react';
+import { ArrowLeft, Calendar, Brain, Eye, FileText, Download, Upload, Plus } from 'lucide-react';
 import {
   ReactFlow,
   Background,
@@ -13,12 +12,16 @@ import {
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 import { mindmapService } from '@/lib/mindmapStorage';
+import { userFilesService } from '@/lib/storage';
+import { useAuth } from '@/lib/auth';
 import { MindMap } from '@/types/mindmap';
 import MaterialNode from '@/components/mindmap/MaterialNode';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Material } from '@/types/materials';
+import NodeUploadForm from '@/components/mindmap/NodeUploadForm';
+import { toast } from '@/components/ui/use-toast';
 
 // Register custom node types
 const nodeTypes = {
@@ -32,6 +35,8 @@ const MindMapView: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [selectedNode, setSelectedNode] = useState<any | null>(null);
   const [selectedNodeMaterials, setSelectedNodeMaterials] = useState<Material[]>([]);
+  const [showUploadForm, setShowUploadForm] = useState(false);
+  const { user } = useAuth();
   
   useEffect(() => {
     if (id) {
@@ -52,7 +57,21 @@ const MindMapView: React.FC = () => {
   
   const handleNodeClick = (event, node) => {
     setSelectedNode(node);
-    setSelectedNodeMaterials(node.data.materials || []);
+    
+    // 获取节点关联的资料
+    const materials = node.data.materials || [];
+    
+    // 如果思维导图节点有材料ID，但不包含完整材料数据，则从存储中获取材料
+    if (materials.length > 0 && typeof materials[0] === 'number') {
+      const materialObjects = materials.map(materialId => {
+        return userFilesService.getById(materialId);
+      }).filter(m => m !== null);
+      
+      setSelectedNodeMaterials(materialObjects);
+    } else {
+      // 已经是完整的材料对象
+      setSelectedNodeMaterials(materials);
+    }
   };
   
   const handleNodeDoubleClick = (event, node) => {
@@ -62,9 +81,91 @@ const MindMapView: React.FC = () => {
   };
   
   const handleDownload = (material: Material) => {
-    // If fileUrl is provided, open it in a new tab
-    if (material.fileUrl) {
+    // 如果有文件数据URL，直接下载
+    if (material.file && material.file.dataUrl) {
+      const link = document.createElement('a');
+      link.href = material.file.dataUrl;
+      link.download = material.file.name;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      
+      // 增加下载计数
+      userFilesService.incrementDownloads(material.id);
+      
+      toast({
+        title: "下载开始",
+        description: `正在下载 ${material.title}`
+      });
+    } 
+    // 如果有文件URL，在新标签页打开
+    else if (material.fileUrl) {
       window.open(material.fileUrl, '_blank');
+    } else {
+      toast({
+        title: "下载失败",
+        description: "文件数据不完整或不可用",
+        variant: "destructive"
+      });
+    }
+  };
+  
+  const handleUploadToNode = () => {
+    if (!selectedNode) {
+      toast({
+        title: "请先选择节点",
+        description: "请先点击左侧思维导图中的一个节点",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    setShowUploadForm(true);
+  };
+  
+  const closeUploadForm = () => {
+    setShowUploadForm(false);
+  };
+  
+  // 处理上传成功，将文件ID添加到思维导图节点的materials数组中
+  const handleUploadSuccess = (materialId: number) => {
+    if (!mindMap || !selectedNode || !id) return;
+    
+    // 获取当前思维导图
+    const currentMindMap = { ...mindMap };
+    
+    // 获取并更新节点
+    if (currentMindMap.content && currentMindMap.content.nodes) {
+      const nodeIndex = currentMindMap.content.nodes.findIndex(node => node.id === selectedNode.id);
+      
+      if (nodeIndex !== -1) {
+        // 确保node.data.materials是数组
+        if (!currentMindMap.content.nodes[nodeIndex].data.materials) {
+          currentMindMap.content.nodes[nodeIndex].data.materials = [];
+        }
+        
+        // 添加材料ID到数组
+        currentMindMap.content.nodes[nodeIndex].data.materials.push(materialId);
+        
+        // 更新思维导图
+        mindmapService.update(parseInt(id), {
+          content: currentMindMap.content
+        });
+        
+        // 更新状态
+        setMindMap(currentMindMap);
+        
+        // 刷新节点材料
+        const material = userFilesService.getById(materialId);
+        if (material) {
+          setSelectedNodeMaterials([...selectedNodeMaterials, material]);
+        }
+        
+        toast({
+          title: "上传成功",
+          description: "文件已成功上传并关联到节点"
+        });
+      }
     }
   };
   
@@ -197,13 +298,27 @@ const MindMapView: React.FC = () => {
         
         <div className="h-[500px] border rounded-lg overflow-hidden">
           <div className="h-full flex flex-col">
-            <div className="p-4 border-b">
-              <h3 className="font-medium">
-                {selectedNode ? selectedNode.data.label : '节点资料'} 
-              </h3>
-              <p className="text-xs text-muted-foreground">
-                {selectedNode ? '查看该节点关联的资料' : '点击左侧节点查看关联资料'}
-              </p>
+            <div className="p-4 border-b flex justify-between items-center">
+              <div>
+                <h3 className="font-medium">
+                  {selectedNode ? selectedNode.data.label : '节点资料'} 
+                </h3>
+                <p className="text-xs text-muted-foreground">
+                  {selectedNode ? '查看该节点关联的资料' : '点击左侧节点查看关联资料'}
+                </p>
+              </div>
+              
+              {user && selectedNode && (
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  onClick={handleUploadToNode}
+                  className="flex items-center gap-1"
+                >
+                  <Upload className="h-3 w-3" />
+                  上传
+                </Button>
+              )}
             </div>
             
             <ScrollArea className="flex-1">
@@ -220,6 +335,8 @@ const MindMapView: React.FC = () => {
                         </CardHeader>
                         <CardContent className="p-3 pt-0 flex justify-between items-center">
                           <div className="text-xs text-muted-foreground">
+                            {material.file && material.file.type && `${material.file.type.split('/')[1]} · `}
+                            {material.file && material.file.size && `${(material.file.size / 1024 / 1024).toFixed(2)} MB`}
                             {material.fileType && `${material.fileType} · `}
                             {material.fileSize && `${(material.fileSize / 1024 / 1024).toFixed(2)} MB`}
                           </div>
@@ -241,6 +358,17 @@ const MindMapView: React.FC = () => {
                     <div>
                       <FileText className="h-10 w-10 text-muted-foreground/30 mx-auto mb-2" />
                       <p className="text-muted-foreground">该节点没有关联资料</p>
+                      {user && (
+                        <Button 
+                          variant="outline" 
+                          size="sm"
+                          onClick={handleUploadToNode}
+                          className="mt-4 flex items-center gap-1"
+                        >
+                          <Plus className="h-3 w-3" />
+                          上传文件
+                        </Button>
+                      )}
                     </div>
                   </div>
                 )
@@ -248,7 +376,7 @@ const MindMapView: React.FC = () => {
                 <div className="h-full flex items-center justify-center p-4 text-center">
                   <div>
                     <Brain className="h-10 w-10 text-muted-foreground/30 mx-auto mb-2" />
-                    <p className="text-muted-foreground">点击左侧节点查看关联资料</p>
+                    <p className="text-muted-foreground">点击左侧思维导图的节点查看关联资料</p>
                   </div>
                 </div>
               )}
@@ -256,6 +384,18 @@ const MindMapView: React.FC = () => {
           </div>
         </div>
       </div>
+      
+      {/* 节点上传表单对话框 */}
+      {showUploadForm && selectedNode && (
+        <NodeUploadForm 
+          open={showUploadForm}
+          onClose={closeUploadForm}
+          nodeId={selectedNode.id}
+          nodeName={selectedNode.data.label}
+          folderPath={selectedNode.data.folderPath || []}
+          onSuccess={handleUploadSuccess}
+        />
+      )}
     </div>
   );
 };

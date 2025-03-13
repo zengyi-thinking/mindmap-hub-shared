@@ -115,6 +115,7 @@ export const userFilesService = {
       views: 0,
       downloads: 0,
       approved: fileData.approved || false,
+      folderPath: fileData.folderPath || [],
     };
     
     files.push(newFile);
@@ -227,7 +228,74 @@ export const userFilesService = {
     localStorage.setItem('userFiles', JSON.stringify(files));
     
     return files[index];
-  }
+  },
+  
+  getByFolderPath: (folderPath) => {
+    if (typeof localStorage === 'undefined') return [];
+    
+    const files = JSON.parse(localStorage.getItem('userFiles') || '[]');
+    if (!folderPath || folderPath.length === 0) {
+      return files;
+    }
+    
+    return files.filter(file => {
+      if (!file.folderPath || !Array.isArray(file.folderPath)) return false;
+      
+      if (file.folderPath.length < folderPath.length) return false;
+      
+      for (let i = 0; i < folderPath.length; i++) {
+        if (file.folderPath[i] !== folderPath[i]) {
+          return false;
+        }
+      }
+      return true;
+    });
+  },
+  
+  getByDirectFolder: (folderPath) => {
+    if (typeof localStorage === 'undefined') return [];
+    
+    const files = JSON.parse(localStorage.getItem('userFiles') || '[]');
+    if (!folderPath) return files.filter(file => !file.folderPath || file.folderPath.length === 0);
+    
+    return files.filter(file => {
+      if (!file.folderPath || !Array.isArray(file.folderPath)) return false;
+      if (file.folderPath.length !== folderPath.length) return false;
+      
+      for (let i = 0; i < folderPath.length; i++) {
+        if (file.folderPath[i] !== folderPath[i]) {
+          return false;
+        }
+      }
+      return true;
+    });
+  },
+  
+  getSubFolders: (folderPath) => {
+    if (typeof localStorage === 'undefined') return [];
+    
+    const files = JSON.parse(localStorage.getItem('userFiles') || '[]');
+    const subFolders = new Set();
+    
+    files.forEach(file => {
+      if (!file.folderPath || !Array.isArray(file.folderPath)) return;
+      
+      let isInFolder = true;
+      for (let i = 0; folderPath && i < folderPath.length; i++) {
+        if (file.folderPath[i] !== folderPath[i]) {
+          isInFolder = false;
+          break;
+        }
+      }
+      
+      if (isInFolder && file.folderPath.length > (folderPath ? folderPath.length : 0)) {
+        const nextFolderLevel = file.folderPath[folderPath ? folderPath.length : 0];
+        subFolders.add(nextFolderLevel);
+      }
+    });
+    
+    return Array.from(subFolders);
+  },
 };
 
 // Materials service
