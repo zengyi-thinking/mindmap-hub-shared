@@ -35,6 +35,14 @@ export interface MindMapNode {
     icon?: string;
     materials?: any[];
   };
+  style?: {
+    background?: string;
+    border?: string;
+    borderRadius?: string;
+    fontSize?: string;
+    padding?: string;
+    boxShadow?: string;
+  };
 }
 
 // 思维导图连线接口
@@ -49,6 +57,7 @@ export interface MindMapEdge {
     strokeWidth?: number;
     strokeDasharray?: string;
   };
+  animated?: boolean;
 }
 
 // 共享思维导图接口

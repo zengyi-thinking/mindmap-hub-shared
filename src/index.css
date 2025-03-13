@@ -137,14 +137,14 @@
 
 /* Glass card effect */
 .glass-card {
-  background: rgba(255, 255, 255, 0.85);
+  background: rgba(255, 255, 255, 0.95);
   backdrop-filter: blur(10px);
   border: 1px solid rgba(255, 255, 255, 0.2);
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.05);
 }
 
 .dark .glass-card {
-  background: rgba(30, 30, 30, 0.7);
+  background: rgba(30, 30, 30, 0.8);
   border: 1px solid rgba(255, 255, 255, 0.08);
 }
 
@@ -182,4 +182,108 @@
 
 .dark .subtle-hover:hover {
   box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
+}
+
+/* React Flow Custom Styling */
+.react-flow-custom .react-flow__node {
+  transition: box-shadow 0.2s ease-in-out;
+}
+
+.react-flow-custom .react-flow__node:hover {
+  box-shadow: 0 0 0 2px hsl(var(--primary)), 0 4px 10px rgba(0, 0, 0, 0.1);
+  z-index: 10;
+}
+
+.react-flow-custom .react-flow__handle {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: hsl(var(--primary));
+  border: 2px solid #fff;
+}
+
+.react-flow-custom .react-flow__handle:hover {
+  background-color: hsl(var(--primary) / 0.8);
+}
+
+.react-flow-custom .react-flow__controls {
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+}
+
+.react-flow-custom .react-flow__controls-button {
+  border: none;
+  background-color: white;
+  border-bottom: 1px solid hsl(var(--border));
+  box-sizing: content-box;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.react-flow-custom .react-flow__controls-button svg {
+  fill: hsl(var(--primary));
+}
+
+.react-flow-custom .react-flow__controls-button:hover {
+  background-color: hsl(var(--primary) / 0.1);
+}
+
+.react-flow-custom .react-flow__edge-path {
+  stroke-width: 1.5;
+}
+
+.react-flow-custom .react-flow__edge-path:hover {
+  stroke-width: 2;
+}
+
+.react-flow-custom .react-flow__edge.animated .react-flow__edge-path {
+  stroke-dasharray: 5;
+  animation: dashdraw 0.5s linear infinite;
+}
+
+@keyframes dashdraw {
+  from {
+    stroke-dashoffset: 10;
+  }
+}
+
+/* Tag selector enhancements */
+.tag-label {
+  margin-bottom: 0.5rem;
+  display: block;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: hsl(var(--foreground));
+}
+
+.tag-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.tag-badge {
+  padding: 0.25rem 0.5rem;
+  font-size: 0.75rem;
+  border-radius: 9999px;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.tag-badge-selected {
+  background-color: hsl(var(--primary));
+  color: hsl(var(--primary-foreground));
+}
+
+.tag-badge-unselected {
+  background-color: transparent;
+  border: 1px solid hsl(var(--border));
+}
+
+.tag-badge-unselected:hover {
+  background-color: hsl(var(--primary) / 0.1);
 }

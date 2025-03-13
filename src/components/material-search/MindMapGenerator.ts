@@ -27,10 +27,11 @@ const createCentralNode = (searchQuery: string): Node => {
       display: 'flex',
       justifyContent: 'center',
       alignItems: 'center',
-      fontSize: '14px',
+      fontSize: '16px',
       fontWeight: 'bold',
       padding: '10px',
       textAlign: 'center',
+      boxShadow: '0 4px 20px rgba(0, 0, 0, 0.1)',
     },
   };
 };
@@ -53,28 +54,64 @@ const calculateNodePosition = (
 const createTagNode = (
   id: string,
   label: string,
-  position: { x: number, y: number },
+  position: { x: number; y: number },
   isLastLevel: boolean = false,
-  fullPath: string[] = []
+  fullPath: string[] = [],
+  level: number = 1
 ): Node => {
+  // Different styles based on the level
+  const getNodeStyle = () => {
+    if (isLastLevel) {
+      return {
+        background: 'hsl(180, 70%, 85%)',
+        border: '1px solid hsl(180, 70%, 60%)',
+        borderRadius: '16px',
+        padding: '8px 16px',
+        fontSize: '14px',
+        fontWeight: 'bold',
+        boxShadow: '0 2px 10px rgba(0, 0, 0, 0.05)',
+      };
+    }
+    
+    // Different colors for different levels
+    const colors = {
+      1: {
+        bg: 'hsl(210, 90%, 95%)',
+        border: 'hsl(210, 90%, 80%)',
+      },
+      2: {
+        bg: 'hsl(260, 90%, 95%)',
+        border: 'hsl(260, 90%, 80%)',
+      },
+      3: {
+        bg: 'hsl(330, 90%, 95%)',
+        border: 'hsl(330, 90%, 80%)',
+      },
+    };
+    
+    const levelColors = colors[level as keyof typeof colors] || colors[1];
+    
+    return {
+      background: levelColors.bg,
+      border: `1px solid ${levelColors.border}`,
+      borderRadius: '16px',
+      padding: '8px 16px',
+      fontSize: '13px',
+      fontWeight: 'normal',
+      boxShadow: '0 2px 5px rgba(0, 0, 0, 0.05)',
+    };
+  };
+
   return {
     id,
-    data: { 
-      label, 
-      tagName: label, 
+    data: {
+      label,
+      tagName: label,
       isLastLevel,
       ...(fullPath.length > 0 ? { fullPath } : {})
     },
     position,
-    style: {
-      background: isLastLevel ? 'hsl(180, 70%, 85%)' : 'hsl(var(--accent))',
-      border: '1px solid hsl(var(--accent-foreground) / 0.2)',
-      borderRadius: '16px',
-      padding: '8px 16px',
-      fontSize: '13px',
-      fontWeight: isLastLevel ? 'bold' : 'normal',
-      cursor: 'pointer',
-    },
+    style: getNodeStyle(),
   };
 };
 
@@ -82,24 +119,24 @@ const createTagNode = (
 const createMaterialNode = (
   id: string,
   material: any,
-  position: { x: number, y: number }
+  position: { x: number; y: number }
 ): Node => {
   return {
     id,
-    data: { 
+    data: {
       label: material.title || material.file?.name,
       materialId: material.id
     },
     position,
     style: {
       background: 'white',
-      border: '1px solid hsl(var(--border))',
+      border: '1px solid hsl(var(--primary) / 0.2)',
       borderRadius: '8px',
       padding: '8px',
       fontSize: '12px',
-      width: 120,
+      width: 130,
       textAlign: 'center',
-      boxShadow: '0 2px 4px rgba(0,0,0,0.05)',
+      boxShadow: '0 2px 8px rgba(0, 0, 0, 0.05)',
       cursor: 'pointer',
     },
   };
@@ -110,14 +147,27 @@ const createEdge = (
   sourceId: string,
   targetId: string,
   animated: boolean = false,
-  withArrow: boolean = false
+  withArrow: boolean = false,
+  level: number = 1
 ): Edge => {
+  // Different colors for different levels
+  const colors = {
+    1: 'hsl(210, 90%, 60%)',
+    2: 'hsl(260, 90%, 60%)',
+    3: 'hsl(330, 90%, 60%)',
+  };
+  
+  const edgeColor = colors[level as keyof typeof colors] || colors[1];
+
   return {
     id: `edge-${sourceId}-${targetId}`,
     source: sourceId,
     target: targetId,
     animated,
-    style: { stroke: animated ? 'hsl(var(--primary) / 0.5)' : 'hsl(var(--border))' },
+    style: { 
+      stroke: animated ? 'hsl(var(--primary) / 0.8)' : edgeColor,
+      strokeWidth: animated ? 2 : 1.5
+    },
     ...(withArrow ? {
       markerEnd: {
         type: MarkerType.ArrowClosed,
@@ -126,7 +176,7 @@ const createEdge = (
         color: 'hsl(var(--primary))',
       }
     } : {}),
-    ...(animated ? {} : { type: 'smoothstep' }),
+    type: 'smoothstep',
   };
 };
 
@@ -206,13 +256,14 @@ const processHierarchicalTag = (
       pathTag, 
       levelNodePosition, 
       isLastLevel,
-      tagPath.slice(0, pathIndex + 1)
+      tagPath.slice(0, pathIndex + 1),
+      pathIndex + 1
     );
     
     nodes.push(levelNode);
     
     lastLevelNodeIds.forEach(sourceId => {
-      edges.push(createEdge(sourceId, levelNodeId, pathIndex === 0, pathIndex === 0));
+      edges.push(createEdge(sourceId, levelNodeId, pathIndex === 0, pathIndex === 0, pathIndex + 1));
     });
     
     if (isLastLevel) {
@@ -231,7 +282,7 @@ const processHierarchicalTag = (
         const materialNode = createMaterialNode(materialNodeId, material, materialPosition);
         
         nodes.push(materialNode);
-        edges.push(createEdge(levelNodeId, materialNodeId));
+        edges.push(createEdge(levelNodeId, materialNodeId, false, false, pathIndex + 1));
       });
     }
     

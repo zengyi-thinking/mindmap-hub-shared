@@ -33,6 +33,15 @@ export const tagHierarchy: TagCategory[] = [
           { id: "case-studies", name: "案例分析" },
           { id: "pitches", name: "路演材料" }
         ]
+      },
+      {
+        id: "academic",
+        name: "学术竞赛",
+        children: [
+          { id: "papers", name: "论文" },
+          { id: "presentations", name: "演讲" },
+          { id: "posters", name: "海报" }
+        ]
       }
     ]
   },
@@ -69,6 +78,15 @@ export const tagHierarchy: TagCategory[] = [
           { id: "cloud", name: "云计算" },
           { id: "security", name: "网络安全" }
         ]
+      },
+      {
+        id: "software-engineering",
+        name: "软件工程",
+        children: [
+          { id: "design-patterns", name: "设计模式" },
+          { id: "testing", name: "测试方法" },
+          { id: "devops", name: "DevOps" }
+        ]
       }
     ]
   },
@@ -100,6 +118,105 @@ export const tagHierarchy: TagCategory[] = [
           { id: "practice", name: "练习题" },
           { id: "exams", name: "考试题" },
           { id: "solutions", name: "解答" }
+        ]
+      }
+    ]
+  },
+  {
+    id: "engineering",
+    name: "工程学科",
+    children: [
+      {
+        id: "mechanical",
+        name: "机械工程",
+        children: [
+          { id: "dynamics", name: "动力学" },
+          { id: "mechanics", name: "力学" },
+          { id: "thermodynamics", name: "热力学" }
+        ]
+      },
+      {
+        id: "electrical",
+        name: "电气工程",
+        children: [
+          { id: "circuits", name: "电路" },
+          { id: "power-systems", name: "电力系统" },
+          { id: "control", name: "控制系统" }
+        ]
+      },
+      {
+        id: "civil",
+        name: "土木工程",
+        children: [
+          { id: "structures", name: "结构" },
+          { id: "materials", name: "材料" },
+          { id: "construction", name: "施工技术" }
+        ]
+      }
+    ]
+  },
+  {
+    id: "science",
+    name: "自然科学",
+    children: [
+      {
+        id: "physics",
+        name: "物理",
+        children: [
+          { id: "mechanics", name: "力学" },
+          { id: "electromagnetism", name: "电磁学" },
+          { id: "quantum", name: "量子物理" }
+        ]
+      },
+      {
+        id: "chemistry",
+        name: "化学",
+        children: [
+          { id: "organic", name: "有机化学" },
+          { id: "inorganic", name: "无机化学" },
+          { id: "analytical", name: "分析化学" }
+        ]
+      },
+      {
+        id: "biology",
+        name: "生物学",
+        children: [
+          { id: "molecular", name: "分子生物学" },
+          { id: "genetics", name: "遗传学" },
+          { id: "ecology", name: "生态学" }
+        ]
+      }
+    ]
+  },
+  {
+    id: "business",
+    name: "商业管理",
+    children: [
+      {
+        id: "management",
+        name: "管理学",
+        children: [
+          { id: "leadership", name: "领导力" },
+          { id: "strategy", name: "战略管理" },
+          { id: "operations", name: "运营管理" }
+        ]
+      },
+      {
+        id: "finance",
+        name: "金融学",
+        children: [
+          { id: "investments", name: "投资" },
+          { id: "banking", name: "银行" },
+          { id: "corporate-finance", name: "公司金融" }
+        ]
+      },
+      {
+        id: "marketing",
+        name: "市场营销",
+        children: [
+          { id: "digital", name: "数字营销" },
+          { id: "branding", name: "品牌管理" },
+          { id: "market-research", name: "市场研究" }
         ]
       }
     ]
