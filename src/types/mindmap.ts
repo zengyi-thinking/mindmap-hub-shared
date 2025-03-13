@@ -66,12 +66,15 @@ export interface MindMapEdge {
   };
   animated?: boolean;
   markerEnd?: {
-    type: string;
+    type: MarkerType;
     width?: number;
     height?: number;
     color?: string;
   };
 }
+
+// 引入 MarkerType 类型
+import { MarkerType } from '@xyflow/react';
 
 // 共享思维导图接口
 export interface SharedMindMap {
