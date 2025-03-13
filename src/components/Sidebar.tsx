@@ -74,6 +74,12 @@ const Sidebar = () => {
       roles: ['user', 'admin']
     },
     {
+      title: '全平台资料导图',
+      icon: <BookOpen size="1.2rem" />,
+      path: '/global-material-map',
+      roles: ['user', 'admin']
+    },
+    {
       title: '上传资料',
       icon: <FileUp size="1.2rem" />,
       path: '/upload',

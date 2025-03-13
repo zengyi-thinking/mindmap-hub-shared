@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -26,6 +25,7 @@ import Register from "./pages/Register";
 import MindMapEditor from './pages/MindMapEditor';
 import MindMapView from './pages/MindMapView';
 import MindMapMaterials from './pages/MindMapMaterials';
+import GlobalMaterialMap from './pages/GlobalMaterialMap';
 
 const queryClient = new QueryClient();
 
@@ -62,6 +62,7 @@ function App() {
                   <Route path="/material/:id" element={<MaterialDetail />} />
                   <Route path="/discussion" element={<DiscussionCenter />} />
                   <Route path="/profile" element={<PersonalCenter />} />
+                  <Route path="/global-material-map" element={<GlobalMaterialMap />} />
                 </Route>
               </Route>
               
