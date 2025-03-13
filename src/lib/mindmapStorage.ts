@@ -1,3 +1,4 @@
+
 import { MindMap } from '../types/mindmap';
 
 // 本地存储键名
@@ -18,19 +19,20 @@ export const mindmapService = {
   },
   
   // 添加新思维导图
-  add: (mindmap: Omit<MindMap, 'id'>): MindMap => {
+  add: (mindmap: Partial<MindMap>): MindMap => {
     const mindmaps = mindmapService.getAll();
     const newId = mindmaps.length > 0 
       ? Math.max(...mindmaps.map(m => m.id)) + 1 
       : 1;
     
-    const newMindMap = {
-      ...mindmap,
+    const newMindMap: MindMap = {
+      ...mindmap as any,
       id: newId,
-      updatedAt: new Date().toISOString().split('T')[0],
-      starred: false,
+      updatedAt: mindmap.updatedAt || new Date().toISOString().split('T')[0],
+      starred: mindmap.starred || false,
       shared: mindmap.shared || false,
-    };
+      viewCount: 0,
+    } as MindMap;
     
     mindmaps.push(newMindMap);
     localStorage.setItem(STORAGE_KEY, JSON.stringify(mindmaps));
@@ -116,6 +118,16 @@ export const mindmapService = {
       (mindmap.description && mindmap.description.toLowerCase().includes(lowerQuery)) ||
       (mindmap.tags && mindmap.tags.some(tag => tag.toLowerCase().includes(lowerQuery)))
     );
+  },
+  
+  // 增加查看次数
+  incrementViews: (id: number): MindMap | null => {
+    const mindmap = mindmapService.getById(id);
+    if (!mindmap) return null;
+    
+    return mindmapService.update(id, { 
+      viewCount: (mindmap.viewCount || 0) + 1 
+    });
   }
 };
 

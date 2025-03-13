@@ -22,6 +22,9 @@ import UserManagement from "./pages/UserManagement";
 import NotFound from "./pages/NotFound";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
+import MindMapEditor from './pages/MindMapEditor';
+import MindMapView from './pages/MindMapView';
+import MindMapMaterials from './pages/MindMapMaterials';
 
 const queryClient = new QueryClient();
 
@@ -71,6 +74,11 @@ function App() {
               
               {/* 重定向从index到dashboard */}
               <Route path="/app" element={<Navigate to="/dashboard" replace />} />
+              
+              {/* 新增的路由 */}
+              <Route path="/mindmap-editor/:id" element={<ProtectedRoute><MindMapEditor /></ProtectedRoute>} />
+              <Route path="/mindmap-view/:id" element={<MindMapView />} />
+              <Route path="/mindmap-materials/:mapId/:nodeId" element={<MindMapMaterials />} />
               
               {/* 捕获所有路由 */}
               <Route path="*" element={<NotFound />} />
