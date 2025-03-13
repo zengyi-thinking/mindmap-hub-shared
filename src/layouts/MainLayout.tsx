@@ -4,6 +4,7 @@ import Sidebar from '@/components/Sidebar';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useAuth } from '@/lib/auth';
 import { cn } from '@/lib/utils';
+import ParticleBackground from '@/components/ui/ParticleBackground';
 
 const MainLayout: React.FC = () => {
   const location = useLocation();
@@ -61,9 +62,16 @@ const MainLayout: React.FC = () => {
       <div className="flex h-screen">
         <Sidebar />
         <main className="flex-1 overflow-auto">
-          {/* 顶部欢迎横幅 */}
-          <div className="w-full bg-gradient-to-r from-primary/10 to-primary/5 border-b p-4 mb-2">
-            <div className="container mx-auto">
+          {/* 顶部欢迎横幅 - 使用粒子背景 */}
+          <ParticleBackground 
+            className="w-full border-b mb-2" 
+            particleCount={40}
+            colorScheme="mixed"
+            density="medium"
+            speed="slow"
+            showAnimeCharacters={true}
+          >
+            <div className="container mx-auto p-4 backdrop-blur-sm bg-gradient-to-r from-primary/10 to-primary/5">
               <motion.h2 
                 initial={{ opacity: 0, y: -10 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -79,7 +87,7 @@ const MainLayout: React.FC = () => {
                 {getWelcomeMessage()}
               </motion.p>
             </div>
-          </div>
+          </ParticleBackground>
           
           <div className="container mx-auto p-6 relative">
             <AnimatePresence mode="wait">
