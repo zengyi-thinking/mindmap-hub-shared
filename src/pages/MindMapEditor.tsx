@@ -1,4 +1,3 @@
-
 import React, { useState, useCallback, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { toast } from '@/components/ui/use-toast';
@@ -75,7 +74,7 @@ const MindMapEditor: React.FC = () => {
   const reactFlowWrapper = useRef<HTMLDivElement>(null);
   
   // State for the mindmap
-  const [nodes, setNodes, onNodesChange] = useNodesState<MindMapNode['data']>([]);
+  const [nodes, setNodes, onNodesChange] = useNodesState<MindMapNode>([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState<MindMapEdge>([]);
   const [reactFlowInstance, setReactFlowInstance] = useState<any>(null);
   

@@ -65,6 +65,12 @@ export interface MindMapEdge {
     strokeDasharray?: string;
   };
   animated?: boolean;
+  markerEnd?: {
+    type: string;
+    width?: number;
+    height?: number;
+    color?: string;
+  };
 }
 
 // 共享思维导图接口
