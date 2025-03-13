@@ -1,4 +1,3 @@
-
 import React, { useState, useCallback, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { toast } from '@/components/ui/use-toast';
@@ -32,7 +31,6 @@ import {
   BackgroundVariant,
   NodeTypes,
   Connection,
-  updateEdge,
   MarkerType
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
@@ -56,7 +54,6 @@ import { mindmapService } from '@/lib/mindmapStorage';
 import { userFilesService } from '@/lib/storage';
 import { useAuth } from '@/lib/auth';
 import MaterialNode from '@/components/mindmap/MaterialNode';
-import NodeEditForm from '@/components/mindmap/NodeEditForm';
 import { MindMap, MindMapNode } from '@/types/mindmap';
 import { Material } from '@/types/materials';
 import AttachMaterialDialog from '@/components/mindmap/AttachMaterialDialog';
@@ -81,7 +78,7 @@ const MindMapEditor: React.FC = () => {
   const [reactFlowInstance, setReactFlowInstance] = useState<any>(null);
   
   // State for the node edit
-  const [selectedNode, setSelectedNode] = useState<any>(null);
+  const [selectedNode, setSelectedNode] = useState<MindMapNode | null>(null);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [nodeName, setNodeName] = useState('');
   const [nodeNotes, setNodeNotes] = useState('');
@@ -129,7 +126,7 @@ const MindMapEditor: React.FC = () => {
       }
     } else {
       // Initialize new mindmap with a root node
-      const initialNode = {
+      const initialNode: MindMapNode = {
         id: '1',
         type: 'materialNode',
         data: { 
@@ -173,7 +170,7 @@ const MindMapEditor: React.FC = () => {
   }, [setEdges]);
   
   // Handle node selection
-  const onNodeClick = useCallback((event, node) => {
+  const onNodeClick = useCallback((event, node: MindMapNode) => {
     if (connectingNodeId) {
       // If we're connecting nodes, create an edge
       if (connectingNodeId !== node.id) {
@@ -222,7 +219,7 @@ const MindMapEditor: React.FC = () => {
       y: reactFlowWrapper.current ? reactFlowWrapper.current.offsetHeight / 2 : 300
     });
 
-    const newNode = {
+    const newNode: MindMapNode = {
       id,
       type: 'materialNode',
       data: { 

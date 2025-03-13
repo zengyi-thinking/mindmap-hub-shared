@@ -10,7 +10,7 @@ export interface MindMap {
   description?: string;
   tags?: string[];
   content?: MindMapContent;
-  viewCount?: number;
+  viewCount: number;
 }
 
 // 思维导图内容接口

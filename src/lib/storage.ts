@@ -198,6 +198,36 @@ export const userFilesService = {
     
     return files[index];
   },
+  
+  getRecent: (limit = 3) => {
+    if (typeof localStorage === 'undefined') return [];
+    
+    const files = JSON.parse(localStorage.getItem('userFiles') || '[]');
+    return [...files]
+      .sort((a, b) => new Date(b.uploadDate).getTime() - new Date(a.uploadDate).getTime())
+      .slice(0, limit);
+  },
+  
+  getStarredFiles: () => {
+    if (typeof localStorage === 'undefined') return [];
+    
+    const files = JSON.parse(localStorage.getItem('userFiles') || '[]');
+    return files.filter(file => file.starred);
+  },
+  
+  toggleStarred: (id) => {
+    if (typeof localStorage === 'undefined') return null;
+    
+    const files = JSON.parse(localStorage.getItem('userFiles') || '[]');
+    const index = files.findIndex(file => file.id === id);
+    
+    if (index === -1) return null;
+    
+    files[index].starred = !files[index].starred;
+    localStorage.setItem('userFiles', JSON.stringify(files));
+    
+    return files[index];
+  }
 };
 
 // Materials service
