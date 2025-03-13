@@ -34,6 +34,7 @@ export interface MindMapNode {
     color?: string;
     icon?: string;
     materials?: any[];
+    url?: string;
   };
   style?: {
     background?: string;

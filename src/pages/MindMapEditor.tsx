@@ -1,4 +1,5 @@
-import React, { useState, useCallback, useEffect } from 'react';
+
+import React, { useState, useCallback, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { toast } from '@/components/ui/use-toast';
 import { Button } from '@/components/ui/button';
@@ -29,23 +30,41 @@ import {
   addEdge,
   Panel,
   BackgroundVariant,
-  NodeChange,
-  EdgeChange,
-  Connection
+  NodeTypes,
+  Connection,
+  updateEdge,
+  MarkerType
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
-import { Save, Share2, ArrowLeft, Plus, Edit2, FileText, Trash2, X } from 'lucide-react';
+import { 
+  Save, 
+  Share2, 
+  ArrowLeft, 
+  Plus, 
+  Edit2, 
+  FileText, 
+  Trash2, 
+  X, 
+  Image,
+  Link2,
+  Layout,
+  ZoomIn,
+  ZoomOut,
+  Maximize2
+} from 'lucide-react';
 import { mindmapService } from '@/lib/mindmapStorage';
 import { userFilesService } from '@/lib/storage';
 import { useAuth } from '@/lib/auth';
 import MaterialNode from '@/components/mindmap/MaterialNode';
 import NodeEditForm from '@/components/mindmap/NodeEditForm';
-import { MindMap } from '@/types/mindmap';
+import { MindMap, MindMapNode } from '@/types/mindmap';
 import { Material } from '@/types/materials';
 import AttachMaterialDialog from '@/components/mindmap/AttachMaterialDialog';
+import NodeIconSelector from '@/components/mindmap/NodeIconSelector';
+import { ScrollArea } from '@/components/ui/scroll-area';
 
 // Register custom node types
-const nodeTypes = {
+const nodeTypes: NodeTypes = {
   materialNode: MaterialNode
 };
 
@@ -54,18 +73,22 @@ const MindMapEditor: React.FC = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const isNew = id === 'new';
+  const reactFlowWrapper = useRef<HTMLDivElement>(null);
   
   // State for the mindmap
-  const [nodes, setNodes, onNodesChange] = useNodesState([]);
+  const [nodes, setNodes, onNodesChange] = useNodesState<MindMapNode['data']>([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState([]);
-  const [reactFlowInstance, setReactFlowInstance] = useState(null);
+  const [reactFlowInstance, setReactFlowInstance] = useState<any>(null);
   
   // State for the node edit
-  const [selectedNode, setSelectedNode] = useState(null);
+  const [selectedNode, setSelectedNode] = useState<any>(null);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [nodeName, setNodeName] = useState('');
   const [nodeNotes, setNodeNotes] = useState('');
   const [nodeColor, setNodeColor] = useState('#ffffff');
+  const [nodeIcon, setNodeIcon] = useState('');
+  const [nodeUrl, setNodeUrl] = useState('');
+  const [nodeIconDialogOpen, setNodeIconDialogOpen] = useState(false);
   
   // State for the mindmap metadata
   const [title, setTitle] = useState('');
@@ -78,6 +101,9 @@ const MindMapEditor: React.FC = () => {
   const [attachDialogOpen, setAttachDialogOpen] = useState(false);
   const [materials, setMaterials] = useState<Material[]>([]);
   const [attachedMaterials, setAttachedMaterials] = useState<Record<string, Material[]>>({});
+  
+  // State for connecting nodes
+  const [connectingNodeId, setConnectingNodeId] = useState<string | null>(null);
   
   // Load existing mindmap if editing
   useEffect(() => {
@@ -93,6 +119,13 @@ const MindMapEditor: React.FC = () => {
           setNodes(mindmap.content.nodes || []);
           setEdges(mindmap.content.edges || []);
         }
+      } else {
+        toast({
+          title: "未找到思维导图",
+          description: "请创建新的思维导图",
+          variant: "destructive"
+        });
+        navigate('/mindmaps');
       }
     } else {
       // Initialize new mindmap with a root node
@@ -101,11 +134,12 @@ const MindMapEditor: React.FC = () => {
         type: 'materialNode',
         data: { 
           label: '中心主题',
+          icon: 'Brain',
           materials: []
         },
         position: { x: 400, y: 300 },
         style: {
-          background: '#ffffff',
+          background: '#f0f4ff',
           borderColor: 'hsl(var(--primary))',
           color: 'hsl(var(--primary))',
           borderWidth: 2,
@@ -122,7 +156,7 @@ const MindMapEditor: React.FC = () => {
     // Load materials
     const allMaterials = userFilesService.getApprovedFiles();
     setMaterials(allMaterials);
-  }, [id, isNew]);
+  }, [id, isNew, navigate]);
   
   // Handle connections between nodes
   const onConnect = useCallback((params: Connection) => {
@@ -130,22 +164,64 @@ const MindMapEditor: React.FC = () => {
       ...params,
       type: 'smoothstep',
       animated: false,
+      markerEnd: {
+        type: MarkerType.ArrowClosed,
+      },
       style: { stroke: 'hsl(var(--border))', strokeWidth: 2 }
     }, eds));
+    setConnectingNodeId(null);
   }, [setEdges]);
   
   // Handle node selection
   const onNodeClick = useCallback((event, node) => {
-    setSelectedNode(node);
-    setNodeName(node.data.label);
-    setNodeNotes(node.data.notes || '');
-    setNodeColor(node.style?.background || '#ffffff');
-    setEditDialogOpen(true);
-  }, []);
+    if (connectingNodeId) {
+      // If we're connecting nodes, create an edge
+      if (connectingNodeId !== node.id) {
+        const newEdge = {
+          id: `e-${connectingNodeId}-${node.id}`,
+          source: connectingNodeId,
+          target: node.id,
+          type: 'smoothstep',
+          animated: false,
+          markerEnd: {
+            type: MarkerType.ArrowClosed,
+          },
+          style: { stroke: 'hsl(var(--border))', strokeWidth: 2 }
+        };
+        setEdges(edges => [...edges, newEdge]);
+      }
+      setConnectingNodeId(null);
+    } else {
+      // Normal node selection
+      setSelectedNode(node);
+      setNodeName(node.data.label);
+      setNodeNotes(node.data.notes || '');
+      setNodeColor(node.style?.background || '#ffffff');
+      setNodeIcon(node.data.icon || '');
+      setNodeUrl(node.data.url || '');
+      setEditDialogOpen(true);
+    }
+  }, [connectingNodeId, setEdges]);
+  
+  // Start connecting nodes
+  const startConnecting = (nodeId: string) => {
+    setConnectingNodeId(nodeId);
+    toast({
+      title: "连接模式",
+      description: "点击另一个节点来创建连接",
+    });
+  };
   
   // Add a new node
   const addNode = useCallback(() => {
+    if (!reactFlowInstance) return;
+    
     const id = `node_${Date.now()}`;
+    const position = reactFlowInstance.project({
+      x: reactFlowWrapper.current ? reactFlowWrapper.current.offsetWidth / 2 : 400,
+      y: reactFlowWrapper.current ? reactFlowWrapper.current.offsetHeight / 2 : 300
+    });
+
     const newNode = {
       id,
       type: 'materialNode',
@@ -153,10 +229,7 @@ const MindMapEditor: React.FC = () => {
         label: '新节点',
         materials: []
       },
-      position: { 
-        x: 400 + Math.random() * 100 - 50, 
-        y: 300 + Math.random() * 100 - 50 
-      },
+      position,
       style: {
         background: '#ffffff',
         borderColor: 'hsl(var(--border))',
@@ -169,7 +242,22 @@ const MindMapEditor: React.FC = () => {
     };
     
     setNodes(nds => [...nds, newNode]);
-  }, [setNodes]);
+    
+    // Auto-select the new node for editing
+    setSelectedNode(newNode);
+    setNodeName(newNode.data.label);
+    setNodeNotes('');
+    setNodeColor('#ffffff');
+    setNodeIcon('');
+    setNodeUrl('');
+    setEditDialogOpen(true);
+  }, [reactFlowInstance, setNodes]);
+  
+  // Handle node movement to ensure it stays centered with child nodes
+  const onNodeDragStop = useCallback((event, node) => {
+    // This is where you could add logic to adjust child nodes
+    // if you want them to move with their parent
+  }, []);
   
   // Delete the selected node
   const deleteNode = useCallback(() => {
@@ -194,7 +282,9 @@ const MindMapEditor: React.FC = () => {
               data: { 
                 ...node.data, 
                 label: nodeName,
-                notes: nodeNotes
+                notes: nodeNotes,
+                icon: nodeIcon,
+                url: nodeUrl
               },
               style: {
                 ...node.style,
@@ -208,7 +298,7 @@ const MindMapEditor: React.FC = () => {
       );
       setEditDialogOpen(false);
     }
-  }, [selectedNode, nodeName, nodeNotes, nodeColor, setNodes]);
+  }, [selectedNode, nodeName, nodeNotes, nodeColor, nodeIcon, nodeUrl, setNodes]);
   
   // Add a tag
   const addTag = () => {
@@ -253,6 +343,12 @@ const MindMapEditor: React.FC = () => {
     }
   };
   
+  // Set node icon
+  const setNodeIconAndClose = (icon: string) => {
+    setNodeIcon(icon);
+    setNodeIconDialogOpen(false);
+  };
+  
   // Save the mindmap
   const saveMindMap = () => {
     if (!title.trim()) {
@@ -285,7 +381,8 @@ const MindMapEditor: React.FC = () => {
       updatedAt: new Date().toISOString(),
       creator: user.username || 'Unknown',
       starred: false,
-      shared: isPublic
+      shared: isPublic,
+      viewCount: 0
     };
     
     if (isNew) {
@@ -318,6 +415,77 @@ const MindMapEditor: React.FC = () => {
     }
   };
   
+  // Auto layout function
+  const autoLayout = () => {
+    // Simple auto layout (horizontal tree layout)
+    // In a real application, you'd use a more sophisticated algorithm
+    if (nodes.length === 0) return;
+    
+    // Find the root node (assuming it's the first node)
+    const rootNode = nodes[0];
+    const rootId = rootNode.id;
+    
+    // Calculate levels for each node based on distance from root
+    const nodeLevels: Record<string, number> = {};
+    nodeLevels[rootId] = 0;
+    
+    // Calculate levels using BFS
+    const queue = [rootId];
+    while (queue.length > 0) {
+      const currentId = queue.shift()!;
+      const childEdges = edges.filter(edge => edge.source === currentId);
+      
+      childEdges.forEach(edge => {
+        const targetId = edge.target;
+        if (nodeLevels[targetId] === undefined) {
+          nodeLevels[targetId] = nodeLevels[currentId] + 1;
+          queue.push(targetId);
+        }
+      });
+    }
+    
+    // Get max level
+    const maxLevel = Math.max(...Object.values(nodeLevels));
+    
+    // Count nodes at each level
+    const nodesPerLevel: Record<number, number> = {};
+    Object.values(nodeLevels).forEach(level => {
+      nodesPerLevel[level] = (nodesPerLevel[level] || 0) + 1;
+    });
+    
+    // Set positions based on levels
+    const levelWidth = 250;
+    const levelHeight = 150;
+    const newNodes = nodes.map(node => {
+      const level = nodeLevels[node.id] || 0;
+      const nodesInThisLevel = nodesPerLevel[level] || 1;
+      
+      // Find position of this node within its level
+      const nodesAtSameLevel = Object.entries(nodeLevels)
+        .filter(([_, l]) => l === level)
+        .map(([id]) => id);
+      
+      const positionInLevel = nodesAtSameLevel.indexOf(node.id);
+      const levelStartY = 300 - (nodesInThisLevel * levelHeight / 2);
+      
+      return {
+        ...node,
+        position: {
+          x: 400 + (level - maxLevel / 2) * levelWidth,
+          y: levelStartY + positionInLevel * levelHeight
+        }
+      };
+    });
+    
+    setNodes(newNodes);
+    
+    if (reactFlowInstance) {
+      setTimeout(() => {
+        reactFlowInstance.fitView();
+      }, 100);
+    }
+  };
+  
   return (
     <div className="w-full h-screen flex flex-col">
       {/* Header */}
@@ -326,7 +494,7 @@ const MindMapEditor: React.FC = () => {
           <Button 
             variant="ghost" 
             size="icon" 
-            onClick={() => navigate('/my-mindmaps')}
+            onClick={() => navigate('/mindmaps')}
           >
             <ArrowLeft className="h-5 w-5" />
           </Button>
@@ -367,6 +535,15 @@ const MindMapEditor: React.FC = () => {
           >
             <Plus className="h-4 w-4" />
             添加节点
+          </Button>
+          <Button 
+            variant="outline" 
+            size="sm"
+            className="flex items-center gap-1"
+            onClick={autoLayout}
+          >
+            <Layout className="h-4 w-4" />
+            自动排列
           </Button>
           <Button 
             variant="default" 
@@ -427,7 +604,7 @@ const MindMapEditor: React.FC = () => {
       </div>
       
       {/* Mindmap Canvas */}
-      <div className="flex-1 w-full h-full">
+      <div className="flex-1 w-full h-full" ref={reactFlowWrapper}>
         <ReactFlow
           nodes={nodes}
           edges={edges}
@@ -435,7 +612,14 @@ const MindMapEditor: React.FC = () => {
           onEdgesChange={onEdgesChange}
           onConnect={onConnect}
           onNodeClick={onNodeClick}
+          onNodeDragStop={onNodeDragStop}
           onNodeDoubleClick={(_, node) => {
+            // If node has URL, open it
+            if (node.data.url) {
+              window.open(node.data.url, '_blank');
+              return;
+            }
+            
             // Navigate to materials view if the node has materials
             if (node.data.materials && node.data.materials.length > 0) {
               navigate(`/mindmap-materials/${id}/${node.id}`);
@@ -444,6 +628,8 @@ const MindMapEditor: React.FC = () => {
           onInit={setReactFlowInstance}
           fitView
           nodeTypes={nodeTypes}
+          deleteKeyCode="Delete"
+          multiSelectionKeyCode="Control"
         >
           <Background 
             variant={"dots" as BackgroundVariant}
@@ -459,6 +645,34 @@ const MindMapEditor: React.FC = () => {
               border: '1px solid hsl(var(--border))'
             }}
           />
+          <Panel position="top-right">
+            <div className="flex gap-2 bg-background border border-border p-2 rounded-md shadow-sm">
+              <Button
+                variant="outline"
+                size="icon"
+                className="h-8 w-8"
+                onClick={() => reactFlowInstance?.zoomIn()}
+              >
+                <ZoomIn className="h-4 w-4" />
+              </Button>
+              <Button
+                variant="outline"
+                size="icon"
+                className="h-8 w-8"
+                onClick={() => reactFlowInstance?.zoomOut()}
+              >
+                <ZoomOut className="h-4 w-4" />
+              </Button>
+              <Button
+                variant="outline"
+                size="icon"
+                className="h-8 w-8"
+                onClick={() => reactFlowInstance?.fitView()}
+              >
+                <Maximize2 className="h-4 w-4" />
+              </Button>
+            </div>
+          </Panel>
         </ReactFlow>
       </div>
       
@@ -507,12 +721,49 @@ const MindMapEditor: React.FC = () => {
               </div>
             </div>
             
+            <div className="space-y-2">
+              <Label>图标</Label>
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setNodeIconDialogOpen(true)}
+                  className="flex items-center gap-1"
+                >
+                  <Image className="h-4 w-4" />
+                  {nodeIcon ? '更换图标' : '选择图标'}
+                </Button>
+                {nodeIcon && <span className="text-sm">{nodeIcon}</span>}
+              </div>
+            </div>
+            
+            <div className="space-y-2">
+              <Label htmlFor="nodeUrl">链接 URL (可选)</Label>
+              <Input
+                id="nodeUrl"
+                placeholder="https://example.com"
+                value={nodeUrl}
+                onChange={(e) => setNodeUrl(e.target.value)}
+              />
+              <p className="text-xs text-muted-foreground">添加 URL 后双击节点将打开此链接</p>
+            </div>
+            
             {/* Show attached materials if any */}
             {selectedNode && selectedNode.data.materials && selectedNode.data.materials.length > 0 && (
               <div className="space-y-2">
-                <Label>已附加资料</Label>
+                <div className="flex justify-between items-center">
+                  <Label>已附加资料</Label>
+                  <Button 
+                    variant="ghost" 
+                    size="sm"
+                    onClick={openAttachMaterialDialog}
+                    className="text-xs"
+                  >
+                    管理资料
+                  </Button>
+                </div>
                 <div className="text-sm space-y-1">
-                  {selectedNode.data.materials.map((material, i) => (
+                  {selectedNode.data.materials.map((material: Material, i: number) => (
                     <div key={i} className="flex items-center gap-2">
                       <FileText className="h-3 w-3 text-muted-foreground" />
                       <span>{material.title}</span>
@@ -521,6 +772,23 @@ const MindMapEditor: React.FC = () => {
                 </div>
               </div>
             )}
+            
+            <div className="pt-2">
+              <Button
+                variant="secondary"
+                size="sm"
+                className="w-full flex items-center justify-center gap-1"
+                onClick={() => {
+                  setEditDialogOpen(false);
+                  if (selectedNode) {
+                    startConnecting(selectedNode.id);
+                  }
+                }}
+              >
+                <Link2 className="h-4 w-4" />
+                连接到其他节点
+              </Button>
+            </div>
           </div>
           <DialogFooter className="flex justify-between">
             <Button 
@@ -557,6 +825,29 @@ const MindMapEditor: React.FC = () => {
         selectedMaterials={selectedNode?.data.materials || []}
         onConfirm={attachMaterials}
       />
+      
+      {/* Node Icon Dialog */}
+      <Dialog open={nodeIconDialogOpen} onOpenChange={setNodeIconDialogOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>选择节点图标</DialogTitle>
+            <DialogDescription>
+              从下面的选项中选择一个图标
+            </DialogDescription>
+          </DialogHeader>
+          <ScrollArea className="h-[300px]">
+            <NodeIconSelector onSelect={setNodeIconAndClose} />
+          </ScrollArea>
+          <DialogFooter>
+            <Button 
+              variant="outline"
+              onClick={() => setNodeIconDialogOpen(false)}
+            >
+              取消
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
