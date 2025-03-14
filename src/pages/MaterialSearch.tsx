@@ -3,7 +3,9 @@ import React, { useState, useEffect } from 'react';
 import MaterialSearchContainer from '@/features/material-search/MaterialSearchContainer';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Brain, Search, FileText, TrendingUp, Users } from 'lucide-react';
+import { Brain, Search, FileText, TrendingUp, Users, Globe } from 'lucide-react';
+import styles from './MaterialSearch.module.css';
+import ParticleBackground from '@/components/ui/ParticleBackground';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
@@ -37,21 +39,40 @@ const MaterialSearch: React.FC = () => {
   return (
     <div className="w-full">
       <Tabs defaultValue="search" className="w-full" onValueChange={setActiveTab}>
-        <div className="container mx-auto mb-6">
-          <TabsList className="grid w-full max-w-md mx-auto grid-cols-2">
-            <TabsTrigger value="search" className="flex items-center gap-2">
-              <Search className="h-4 w-4" />
-              资料标签化导图搜索
+        <div className={`container mx-auto mb-6 ${styles.navGradient} p-4 rounded-lg shadow-md`}>
+          <TabsList className="grid w-full max-w-md mx-auto grid-cols-2 bg-transparent">
+            <TabsTrigger 
+              value="search" 
+              className={`flex items-center gap-2 ${styles.tabUnderline} ${activeTab === 'search' ? styles.activeTab : ''}`}
+            >
+              <Search className={`h-4 w-4 ${styles.dynamicIcon} ${styles.dualColorIcon}`} />
+              <span className={styles.buttonText}>资料标签化导图搜索</span>
             </TabsTrigger>
-            <TabsTrigger value="mindmaps" className="flex items-center gap-2">
-              <Brain className="h-4 w-4" />
-              全平台资料导图
+            <TabsTrigger 
+              value="mindmaps" 
+              className={`flex items-center gap-2 ${styles.tabUnderline} ${activeTab === 'mindmaps' ? styles.activeTab : ''}`}
+            >
+              <Brain className={`h-4 w-4 ${styles.dynamicIcon} ${styles.dualColorIcon}`} />
+              <span className={styles.buttonText}>全平台资料导图</span>
             </TabsTrigger>
           </TabsList>
         </div>
         
         <TabsContent value="search">
-          <MaterialSearchContainer />
+          <div className={styles.emptyStateContainer}>
+            <ParticleBackground 
+              className={styles.particleBackground} 
+              particleCount={60} 
+              colorScheme="mixed" 
+              density="high" 
+              speed="fast"
+              showAnimeCharacters={true}
+              animeCharacterCount={2}
+            />
+            <div className={styles.emptyStateContent}>
+              <MaterialSearchContainer />
+            </div>
+          </div>
         </TabsContent>
         
         <TabsContent value="mindmaps">
@@ -60,8 +81,8 @@ const MaterialSearch: React.FC = () => {
               initial={{ opacity: 0, y: -10 }}
               animate={{ opacity: 1, y: 0 }}
             >
-              <h1 className="text-3xl font-bold tracking-tight text-primary">全平台资料导图</h1>
-              <p className="text-muted-foreground">
+              <h1 className={`text-3xl ${styles.mainTitle} text-primary`}>全平台资料导图</h1>
+              <p className={`text-muted-foreground ${styles.hintText}`}>
                 浏览其他用户创建并公开分享的思维导图，探索更多学习资源
               </p>
             </motion.div>
@@ -80,7 +101,7 @@ const MaterialSearch: React.FC = () => {
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.1 * (index % 3) }}
                   >
-                    <Card className="overflow-hidden hover:shadow-md transition-shadow border-primary/20 h-full flex flex-col">
+                    <Card className={`overflow-hidden border-primary/20 h-full flex flex-col ${styles.cardHoverEffect}`}>
                       <CardHeader className="p-4 pb-2 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/30 dark:to-indigo-950/30 border-b border-primary/10">
                         <CardTitle className="text-lg font-semibold text-primary">{mindMap.title}</CardTitle>
                       </CardHeader>
@@ -98,7 +119,7 @@ const MaterialSearch: React.FC = () => {
                         {mindMap.tags && mindMap.tags.length > 0 && (
                           <div className="flex flex-wrap gap-1 mt-2">
                             {mindMap.tags.map((tag, i) => (
-                              <Badge key={i} variant="outline" className="text-xs bg-primary/5 hover:bg-primary/10 border-primary/10">
+                              <Badge key={i} variant="outline" className={`text-xs bg-primary/5 hover:bg-primary/10 border-primary/10 ${styles.tagPulse}`}>
                                 {tag}
                               </Badge>
                             ))}
@@ -131,8 +152,8 @@ const MaterialSearch: React.FC = () => {
                 transition={{ delay: 0.2 }}
                 className="text-center py-16"
               >
-                <div className="inline-flex justify-center items-center w-16 h-16 rounded-full bg-primary/10 mb-4">
-                  <Brain className="h-8 w-8 text-primary/70" />
+                <div className="inline-flex justify-center items-center w-16 h-16 rounded-full bg-primary/10 mb-4 overflow-hidden">
+                  <Globe className={`h-10 w-10 text-primary/70 ${styles.earthIcon}`} />
                 </div>
                 <h2 className="text-xl font-semibold mb-2">暂无公开的思维导图</h2>
                 <p className="text-muted-foreground">

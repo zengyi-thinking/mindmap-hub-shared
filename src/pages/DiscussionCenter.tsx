@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
+import styles from './DiscussionCenter.module.css';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -588,24 +589,40 @@ const DiscussionCenter = () => {
         
         <TabsContent value="topics" className="space-y-4">
           <div className="flex items-center gap-4 mb-4">
-            <Select defaultValue="all" onValueChange={setFilterCategory}>
-              <SelectTrigger className="w-[180px]">
-                <SelectValue placeholder="筛选话题" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">全部话题</SelectItem>
-                <SelectItem value="followed">我关注的</SelectItem>
-                <SelectItem value="思维导图">思维导图</SelectItem>
-                <SelectItem value="学习方法">学习方法</SelectItem>
-                <SelectItem value="编程">编程</SelectItem>
-                <SelectItem value="数学">数学</SelectItem>
-              </SelectContent>
-            </Select>
+            <div className={styles['filter-menu']}>
+              <Select defaultValue="all" onValueChange={setFilterCategory}>
+                <SelectTrigger className="w-[180px]">
+                  <SelectValue placeholder="筛选话题" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">全部话题</SelectItem>
+                  <SelectItem value="followed">我关注的</SelectItem>
+                  <SelectItem value="思维导图">思维导图</SelectItem>
+                  <SelectItem value="学习方法">学习方法</SelectItem>
+                  <SelectItem value="编程">编程</SelectItem>
+                  <SelectItem value="数学">数学</SelectItem>
+                </SelectContent>
+              </Select>
+              <div className={`${styles['filter-item']} ${filterCategory === 'all' ? styles['active'] : ''}`} onClick={() => setFilterCategory('all')}>
+                <Filter className="h-4 w-4" />
+                <span>全部</span>
+              </div>
+              <div className={`${styles['filter-item']} ${filterCategory === 'followed' ? styles['active'] : ''}`} onClick={() => setFilterCategory('followed')}>
+                <Heart className="h-4 w-4" />
+                <span>关注</span>
+              </div>
+            </div>
             
-            <Input 
-              placeholder="搜索话题..." 
-              className="max-w-sm"
-            />
+            <div className={styles['smart-search']}>
+              <Input 
+                placeholder="搜索话题..." 
+                className="max-w-sm"
+              />
+              <div className={styles['search-suggestions']}>
+                <div className={styles['suggest-item']}>热门：思维导图</div>
+                <div className={styles['suggest-item']}>近期：学习方法</div>
+              </div>
+            </div>
           </div>
           
           <div className="space-y-4">
@@ -617,7 +634,7 @@ const DiscussionCenter = () => {
                 whileHover={{ y: -2 }}
                 transition={{ duration: 0.2 }}
               >
-                <Card className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => handleViewTopic(topic)}>
+                <Card className={`cursor-pointer ${styles['topic-card']} ${styles['cardHoverEffect']}`} onClick={() => handleViewTopic(topic)}>
                   <CardHeader className="pb-2">
                     <div className="flex justify-between">
                       <div className="flex items-center gap-2">
@@ -636,17 +653,17 @@ const DiscussionCenter = () => {
                         className={topic.followed ? "text-red-500" : ""}
                         onClick={(e) => handleLikeTopic(topic.id, e)}
                       >
-                        <Heart className={`h-5 w-5 ${topic.followed ? "fill-red-500" : ""}`} />
+                        <Heart className={`h-5 w-5 ${styles['like-icon']} ${topic.followed ? "fill-red-500" : ""}`} />
                       </Button>
                     </div>
-                    <CardTitle className="mt-2 text-xl">{topic.title}</CardTitle>
+                    <CardTitle className={`mt-2 text-xl ${styles['topic-title']}`}>{topic.title}</CardTitle>
         </CardHeader>
         <CardContent>
                     <p className="line-clamp-2 text-muted-foreground">{topic.content}</p>
                     <div className="flex flex-wrap gap-2 mt-3">
                       {topic.tags.map(tag => (
                         <span key={tag}>
-                          <Badge variant="secondary">{tag}</Badge>
+                          <Badge variant="secondary" className={styles['topic-tag']}>{tag}</Badge>
                         </span>
                       ))}
                     </div>
@@ -803,10 +820,10 @@ const DiscussionCenter = () => {
             </DialogHeader>
             
             <div className="py-4">
-              <div className="mb-2">
+              <div className={`mb-2 ${styles['tag-cloud']}`}>
                 {selectedTopic.tags.map(tag => (
                   <span key={tag}>
-                    <Badge variant="secondary" className="mr-2 mb-2">{tag}</Badge>
+                    <Badge variant="secondary" className={`mr-2 mb-2 ${styles['topic-tag']} ${styles['tagPulse']}`}>{tag}</Badge>
                   </span>
                 ))}
               </div>
@@ -814,8 +831,32 @@ const DiscussionCenter = () => {
             </div>
             
             <div className="border-t pt-4">
-              <h3 className="font-medium mb-4">评论 ({selectedTopic.commentsCount})</h3>
+              <div className="flex justify-between items-center mb-4">
+                <h3 className="font-medium">评论 ({selectedTopic.commentsCount})</h3>
+                <div className={styles['metric-box']}>
+                  <div className={styles['metric-item']}>
+                    <MessageCircle className="h-4 w-4" /> 
+                    <span>{selectedTopic.commentsCount} 评论</span>
+                  </div>
+                  <div className={styles['metric-item']}>
+                    <ThumbsUp className="h-4 w-4" /> 
+                    <span>{selectedTopic.likesCount} 点赞</span>
+                  </div>
+                  {selectedTopic.views !== undefined && (
+                    <div className={styles['metric-item']}>
+                      <BookOpen className="h-4 w-4" /> 
+                      <span>{selectedTopic.views} 浏览</span>
+                    </div>
+                  )}
+                </div>
+              </div>
               
+              {selectedTopic.comments && selectedTopic.comments.length === 0 && (
+                <div className={styles['comment-guide']}>
+                  <span>🗣️ 成为首个评论者...</span>
+                  <button className={styles['micro-btn']} onClick={() => (document.querySelector('input[placeholder="添加评论..."]') as HTMLInputElement)?.focus()}>立即发言</button>
+                </div>
+              )}
               <div className="space-y-4 mb-6">
                 {selectedTopic.comments && selectedTopic.comments.length > 0 ? (
                   selectedTopic.comments.map(comment => (

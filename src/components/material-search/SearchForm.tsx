@@ -1,6 +1,7 @@
 
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import styles from '@/pages/MaterialSearch.module.css';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -31,25 +32,25 @@ const SearchForm: React.FC<SearchFormProps> = ({
   popularTags
 }) => {
   return (
-    <Card className="glass-card border-primary/20 shadow-md">
-      <CardHeader className="pb-2 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/30 dark:to-indigo-950/30 rounded-t-lg border-b border-primary/10">
-        <CardTitle className="flex items-center gap-2 text-primary">
+    <Card className={`${styles.glassCard} ${styles.cardShadow} border-primary/20`}>
+      <CardHeader className={`pb-2 ${styles.navGradient} rounded-t-lg border-b border-primary/10`}>
+        <CardTitle className={`flex items-center gap-2 text-primary ${styles.mainTitle}`}>
           <Brain className="h-5 w-5" />
           资料搜索
         </CardTitle>
-        <CardDescription>
+        <CardDescription className={styles.hintText}>
           输入关键词并选择标签，系统将生成相关资料的思维导图
         </CardDescription>
       </CardHeader>
       <CardContent className="p-4">
         <div className="flex flex-col gap-4">
           <div className="flex flex-col sm:flex-row gap-2">
-            <div className="relative flex-1">
-              <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+            <div className={`relative flex-1 ${styles.smartSearch}`}>
+              <Search className={`absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground ${styles.dynamicIcon}`} />
               <Input
                 type="search"
-                placeholder="输入关键词搜索资料..."
-                className="pl-9 border-primary/20 focus-visible:ring-primary"
+                placeholder="尝试「人工智能」或「项目管理」..."
+                className={`pl-9 border-primary/20 focus-visible:ring-primary ${styles.enhancedRadius} ${styles.searchContainer}`}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 onKeyPress={(e) => {
@@ -58,12 +59,27 @@ const SearchForm: React.FC<SearchFormProps> = ({
                   }
                 }}
               />
+              {!filterVisible && searchQuery.length === 0 && (
+                <div className={styles.searchHints}>
+                  <span className="text-xs text-muted-foreground"># 热门标签</span>
+                  {popularTags.slice(0, 5).map(tag => (
+                    <div 
+                      key={tag} 
+                      className={`${styles.tagBubble} ${styles.bounceIn}`}
+                      onClick={() => onTagToggle(tag)}
+                    >
+                      {tag}
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
             <Button 
-              className="sm:w-auto bg-primary hover:bg-primary/90"
+              className={`sm:w-auto bg-primary hover:bg-primary/90 ${styles.searchButton}`}
               onClick={onSearch}
             >
-              搜索
+              <Search className={`h-4 w-4 mr-1 ${styles.dynamicIcon}`} />
+              <span className={styles.buttonText}>搜索</span>
             </Button>
             <Button 
               variant="outline" 

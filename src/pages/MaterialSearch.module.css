@@ -1,0 +1,296 @@
+/* 资料搜索界面美化样式 */
+
+/* 一、核心视觉要素调整 */
+
+/* 1. 色彩层次升级 */
+.navGradient {
+  background: linear-gradient(90deg, #2B3A4A 0%, #3A4B5D 100%);
+}
+
+.activeMenu {
+  border-left: 4px solid #6C63FF;
+  box-shadow: inset 8px 0 12px -8px rgba(108,99,255,0.2);
+}
+
+/* 2. 图标系统重构 */
+.dynamicIcon {
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.dynamicIcon:hover {
+  transform: scale(1.05);
+}
+
+.dualColorIcon {
+  stroke: #2B3A4A;
+  stroke-width: 2px;
+  fill: transparent;
+}
+
+.dualColorIcon:hover {
+  stroke: #6C63FF;
+}
+
+.newBadge {
+  background: conic-gradient(#FF6B6B, #FFE66D, #FF6B6B);
+  animation: glow 1.5s infinite;
+}
+
+@keyframes glow {
+  0% { opacity: 0.7; }
+  50% { opacity: 1; }
+  100% { opacity: 0.7; }
+}
+
+/* 二、交互体验优化 */
+
+/* 1. 搜索区域重塑 */
+.smartSearch {
+  position: relative;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  perspective: 1000px;
+}
+
+.smartSearch:focus-within {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(108,99,255,0.15);
+  animation: searchGlow 2s infinite alternate;
+}
+
+@keyframes searchGlow {
+  0% { box-shadow: 0 4px 12px rgba(108,99,255,0.15); }
+  100% { box-shadow: 0 4px 18px rgba(108,99,255,0.3); }
+}
+
+.searchHints {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.tagBubble {
+  padding: 4px 10px;
+  border-radius: 16px;
+  background-color: rgba(108,99,255,0.1);
+  color: #2B3A4A;
+  font-size: 0.85rem;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  cursor: pointer;
+}
+
+.tagBubble:hover {
+  background-color: rgba(108,99,255,0.2);
+  transform: translateY(-1px);
+}
+
+@keyframes bounceIn {
+  0% { opacity: 0; transform: scale(0.8); }
+  70% { transform: scale(1.05); }
+  100% { opacity: 1; transform: scale(1); }
+}
+
+.bounceIn {
+  animation: bounceIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.searchButton {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.searchButton:hover svg {
+  transform: rotate(15deg);
+}
+
+/* 2. 空白区域激活 */
+.emptyStateContainer {
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(135deg, rgba(76, 175, 80, 0.05), rgba(33, 150, 243, 0.05));
+}
+
+.particleBackground {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 0;
+}
+
+.emptyStateContent {
+  position: relative;
+  z-index: 1;
+}
+
+/* 三、细节质感提升 */
+
+/* 1. 文字排版规范 */
+.mainTitle {
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  text-shadow: 0 2px 4px rgba(43,58,77,0.1);
+  background: linear-gradient(90deg, #2B3A4A, #6C63FF, #2B3A4A);
+  background-size: 200% auto;
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: gradientText 5s linear infinite;
+}
+
+@keyframes gradientText {
+  0% { background-position: 0% center; }
+  100% { background-position: 200% center; }
+}
+
+.hintText {
+  color: #8C9BAB;
+  font-style: italic;
+  line-height: 1.8;
+}
+
+.buttonText {
+  font-variant: small-caps;
+  letter-spacing: 0.5px;
+}
+
+/* 2. 边缘处理优化 */
+.enhancedRadius {
+  border-radius: 8px;
+}
+
+.cardShadow {
+  box-shadow: 
+    0 2px 4px rgba(0,0,0,0.05),
+    0 4px 12px -2px rgba(108,99,255,0.1);
+  transition: box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.cardShadow:hover {
+  box-shadow: 
+    0 4px 8px rgba(0,0,0,0.08),
+    0 8px 16px -4px rgba(108,99,255,0.15);
+}
+
+/* 四、风格统一对照实施 */
+.glassCard {
+  backdrop-filter: blur(8px);
+  background: rgba(255, 255, 255, 0.7);
+}
+
+.dark .glassCard {
+  background: rgba(30, 30, 40, 0.7);
+}
+
+.searchContainer {
+  height: 40px;
+}
+
+.tabGradient {
+  background: conic-gradient(from 90deg at 40% 50%, #3A4B5D 0%, #6C63FF 30%, #3A4B5D 70%);
+}
+
+.tabUnderline {
+  position: relative;
+}
+
+.tabUnderline::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  width: 0;
+  height: 2px;
+  background-color: #6C63FF;
+  transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.tabUnderline:hover::after {
+  width: 100%;
+}
+
+.activeTab::after {
+  width: 100%;
+}
+
+/* 动态地球图标 */
+.earthIcon {
+  stroke-dasharray: 100;
+  stroke-dashoffset: 100;
+  animation: drawEarth 2s forwards, pulseEarth 3s infinite 2s;
+}
+
+@keyframes drawEarth {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes pulseEarth {
+  0% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.05); opacity: 0.9; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+/* 流动效果 */
+.fluidProgress {
+  position: relative;
+  overflow: hidden;
+}
+
+.fluidProgress::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 200%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+  animation: fluid 1.5s infinite;
+}
+
+@keyframes fluid {
+  0% { left: -100%; }
+  100% { left: 100%; }
+}
+
+/* 卡片悬停动画 */
+.cardHoverEffect {
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  perspective: 1000px;
+  animation: floatingCard 6s ease-in-out infinite;
+}
+
+.cardHoverEffect:hover {
+  transform: translateY(-8px) scale(1.01) rotateY(5deg);
+  box-shadow: 0 12px 20px -10px rgba(108, 99, 255, 0.28), -5px 5px 15px -5px rgba(0, 0, 0, 0.1);
+}
+
+@keyframes floatingCard {
+  0% { transform: translateY(0px); }
+  50% { transform: translateY(-5px); }
+  100% { transform: translateY(0px); }
+}
+
+/* 标签动态效果 */
+.tagPulse {
+  position: relative;
+}
+
+.tagPulse::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border-radius: inherit;
+  box-shadow: 0 0 0 0 rgba(108, 99, 255, 0.4);
+  animation: tagPulse 2s infinite cubic-bezier(0.66, 0, 0, 1);
+}
+
+@keyframes tagPulse {
+  0% { box-shadow: 0 0 0 0 rgba(108, 99, 255, 0.4); }
+  70% { box-shadow: 0 0 0 6px rgba(108, 99, 255, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(108, 99, 255, 0); }
+}

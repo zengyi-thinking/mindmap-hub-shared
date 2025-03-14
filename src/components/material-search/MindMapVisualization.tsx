@@ -1,5 +1,6 @@
 
 import React from 'react';
+import styles from '@/pages/MaterialSearch.module.css';
 import { Card, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Save, Circle, ZoomIn, ZoomOut, Maximize } from 'lucide-react';
@@ -35,7 +36,7 @@ const MindMapVisualization: React.FC<MindMapVisualizationProps> = ({
   reactFlowInstance
 }) => {
   return (
-    <Card className="overflow-hidden border border-primary/20 shadow-lg mb-8">
+    <Card className={`overflow-hidden border border-primary/20 shadow-lg mb-8 ${styles.cardShadow}`}>
       <CardHeader className="p-4 pb-3 border-b bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/30 dark:to-indigo-950/30 border-primary/10">
         <div className="flex justify-between items-center">
           <CardTitle className="text-lg text-primary">思维导图可视化</CardTitle>

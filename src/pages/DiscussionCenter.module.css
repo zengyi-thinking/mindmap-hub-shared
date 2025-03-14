@@ -1,0 +1,257 @@
+/* 讨论话题界面美化样式 */
+
+/* 一、视觉层次强化 */
+
+/* 1. 色彩系统升级 */
+.topic-tag {
+  background: rgba(108, 99, 255, 0.1); /* 主色系弱化 */
+  border: 1px solid #6C63FF; 
+  color: #2B3A4D; /* 深蓝灰文字 */
+  transition: transform 0.2s ease;
+}
+
+.topic-tag:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 2px 8px rgba(108, 99, 255, 0.1);
+}
+
+.topic-title {
+  color: #2B3A4D; /* 原黑色→深蓝灰 */
+  font-weight: 600;
+  text-shadow: 0 1px 2px rgba(43, 58, 77, 0.05);
+}
+
+/* 2. 动态元素注入 */
+.topic-card {
+  transition: box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1), transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.topic-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 6px 16px rgba(0,0,0,0.08);
+}
+
+.like-icon {
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.like-icon:hover {
+  transform: scale(1.2);
+}
+
+/* 二、互动功能增强 */
+
+/* 1. 零评论激活策略 */
+.comment-guide {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 12px;
+  background-color: rgba(108, 99, 255, 0.05);
+  border-radius: 8px;
+  margin-bottom: 12px;
+}
+
+.micro-btn {
+  font-size: 0.85rem;
+  padding: 4px 8px;
+  border-radius: 4px;
+  background-color: rgba(108, 99, 255, 0.1);
+  color: #6C63FF;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.micro-btn:hover {
+  background-color: rgba(108, 99, 255, 0.2);
+  transform: translateY(-1px);
+}
+
+/* 2. 智能标签系统 */
+.tag-cloud {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.tag-item {
+  padding: 4px 10px;
+  border-radius: 16px;
+  background-color: rgba(108, 99, 255, 0.1);
+  color: #2B3A4A;
+  font-size: 0.85rem;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  cursor: pointer;
+}
+
+.tag-item:hover {
+  background-color: rgba(108, 99, 255, 0.2);
+  transform: translateY(-1px);
+}
+
+/* 三、信息展示优化 */
+
+/* 1. 数据可视化增强 */
+.metric-box {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.metric-item {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  color: #8C9BAB;
+  font-size: 0.85rem;
+}
+
+/* 2. 发布者信息升级 */
+.publisher-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.publisher-badge {
+  width: 24px;
+  height: 24px;
+  background: conic-gradient(#4CAF50, #2196F3);
+  border-radius: 50%;
+}
+
+/* 四、导航系统升级 */
+
+/* 1. 智能搜索优化 */
+.smart-search {
+  position: relative;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  perspective: 1000px;
+}
+
+.smart-search:focus-within {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(108,99,255,0.15);
+}
+
+.search-suggestions {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  width: 100%;
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  padding: 8px 0;
+  margin-top: 4px;
+  z-index: 10;
+  display: none;
+}
+
+.smart-search:focus-within .search-suggestions {
+  display: block;
+  animation: fadeIn 0.2s ease-out;
+}
+
+.suggest-item {
+  padding: 8px 12px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.suggest-item:hover {
+  background-color: rgba(108, 99, 255, 0.05);
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* 2. 筛选系统重构 */
+.filter-menu {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.filter-item {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 12px;
+  border-radius: 6px;
+  background-color: white;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.filter-item:hover {
+  background-color: rgba(108, 99, 255, 0.05);
+  transform: translateY(-1px);
+}
+
+.filter-item.active {
+  background-color: rgba(108, 99, 255, 0.1);
+  color: #6C63FF;
+}
+
+/* 五、风格统一对照表 */
+
+/* 主色系 */
+.primary-color {
+  color: #2B3A4D;
+}
+
+.accent-color {
+  color: #6C63FF;
+}
+
+/* 圆角值 */
+.card-radius {
+  border-radius: 8px;
+}
+
+.button-radius {
+  border-radius: 12px;
+}
+
+/* 动效曲线 */
+.transition-standard {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* 标签动态效果 */
+.tagPulse {
+  position: relative;
+}
+
+.tagPulse::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border-radius: inherit;
+  box-shadow: 0 0 0 0 rgba(108, 99, 255, 0.4);
+  animation: tagPulse 2s infinite cubic-bezier(0.66, 0, 0, 1);
+}
+
+@keyframes tagPulse {
+  0% { box-shadow: 0 0 0 0 rgba(108, 99, 255, 0.4); }
+  70% { box-shadow: 0 0 0 6px rgba(108, 99, 255, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(108, 99, 255, 0); }
+}
+
+/* 卡片悬停动画 */
+.cardHoverEffect {
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  perspective: 1000px;
+}
+
+.cardHoverEffect:hover {
+  transform: translateY(-8px) scale(1.01) rotateY(5deg);
+  box-shadow: 0 12px 20px -10px rgba(108, 99, 255, 0.28), -5px 5px 15px -5px rgba(0, 0, 0, 0.1);
+}

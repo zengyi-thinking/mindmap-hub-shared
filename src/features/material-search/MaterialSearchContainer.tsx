@@ -1,6 +1,7 @@
 
 import React, { useRef, useEffect } from 'react';
 import { motion } from 'framer-motion';
+import styles from '@/pages/MaterialSearch.module.css';
 import { useAuth } from '@/lib/auth';
 import { tagHierarchy } from '@/data/tagHierarchy';
 
@@ -129,15 +130,15 @@ const MaterialSearchContainer: React.FC = () => {
           transition={{ delay: 0.2 }}
           className="text-center py-16 my-12 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/30 dark:to-indigo-950/30 rounded-lg border border-primary/20 shadow-md"
         >
-          <div className="inline-flex justify-center items-center w-16 h-16 rounded-full bg-primary/10 mb-4">
-            <svg className="w-8 h-8 text-primary/70" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <div className="inline-flex justify-center items-center w-16 h-16 rounded-full bg-primary/10 mb-4 overflow-hidden">
+            <svg className={`w-10 h-10 text-primary/70 ${styles.earthIcon}`} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <circle cx="12" cy="12" r="10"/>
               <line x1="2" y1="12" x2="22" y2="12"/>
               <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
             </svg>
           </div>
-          <h2 className="text-xl font-semibold mb-2 text-primary">搜索以开始</h2>
-          <p className="text-muted-foreground max-w-md mx-auto">
+          <h2 className={`text-xl font-semibold mb-2 text-primary ${styles.mainTitle}`}>搜索以开始</h2>
+          <p className={`text-muted-foreground max-w-md mx-auto ${styles.hintText}`}>
             输入关键词或选择标签来搜索相关资料，系统将自动生成资料的思维导图展示
           </p>
         </motion.div>

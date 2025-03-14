@@ -1,5 +1,6 @@
 
 import React from 'react';
+import styles from '@/pages/MaterialSearch.module.css';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -63,7 +64,7 @@ const MaterialsList: React.FC<MaterialsListProps> = ({
                 transition={{ delay: 0.05 * (i % 6) }}
               >
                 <Card 
-                  className="glass-card subtle-hover cursor-pointer transition-all duration-200 hover:shadow-md border-primary/20 h-full flex flex-col"
+                  className={`${styles.glassCard} ${styles.cardShadow} cursor-pointer transition-all duration-200 border-primary/20 h-full flex flex-col ${styles.cardHover}`}
                   onClick={() => onMaterialSelect(material)}
                 >
                   <CardHeader className="p-4 pb-2 bg-gradient-to-r from-blue-50/60 to-indigo-50/60 dark:from-blue-950/20 dark:to-indigo-950/20 border-b border-primary/10">

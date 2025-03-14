@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import styles from './MyMindMaps.module.css';
 import { motion } from 'framer-motion';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -215,14 +216,14 @@ const MyMindMaps = () => {
           <motion.h1 
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
-            className="text-3xl font-bold tracking-tight"
+            className={`text-3xl font-bold tracking-tight ${styles.mainTitle}`}
           >
             我的思维导图
           </motion.h1>
           <motion.p 
             initial={{ opacity: 0 }}
             animate={{ opacity: 1, transition: { delay: 0.1 } }}
-            className="text-muted-foreground"
+            className={`text-muted-foreground ${styles.subTitle}`}
           >
             创建、编辑和整理您的思维导图
           </motion.p>
@@ -233,7 +234,7 @@ const MyMindMaps = () => {
           animate={{ opacity: 1, scale: 1 }}
           className="flex items-center gap-3 w-full md:w-auto"
         >
-          <div className="relative w-full md:w-64">
+          <div className={`relative w-full md:w-64 ${styles.searchFocus}`}>
             <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
             <Input
               type="search"
@@ -246,31 +247,77 @@ const MyMindMaps = () => {
           
           <Dialog>
             <DialogTrigger asChild>
-              <Button className="flex items-center gap-2">
+              <Button className={`flex items-center gap-2 ${styles.createButton} ${styles.buttonRadius}`}>
                 <Plus className="h-4 w-4" />
-                创建导图
+                <span className={styles.buttonText}>创建导图</span>
               </Button>
             </DialogTrigger>
-            <DialogContent>
-              <DialogHeader>
-                <DialogTitle>创建新的思维导图</DialogTitle>
+            <DialogContent className={`${styles.cardRadius} ${styles.cardShadow}`}>
+              <DialogHeader className={styles.navGradient}>
+                <DialogTitle className={styles.mainTitle}>创建新的思维导图</DialogTitle>
                 <DialogDescription>
-                  请输入新思维导图的名称。创建后您可以立即开始编辑。
+                  请输入新思维导图的名称和描述。创建后您可以立即开始编辑。
                 </DialogDescription>
               </DialogHeader>
               <div className="grid gap-4 py-4">
                 <div className="grid gap-2">
-                  <Label htmlFor="name">思维导图名称</Label>
+                  <Label htmlFor="name" className={styles.mainTitle}>思维导图名称</Label>
                   <Input
                     id="name"
                     placeholder="例如：项目计划、学习笔记..."
                     value={newMindMapName}
                     onChange={(e) => setNewMindMapName(e.target.value)}
+                    className={styles.hoverTransition}
                   />
+                </div>
+                <div className="grid gap-2">
+                  <Label htmlFor="description" className={styles.mainTitle}>描述</Label>
+                  <Textarea
+                    id="description"
+                    placeholder="简要描述思维导图的内容和用途..."
+                    value={newMindMapDescription}
+                    onChange={(e) => setNewMindMapDescription(e.target.value)}
+                    className={styles.hoverTransition}
+                  />
+                </div>
+                <div className="grid gap-2">
+                  <Label htmlFor="tags" className={styles.mainTitle}>标签</Label>
+                  <Input
+                    id="tags"
+                    placeholder="使用逗号分隔多个标签，如：学习,笔记,计划"
+                    value={newMindMapTags}
+                    onChange={(e) => setNewMindMapTags(e.target.value)}
+                    className={styles.hoverTransition}
+                  />
+                </div>
+                <div className="grid gap-2">
+                  <Label htmlFor="privacy" className={styles.mainTitle}>隐私设置</Label>
+                  <Select value={privacyOption} onValueChange={setPrivacyOption}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="选择隐私设置" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="private">
+                        <div className="flex items-center gap-2">
+                          <Lock className={`h-4 w-4 ${styles.lineIcon}`} />
+                          <span>私密</span>
+                        </div>
+                      </SelectItem>
+                      <SelectItem value="public">
+                        <div className="flex items-center gap-2">
+                          <Globe className={`h-4 w-4 ${styles.lineIcon}`} />
+                          <span>公开</span>
+                        </div>
+                      </SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
               </div>
               <DialogFooter>
-                <Button onClick={handleCreateMindMap}>创建</Button>
+                <Button onClick={handleCreateMindMap} className={`${styles.createButton} ${styles.buttonRadius}`}>
+                  <Save className="h-4 w-4 mr-2" />
+                  <span className={styles.buttonText}>创建</span>
+                </Button>
               </DialogFooter>
             </DialogContent>
           </Dialog>
@@ -283,9 +330,9 @@ const MyMindMaps = () => {
       >
         <Tabs defaultValue="all">
           <TabsList className="mb-4">
-            <TabsTrigger value="all">全部</TabsTrigger>
-            <TabsTrigger value="recent">最近</TabsTrigger>
-            <TabsTrigger value="starred">收藏</TabsTrigger>
+            <TabsTrigger value="all" className={styles.tabUnderline}>全部</TabsTrigger>
+            <TabsTrigger value="recent" className={styles.tabUnderline}>最近</TabsTrigger>
+            <TabsTrigger value="starred" className={styles.tabUnderline}>收藏</TabsTrigger>
           </TabsList>
           
           <TabsContent value="all">
@@ -293,7 +340,7 @@ const MyMindMaps = () => {
               variants={container}
               initial="hidden"
               animate="show"
-              className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"
+              className={`grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 ${styles.contentGrid}`}
             >
               {filteredMindMaps.map((mindMap) => (
                 <MindMapCard 
@@ -310,7 +357,7 @@ const MyMindMaps = () => {
               variants={container}
               initial="hidden"
               animate="show"
-              className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"
+              className={`grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 ${styles.contentGrid}`}
             >
               {recentMindMaps.slice(0, 6).map((mindMap) => (
                 <MindMapCard 
@@ -327,7 +374,7 @@ const MyMindMaps = () => {
               variants={container}
               initial="hidden"
               animate="show"
-              className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"
+              className={`grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 ${styles.contentGrid}`}
             >
               {starredMindMaps.map((mindMap) => (
                 <MindMapCard 
@@ -356,56 +403,56 @@ interface MindMapCardProps {
 
 const MindMapCard: React.FC<MindMapCardProps> = ({ mindMap, onToggleStar }) => {
   return (
-    <motion.div variants={{ hidden: { opacity: 0, y: 20 }, show: { opacity: 1, y: 0 } }}>
-      <Card className="overflow-hidden h-full glass-card subtle-hover border transition-all duration-300">
-        <CardHeader className="p-4 pb-0 flex flex-row items-start justify-between space-y-0">
+    <motion.div variants={{ hidden: { opacity: 0, y: 20 }, show: { opacity: 1, y: 0 } }} className={styles.cardEntrance}>
+      <Card className={`overflow-hidden h-full ${styles.mindmapCard} ${styles.cardShadow}`}>
+        <CardHeader className={`p-4 pb-0 flex flex-row items-start justify-between space-y-0 ${styles.cardHeader}`}>
           <CardTitle className="text-lg font-semibold truncate">{mindMap.title}</CardTitle>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" size="icon" className="h-8 w-8">
-                <MoreVertical className="h-4 w-4" />
+                <MoreVertical className={`h-4 w-4 ${styles.lineIcon}`} />
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
               <DropdownMenuItem onClick={onToggleStar}>
                 {mindMap.starred ? (
                   <>
-                    <Star className="mr-2 h-4 w-4 fill-primary text-primary" />
+                    <Star className={`mr-2 h-4 w-4 fill-primary text-primary ${styles.fillIcon}`} />
                     取消收藏
                   </>
                 ) : (
                   <>
-                    <Star className="mr-2 h-4 w-4" />
+                    <Star className={`mr-2 h-4 w-4 ${styles.lineIcon}`} />
                     收藏
                   </>
                 )}
               </DropdownMenuItem>
               <DropdownMenuItem>
-                <Share2 className="mr-2 h-4 w-4" />
+                <Share2 className={`mr-2 h-4 w-4 ${styles.lineIcon}`} />
                 分享
               </DropdownMenuItem>
               <DropdownMenuItem>
-                <Edit className="mr-2 h-4 w-4" />
+                <Edit className={`mr-2 h-4 w-4 ${styles.lineIcon}`} />
                 重命名
               </DropdownMenuItem>
               <DropdownMenuItem className="text-destructive focus:text-destructive">
-                <Trash2 className="mr-2 h-4 w-4" />
+                <Trash2 className={`mr-2 h-4 w-4 ${styles.lineIcon}`} />
                 删除
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
         </CardHeader>
         <CardContent className="p-4 pt-3">
-          <div className="w-full h-32 rounded-md bg-primary/10 flex items-center justify-center mb-2">
-            <Brain className="h-12 w-12 text-primary/60" />
+          <div className={`w-full h-32 rounded-md flex items-center justify-center mb-2 ${styles.mindmapPreview}`}>
+            <Brain className={`h-12 w-12 text-primary/60 ${styles.mindmapIcon}`} />
           </div>
         </CardContent>
         <CardFooter className="p-4 pt-0 flex justify-between">
           <div className="flex items-center text-sm text-muted-foreground">
-            <Calendar className="mr-1 h-4 w-4" />
+            <Calendar className={`mr-1 h-4 w-4 ${styles.lineIcon}`} />
             {mindMap.updatedAt}
           </div>
-          <Button size="sm">编辑</Button>
+          <Button size="sm" className={styles.editButton}>编辑</Button>
         </CardFooter>
       </Card>
     </motion.div>
