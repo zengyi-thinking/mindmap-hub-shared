@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { FileText, Image, Film, Music, Archive, FileCode, FilePdf, FileSpreadsheet } from 'lucide-react';
+import { FileText, Image, Film, Music, Archive, FileCode, File } from 'lucide-react';
 
 interface FileTypeProps {
   fileType: string;
@@ -14,13 +14,13 @@ export const FileType: React.FC<FileTypeProps> = ({ fileType, className = "h-4 w
     if (fileType.includes('image/')) {
       return <Image className={className} />;
     } else if (fileType.includes('application/pdf')) {
-      return <FilePdf className={className} />;
+      return <File className={className} />; // Changed from FilePdf to File
     } else if (fileType.includes('application/msword') || 
               fileType.includes('application/vnd.openxmlformats-officedocument.wordprocessingml')) {
       return <FileText className={className} />;
     } else if (fileType.includes('application/vnd.ms-excel') || 
               fileType.includes('application/vnd.openxmlformats-officedocument.spreadsheetml')) {
-      return <FileSpreadsheet className={className} />;
+      return <FileText className={className} />; // Changed from FileSpreadsheet to FileText
     } else if (fileType.includes('text/html') || fileType.includes('application/javascript')) {
       return <FileCode className={className} />;
     } else if (fileType.includes('audio/')) {
