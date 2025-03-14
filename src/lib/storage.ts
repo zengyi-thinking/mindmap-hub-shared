@@ -1,6 +1,6 @@
 import { SharedMindMap, MindMapComment } from "@/types/mindmap";
+import { Material } from "@/types/materials";
 // Don't import DiscussionTopic and DiscussionComment to avoid conflicts
-// import { DiscussionTopic, DiscussionComment } from "@/types/discussion";
 
 // Define User type
 export interface User {
@@ -9,28 +9,9 @@ export interface User {
   password: string;
   email: string;
   role: "user" | "admin";
-  avatar?: string; // Added avatar field
-  name?: string;    // Added name field
+  avatar?: string; 
+  name?: string;   
   createdAt: string;
-}
-
-// Material interface
-export interface Material {
-  id: number;
-  title: string;
-  description: string;
-  fileUrl: string;
-  fileType: string;
-  fileSize: number;
-  tags: string[];
-  uploadedBy: number;
-  uploaderName: string;
-  uploadDate: string;
-  views: number;
-  downloads: number;
-  likes: number;
-  comments: number;
-  starred: boolean;
 }
 
 // Define the discussion types locally to avoid import conflicts
@@ -296,6 +277,53 @@ export const userFilesService = {
     
     return Array.from(subFolders);
   },
+  
+  // Add new methods for favorites
+  getRecentFiles: (limit = 5) => {
+    if (typeof localStorage === 'undefined') return [];
+    
+    const files = JSON.parse(localStorage.getItem('userFiles') || '[]');
+    return [...files]
+      .sort((a, b) => new Date(b.uploadTime).getTime() - new Date(a.uploadTime).getTime())
+      .slice(0, limit);
+  },
+  
+  getFavoriteFiles: () => {
+    if (typeof localStorage === 'undefined') return [];
+    
+    const files = JSON.parse(localStorage.getItem('userFiles') || '[]');
+    return files.filter(file => file.favoriteInfo);
+  },
+  
+  addFavoriteFile: (id, favoriteInfo) => {
+    if (typeof localStorage === 'undefined') return null;
+    
+    const files = JSON.parse(localStorage.getItem('userFiles') || '[]');
+    const index = files.findIndex(file => file.id === id);
+    
+    if (index === -1) return null;
+    
+    files[index].favoriteInfo = {
+      timestamp: new Date().toISOString(),
+      ...favoriteInfo
+    };
+    
+    localStorage.setItem('userFiles', JSON.stringify(files));
+    return files[index];
+  },
+  
+  removeFavoriteFile: (id) => {
+    if (typeof localStorage === 'undefined') return null;
+    
+    const files = JSON.parse(localStorage.getItem('userFiles') || '[]');
+    const index = files.findIndex(file => file.id === id);
+    
+    if (index === -1) return null;
+    
+    delete files[index].favoriteInfo;
+    localStorage.setItem('userFiles', JSON.stringify(files));
+    return files[index];
+  }
 };
 
 // Materials service

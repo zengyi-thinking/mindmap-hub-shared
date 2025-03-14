@@ -1,4 +1,3 @@
-
 import React, { useState, useCallback, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { toast } from '@/components/ui/use-toast';
@@ -43,6 +42,8 @@ import { useMindMapLayout } from '@/hooks/useMindMapLayout';
 const nodeTypes: NodeTypes = {
   materialNode: MaterialNode
 };
+
+const navigate = useNavigate();
 
 const MindMapEditor: React.FC = () => {
   const reactFlowWrapper = useRef<HTMLDivElement>(null);

@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Calendar, FolderTree, Pencil, Eye, XCircle } from 'lucide-react';
@@ -8,7 +9,7 @@ import { MainDashboard } from '@/components/layouts/dashboard';
 import { useToast } from '@/components/ui/use-toast';
 import { userFilesService } from '@/lib/storage';
 import { formatDate, formatFileSize } from '@/lib/utils';
-import { FileType } from '@/components/file-upload/file-type';
+import FileType from '@/components/file-upload/file-type';
 import { Material } from '@/types/materials';
 import { useNavigate } from 'react-router-dom';
 
@@ -58,7 +59,7 @@ const Dashboard = () => {
     }
   };
 
-  const item = {
+  const itemVariant = {
     hidden: { opacity: 0, y: 20 },
     show: { opacity: 1, y: 0 }
   };
@@ -105,7 +106,7 @@ const Dashboard = () => {
               className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"
             >
               {recentItems.map((item) => (
-                <motion.div key={item.id} variants={item}>
+                <motion.div key={item.id} variants={itemVariant}>
                   <Card className="overflow-hidden border hover:border-primary/50 transition-all duration-300">
                     <CardHeader className="p-4 pb-2">
                       <CardTitle className="text-base flex items-center gap-2 truncate">
@@ -173,7 +174,7 @@ const Dashboard = () => {
               {favoriteItems.map((item) => (
                 <motion.div 
                   key={item.id} 
-                  variants={item}
+                  variants={itemVariant}
                   className="relative group"
                 >
                   <Card className="overflow-hidden border hover:border-primary/50 transition-all duration-300">
