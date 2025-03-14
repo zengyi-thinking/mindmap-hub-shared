@@ -1,4 +1,3 @@
-
 import React, { useRef, useState, useCallback, useEffect } from 'react';
 import { useNodesState, useEdgesState } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
@@ -29,6 +28,7 @@ const MindMapEditor: React.FC = () => {
   
   const {
     isNew,
+    id: mindMapId,
     title,
     setTitle,
     description,
@@ -99,6 +99,10 @@ const MindMapEditor: React.FC = () => {
   
   // Handle node click
   const onNodeClick = React.useCallback((event: React.MouseEvent, node: MindMapNode) => {
+    if (event.detail === 2) {
+      return;
+    }
+    
     if (connectingNodeId) {
       if (connectingNodeId !== node.id) {
         createConnection(connectingNodeId, node.id);
@@ -207,6 +211,7 @@ const MindMapEditor: React.FC = () => {
           onNodeClick={onNodeClick}
           reactFlowInstance={reactFlowInstance}
           setReactFlowInstance={setReactFlowInstance}
+          mindMapId={mindMapId}
         />
       </div>
       

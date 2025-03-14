@@ -1,4 +1,3 @@
-
 export interface Material {
   id: number | string;
   title: string;
@@ -25,6 +24,9 @@ export interface Material {
     size: number;
     dataUrl?: string;
   };
+  favoriteTime?: string;
+  favoriteNote?: string;
+  favoriteByUsers?: FavoriteRecord[];
 }
 
 export interface Comment {
@@ -71,4 +73,11 @@ export interface FolderPath {
   path: string[];
   name: string;
   fullPath: string;
+}
+
+export interface FavoriteRecord {
+  userId: number | string;
+  username: string;
+  favoriteTime: string;
+  favoriteNote?: string;
 }

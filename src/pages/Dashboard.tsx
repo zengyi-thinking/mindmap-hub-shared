@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
@@ -18,11 +17,16 @@ import {
   Users, 
   MessageSquare, 
   BookOpen,
-  Search
+  Search,
+  Calendar,
+  InfoIcon
 } from 'lucide-react';
 import { mindmapService } from '@/lib/mindmapStorage';
 import { userFilesService } from '@/lib/storage';
 import { toast } from '@/components/ui/use-toast';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+import { Badge } from '@/components/ui/badge';
+import { useAuth } from '@/lib/auth';
 
 // Define proper interface for content items
 interface ContentItem {
@@ -33,10 +37,29 @@ interface ContentItem {
   starred: boolean;
 }
 
+// 获取用户收藏资料的函数
+const loadUserFavorites = (userId) => {
+  if (!userId) return [];
+  
+  const userFavorites = userFilesService.getUserFavorites(userId);
+  
+  // 为每个收藏的资料添加收藏记录信息
+  return userFavorites.map(item => {
+    const favoriteRecord = item.favoriteByUsers?.find(record => record.userId === userId);
+    return {
+      ...item,
+      favoriteTime: favoriteRecord?.favoriteTime,
+      favoriteNote: favoriteRecord?.favoriteNote
+    };
+  });
+};
+
 const Dashboard = () => {
   const navigate = useNavigate();
+  const { user } = useAuth(); // 获取用户信息
   const [activeTab, setActiveTab] = useState('recent');
   const [recentContent, setRecentContent] = useState<ContentItem[]>([]);
+  const [starredItems, setStarredItems] = useState<any[]>([]);
   
   useEffect(() => {
     // Load recent mindmaps and materials
@@ -215,6 +238,149 @@ const Dashboard = () => {
   // Filter the starredContent
   const starredContent = recentContent.filter(item => item.starred);
 
+  // 加载收藏内容
+  useEffect(() => {
+    if (user) {
+      // 加载收藏的思维导图
+      const starredMindmaps = mindmapService.getStarred().map(item => ({
+        ...item,
+        type: 'mindmap'
+      }));
+      
+      // 加载收藏的资料
+      const starredMaterials = loadUserFavorites(user.id).map(item => ({
+        ...item,
+        type: 'material'
+      }));
+      
+      // 合并并按收藏时间排序
+      setStarredItems([...starredMindmaps, ...starredMaterials].sort((a, b) => {
+        const timeA = a.favoriteTime || a.updatedAt;
+        const timeB = b.favoriteTime || b.updatedAt;
+        return new Date(timeB).getTime() - new Date(timeA).getTime();
+      }));
+    }
+  }, [user]);
+  
+  // 收藏卡片渲染
+  const renderStarredItem = (item) => {
+    const isMindmap = item.type === 'mindmap';
+    const formattedDate = isMindmap
+      ? new Date(item.updatedAt).toLocaleDateString()
+      : new Date(item.favoriteTime || item.uploadTime).toLocaleDateString();
+      
+    return (
+      <Card key={`${item.type}-${item.id}`} className="overflow-hidden">
+        <CardHeader className="p-4 pb-2">
+          <div className="flex justify-between items-start">
+            <div>
+              <CardTitle className="text-base">
+                {item.title}
+              </CardTitle>
+              <CardDescription className="text-xs">
+                {isMindmap ? '思维导图' : '学习资料'}
+              </CardDescription>
+            </div>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-8 w-8"
+              onClick={() => handleToggleFavorite(item)}
+            >
+              <Star className="h-4 w-4 fill-yellow-500 text-yellow-500" />
+            </Button>
+          </div>
+        </CardHeader>
+        <CardContent className="p-4 pt-2">
+          <div className="flex flex-wrap gap-1 mb-2">
+            {item.tags && item.tags.slice(0, 3).map((tag, i) => (
+              <Badge key={i} variant="secondary" className="text-xs">
+                {tag}
+              </Badge>
+            ))}
+          </div>
+          <div className="flex justify-between items-center mt-3 text-xs text-muted-foreground">
+            <div className="flex items-center">
+              <Calendar className="h-3.5 w-3.5 mr-1" />
+              {isMindmap ? '更新于：' : '收藏于：'} {formattedDate}
+            </div>
+            
+            {/* 收藏备注提示 */}
+            {!isMindmap && item.favoriteNote && (
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button variant="ghost" size="icon" className="h-7 w-7">
+                    <InfoIcon className="h-3.5 w-3.5 text-muted-foreground" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p className="max-w-xs">{item.favoriteNote}</p>
+                </TooltipContent>
+              </Tooltip>
+            )}
+            
+            <Button
+              size="sm"
+              variant="ghost"
+              className="h-7 px-2 text-xs"
+              onClick={() => handleViewItem(item)}
+            >
+              查看
+              <ChevronRight className="h-3.5 w-3.5 ml-1" />
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  };
+
+  // 处理查看收藏项目
+  const handleViewItem = (item) => {
+    if (item.type === 'mindmap') {
+      navigate(`/mindmap-view/${item.id}`);
+    } else {
+      navigate(`/material/${item.id}`);
+    }
+  };
+  
+  // 处理切换收藏状态
+  const handleToggleFavorite = (item) => {
+    try {
+      if (item.type === 'mindmap') {
+        // 切换思维导图的收藏状态
+        const updatedMindMap = mindmapService.toggleStarred(item.id);
+        
+        // 更新列表中的项目
+        setStarredItems(prevItems => 
+          prevItems.filter(i => !(i.type === 'mindmap' && i.id === item.id))
+        );
+        
+        toast({
+          title: "已取消收藏",
+        });
+      } else {
+        // 切换资料的收藏状态
+        const updatedMaterial = userFilesService.removeFavorite(item.id, user?.id);
+        
+        // 更新列表中的项目
+        setStarredItems(prevItems => 
+          prevItems.filter(i => !(i.type === 'material' && i.id === item.id))
+        );
+        
+        toast({
+          title: "已取消收藏",
+        });
+      }
+    } catch (error) {
+      console.error('收藏操作出错:', error);
+      toast({
+        title: "操作失败",
+        description: "收藏操作失败，请稍后再试",
+        variant: "destructive"
+      });
+    }
+  };
+
   return (
     <div className="w-full max-w-6xl mx-auto space-y-8">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
@@ -325,18 +491,24 @@ const Dashboard = () => {
         >
           <Card>
             <CardHeader className="pb-2">
+              <CardTitle>收藏内容</CardTitle>
               <div className="flex justify-between items-center">
-                <CardTitle>收藏内容</CardTitle>
-                <Star className="h-5 w-5 fill-amber-400 text-amber-400" />
+                <CardDescription>您标记为收藏的内容</CardDescription>
+                {starredItems.length > 0 && (
+                  <Button variant="link" size="sm" className="text-xs h-6 px-0">
+                    查看全部 <ChevronRight className="h-3.5 w-3.5 ml-1" />
+                  </Button>
+                )}
               </div>
-              <CardDescription>您标记为收藏的内容</CardDescription>
             </CardHeader>
-            <CardContent className="space-y-4">
-              {starredContent.length > 0 ? (
-                renderContentItems(starredContent)
+            <CardContent>
+              {starredItems.length > 0 ? (
+                <div className="grid gap-3">
+                  {starredItems.slice(0, 3).map(renderStarredItem)}
+                </div>
               ) : (
                 <div className="text-center py-8 text-muted-foreground">
-                  <Star className="h-12 w-12 mx-auto opacity-20 mb-3" />
+                  <Star className="h-12 w-12 mx-auto mb-3 stroke-muted-foreground/50" />
                   <p>没有收藏的内容</p>
                   <p className="text-sm">点击星标图标添加收藏</p>
                 </div>

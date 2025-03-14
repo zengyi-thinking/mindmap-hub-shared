@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { 
   ReactFlow,
@@ -13,6 +12,7 @@ import { ZoomIn, ZoomOut, Maximize2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { MindMapNode, MindMapEdge } from '@/types/mindmap';
 import MaterialNode from '@/components/mindmap/MaterialNode';
+import { useNavigate } from 'react-router-dom';
 
 const nodeTypes: NodeTypes = {
   materialNode: MaterialNode
@@ -25,8 +25,11 @@ interface MindMapWorkspaceProps {
   onEdgesChange: any;
   onConnect: (params: Connection) => void;
   onNodeClick: (event: React.MouseEvent, node: MindMapNode) => void;
+  onNodeDoubleClick?: (event: React.MouseEvent, node: MindMapNode) => void;
   reactFlowInstance: any;
   setReactFlowInstance: (instance: any) => void;
+  mindMapId?: number; // 思维导图ID，用于跳转
+  readOnly?: boolean; // 是否只读模式
 }
 
 const MindMapWorkspace: React.FC<MindMapWorkspaceProps> = ({
@@ -36,9 +39,35 @@ const MindMapWorkspace: React.FC<MindMapWorkspaceProps> = ({
   onEdgesChange,
   onConnect,
   onNodeClick,
+  onNodeDoubleClick,
   reactFlowInstance,
-  setReactFlowInstance
+  setReactFlowInstance,
+  mindMapId,
+  readOnly = false
 }) => {
+  const navigate = useNavigate();
+
+  // 处理节点双击
+  const handleNodeDoubleClick = (event: React.MouseEvent, node: MindMapNode) => {
+    // 如果提供了自定义的双击处理函数，使用它
+    if (onNodeDoubleClick) {
+      onNodeDoubleClick(event, node);
+      return;
+    }
+    
+    // 如果节点有URL，优先打开URL
+    if (node.data.url) {
+      window.open(node.data.url, '_blank');
+      return;
+    }
+    
+    // 如果节点有附加资料，导航到资料页面
+    if (node.data.materials && node.data.materials.length > 0 && mindMapId) {
+      navigate(`/mindmap-materials/${mindMapId}/${node.id}`);
+      return;
+    }
+  };
+
   return (
     <ReactFlow
       nodes={nodes}
@@ -47,17 +76,15 @@ const MindMapWorkspace: React.FC<MindMapWorkspaceProps> = ({
       onEdgesChange={onEdgesChange}
       onConnect={onConnect}
       onNodeClick={onNodeClick}
-      onNodeDoubleClick={(_, node) => {
-        if (node.data.url) {
-          window.open(node.data.url, '_blank');
-          return;
-        }
-      }}
+      onNodeDoubleClick={handleNodeDoubleClick}
       onInit={setReactFlowInstance}
       fitView
       nodeTypes={nodeTypes}
       deleteKeyCode="Delete"
       multiSelectionKeyCode="Control"
+      nodesDraggable={!readOnly}
+      nodesConnectable={!readOnly}
+      elementsSelectable={!readOnly}
     >
       <Background 
         variant={BackgroundVariant.DOTS}

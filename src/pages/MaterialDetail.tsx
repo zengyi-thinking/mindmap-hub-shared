@@ -28,6 +28,8 @@ import {
 } from 'lucide-react';
 import MaterialComments from '@/components/materials/MaterialComments';
 import FilePreview from '@/components/materials/FilePreview';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
+import { Label } from '@/components/ui/label';
 
 // 为MaterialDetail组件创建一个新类型
 interface MaterialComment {
@@ -55,6 +57,8 @@ const MaterialDetail: React.FC = () => {
   const [comments, setComments] = useState<MaterialComment[]>([]);
   const [liked, setLiked] = useState(false);
   const [favorited, setFavorited] = useState(false);
+  const [favoriteDialogOpen, setFavoriteDialogOpen] = useState(false);
+  const [favoriteNote, setFavoriteNote] = useState('');
   
   useEffect(() => {
     if (!id) {
@@ -103,6 +107,14 @@ const MaterialDetail: React.FC = () => {
     
     loadMaterial();
   }, [id, navigate]);
+  
+  // 初始加载时检查用户是否已收藏
+  useEffect(() => {
+    if (user && material) {
+      const isFavorited = userFilesService.isFavoritedByUser(material.id, user.id);
+      setFavorited(isFavorited);
+    }
+  }, [user, material]);
   
   const loadComments = (materialId: number) => {
     try {
@@ -280,43 +292,54 @@ const MaterialDetail: React.FC = () => {
       return;
     }
     
+    // 如果已经收藏，则取消收藏
+    if (favorited) {
+      try {
+        const updatedMaterial = userFilesService.removeFavorite(parseInt(id!), user.id);
+        
+        if (updatedMaterial) {
+          setMaterial(updatedMaterial);
+          setFavorited(false);
+        }
+        
+        toast({
+          title: "已取消收藏",
+        });
+      } catch (error) {
+        console.error("取消收藏出错:", error);
+        toast({
+          title: "操作失败",
+          description: "取消收藏操作失败，请稍后再试",
+          variant: "destructive"
+        });
+      }
+    } else {
+      // 如果未收藏，打开收藏对话框
+      setFavoriteDialogOpen(true);
+    }
+  };
+  
+  // 确认收藏
+  const handleConfirmFavorite = () => {
     try {
-      const materialId = parseInt(id!);
-      const favoritedMaterials = JSON.parse(localStorage.getItem('user_favorited_materials') || '[]');
+      const updatedMaterial = userFilesService.addFavorite(
+        parseInt(id!), 
+        user?.id!, 
+        user?.username!, 
+        favoriteNote
+      );
       
-      // 切换收藏状态
-      if (favorited) {
-        // 取消收藏
-        const updatedFavoritedMaterials = favoritedMaterials.filter((id: number) => id !== materialId);
-        localStorage.setItem('user_favorited_materials', JSON.stringify(updatedFavoritedMaterials));
-        
-        // 更新资料收藏数
-        const updatedMaterial = userFilesService.update(materialId, {
-          favorites: (material.favorites || 0) - 1
-        });
-        
-        if (updatedMaterial) {
-          setMaterial(updatedMaterial);
-        }
-      } else {
-        // 添加收藏
-        favoritedMaterials.push(materialId);
-        localStorage.setItem('user_favorited_materials', JSON.stringify(favoritedMaterials));
-        
-        // 更新资料收藏数
-        const updatedMaterial = userFilesService.update(materialId, {
-          favorites: (material.favorites || 0) + 1
-        });
-        
-        if (updatedMaterial) {
-          setMaterial(updatedMaterial);
-        }
+      if (updatedMaterial) {
+        setMaterial(updatedMaterial);
+        setFavorited(true);
       }
       
-      setFavorited(!favorited);
+      // 关闭对话框并重置备注
+      setFavoriteDialogOpen(false);
+      setFavoriteNote('');
       
       toast({
-        title: favorited ? "已取消收藏" : "收藏成功",
+        title: "收藏成功",
       });
     } catch (error) {
       console.error("收藏出错:", error);
@@ -326,6 +349,12 @@ const MaterialDetail: React.FC = () => {
         variant: "destructive"
       });
     }
+  };
+  
+  // 取消收藏操作
+  const handleCancelFavorite = () => {
+    setFavoriteDialogOpen(false);
+    setFavoriteNote('');
   };
   
   const handleDownload = () => {
@@ -554,6 +583,62 @@ const MaterialDetail: React.FC = () => {
           </Tabs>
         </div>
       </div>
+      
+      {/* 收藏对话框 */}
+      <Dialog open={favoriteDialogOpen} onOpenChange={setFavoriteDialogOpen}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>收藏资料</DialogTitle>
+            <DialogDescription>
+              请添加收藏备注（可选），帮助您记住收藏这个资料的原因
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="grid gap-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="favorite-note">收藏备注</Label>
+              <Textarea
+                id="favorite-note"
+                placeholder="添加备注信息（可选）"
+                value={favoriteNote}
+                onChange={(e) => setFavoriteNote(e.target.value)}
+                rows={4}
+              />
+            </div>
+            
+            <div className="flex items-center space-x-2 text-sm">
+              <Calendar className="h-4 w-4 text-muted-foreground" />
+              <span className="text-muted-foreground">
+                收藏时间：{new Date().toLocaleString()}
+              </span>
+            </div>
+            
+            <div className="flex flex-wrap items-center gap-2 text-sm">
+              <Tag className="h-4 w-4 text-muted-foreground" />
+              <span className="text-muted-foreground mr-2">收藏路径：</span>
+              {material?.folderPath && material.folderPath.length > 0 ? (
+                <div className="flex flex-wrap gap-1">
+                  {material.folderPath.map((folder, index) => (
+                    <React.Fragment key={index}>
+                      {index > 0 && <span className="text-muted-foreground mx-1">›</span>}
+                      <Badge variant="outline" className="text-xs">
+                        {folder}
+                      </Badge>
+                    </React.Fragment>
+                  ))}
+                </div>
+              ) : (
+                <span className="text-muted-foreground">无分类路径</span>
+              )}
+            </div>
+          </div>
+          
+          <DialogFooter>
+            <Button variant="outline" onClick={handleCancelFavorite}>取消</Button>
+            <Button onClick={handleConfirmFavorite}>确认收藏</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

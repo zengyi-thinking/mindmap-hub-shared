@@ -296,6 +296,119 @@ export const userFilesService = {
     
     return Array.from(subFolders);
   },
+
+  // 添加收藏记录
+  addFavorite: (fileId: number | string, userId: number | string, username: string, note?: string) => {
+    if (typeof localStorage === 'undefined') return null;
+    
+    const files = JSON.parse(localStorage.getItem('userFiles') || '[]');
+    const index = files.findIndex(file => file.id === fileId);
+    
+    if (index === -1) return null;
+    
+    // 初始化收藏用户记录数组
+    if (!files[index].favoriteByUsers) {
+      files[index].favoriteByUsers = [];
+    }
+    
+    // 检查用户是否已经收藏过
+    const existingFavoriteIndex = files[index].favoriteByUsers.findIndex(
+      record => record.userId === userId
+    );
+    
+    // 当前收藏时间
+    const favoriteTime = new Date().toISOString();
+    
+    if (existingFavoriteIndex !== -1) {
+      // 更新现有收藏记录
+      files[index].favoriteByUsers[existingFavoriteIndex] = {
+        ...files[index].favoriteByUsers[existingFavoriteIndex],
+        favoriteTime,
+        favoriteNote: note
+      };
+    } else {
+      // 添加新收藏记录
+      files[index].favoriteByUsers.push({
+        userId,
+        username,
+        favoriteTime,
+        favoriteNote: note
+      });
+      
+      // 更新收藏计数
+      files[index].favorites = (files[index].favorites || 0) + 1;
+    }
+    
+    localStorage.setItem('userFiles', JSON.stringify(files));
+    
+    return files[index];
+  },
+  
+  // 移除收藏记录
+  removeFavorite: (fileId: number | string, userId: number | string) => {
+    if (typeof localStorage === 'undefined') return null;
+    
+    const files = JSON.parse(localStorage.getItem('userFiles') || '[]');
+    const index = files.findIndex(file => file.id === fileId);
+    
+    if (index === -1) return null;
+    
+    // 如果没有收藏记录数组，直接返回
+    if (!files[index].favoriteByUsers) return files[index];
+    
+    // 查找该用户的收藏记录
+    const favoriteIndex = files[index].favoriteByUsers.findIndex(
+      record => record.userId === userId
+    );
+    
+    // 如果找到记录，移除它
+    if (favoriteIndex !== -1) {
+      files[index].favoriteByUsers.splice(favoriteIndex, 1);
+      
+      // 更新收藏计数
+      files[index].favorites = Math.max(0, (files[index].favorites || 0) - 1);
+      
+      localStorage.setItem('userFiles', JSON.stringify(files));
+    }
+    
+    return files[index];
+  },
+  
+  // 检查用户是否收藏了特定文件
+  isFavoritedByUser: (fileId: number | string, userId: number | string) => {
+    if (typeof localStorage === 'undefined') return false;
+    
+    const files = JSON.parse(localStorage.getItem('userFiles') || '[]');
+    const file = files.find(file => file.id === fileId);
+    
+    if (!file || !file.favoriteByUsers) return false;
+    
+    return file.favoriteByUsers.some(record => record.userId === userId);
+  },
+  
+  // 获取用户的收藏记录
+  getUserFavorites: (userId: number | string) => {
+    if (typeof localStorage === 'undefined') return [];
+    
+    const files = JSON.parse(localStorage.getItem('userFiles') || '[]');
+    
+    return files.filter(file => 
+      file.favoriteByUsers && 
+      file.favoriteByUsers.some(record => record.userId === userId)
+    );
+  },
+
+  // 获取文件的收藏记录
+  getFileFavorites: (fileId: number | string) => {
+    if (typeof localStorage === 'undefined') return [];
+    
+    const files = JSON.parse(localStorage.getItem('userFiles') || '[]');
+    const file = files.find(file => file.id === fileId);
+    
+    if (!file || !file.favoriteByUsers) return [];
+    
+    return file.favoriteByUsers;
+  },
 };
 
 // Materials service

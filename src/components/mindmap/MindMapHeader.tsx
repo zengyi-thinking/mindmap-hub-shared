@@ -1,10 +1,20 @@
-
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
-import { ArrowLeft, Plus, FileText, Layout, Save } from 'lucide-react';
+import { Label } from '@/components/ui/label';
+import { 
+  Brain, 
+  Save, 
+  Plus, 
+  PaperclipIcon, 
+  LayoutGrid,
+  Globe,
+  Lock,
+  EyeIcon,
+  EyeOffIcon
+} from 'lucide-react';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { useNavigate } from 'react-router-dom';
 
 interface MindMapHeaderProps {
@@ -31,71 +41,89 @@ const MindMapHeader: React.FC<MindMapHeaderProps> = ({
   const navigate = useNavigate();
 
   return (
-    <div className="flex justify-between items-center p-4 border-b">
-      <div className="flex items-center gap-3">
-        <Button 
-          variant="ghost" 
-          size="icon" 
-          onClick={() => navigate('/mindmaps')}
-        >
-          <ArrowLeft className="h-5 w-5" />
-        </Button>
-        <div>
-          <Input
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            placeholder="思维导图标题"
-            className="text-xl font-bold border-0 p-0 h-auto focus-visible:ring-0 bg-transparent"
-          />
-        </div>
-      </div>
+    <div className="border-b p-4 flex gap-4 items-center justify-between">
       <div className="flex items-center gap-2">
-        <div className="flex items-center gap-2 mr-4">
-          <Switch 
-            id="public" 
-            checked={isPublic} 
-            onCheckedChange={setIsPublic} 
-          />
-          <Label htmlFor="public" className="cursor-pointer">
-            {isPublic ? '公开' : '私有'}
-          </Label>
+        <Brain className="h-6 w-6 text-primary" />
+        <Input
+          value={title}
+          onChange={(e) => setTitle(e.target.value)}
+          placeholder="思维导图标题"
+          className="w-64 text-lg font-semibold border-none focus-visible:ring-0"
+        />
+      </div>
+      
+      <div className="flex items-center gap-5">
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <div className="flex items-center gap-2">
+              <Switch
+                checked={isPublic}
+                onCheckedChange={setIsPublic}
+                id="public-mode"
+              />
+              <Label htmlFor="public-mode" className="cursor-pointer flex items-center gap-1.5">
+                {isPublic ? (
+                  <>
+                    <Globe className="h-4 w-4 text-green-500" />
+                    <span className="text-sm">公开</span>
+                  </>
+                ) : (
+                  <>
+                    <Lock className="h-4 w-4 text-orange-500" />
+                    <span className="text-sm">私有</span>
+                  </>
+                )}
+              </Label>
+            </div>
+          </TooltipTrigger>
+          <TooltipContent>
+            <p>{isPublic 
+              ? "公开模式: 思维导图将在资料搜索页面对所有用户可见" 
+              : "私有模式: 思维导图仅对您可见"}</p>
+          </TooltipContent>
+        </Tooltip>
+        
+        <div className="flex items-center gap-1">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={onAddNode}
+            className="flex gap-1"
+          >
+            <Plus className="h-4 w-4" />
+            <span>添加节点</span>
+          </Button>
+          
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={onAttachMaterial}
+            className="flex gap-1"
+          >
+            <PaperclipIcon className="h-4 w-4" />
+            <span>附加资料</span>
+          </Button>
+          
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={onAutoLayout}
+            className="flex gap-1"
+          >
+            <LayoutGrid className="h-4 w-4" />
+            <span>自动布局</span>
+          </Button>
+          
+          <Button
+            variant="primary"
+            size="sm"
+            onClick={onSave}
+            className="flex gap-1 bg-primary text-primary-foreground hover:bg-primary/90"
+          >
+            <Save className="h-4 w-4" />
+            <span>保存</span>
+          </Button>
         </div>
-        <Button 
-          variant="outline" 
-          size="sm"
-          className="flex items-center gap-1"
-          onClick={onAttachMaterial}
-        >
-          <FileText className="h-4 w-4" />
-          附加资料
-        </Button>
-        <Button 
-          variant="outline" 
-          size="sm"
-          className="flex items-center gap-1"
-          onClick={onAddNode}
-        >
-          <Plus className="h-4 w-4" />
-          添加节点
-        </Button>
-        <Button 
-          variant="outline" 
-          size="sm"
-          className="flex items-center gap-1"
-          onClick={onAutoLayout}
-        >
-          <Layout className="h-4 w-4" />
-          自动排列
-        </Button>
-        <Button 
-          variant="default" 
-          size="sm"
-          className="flex items-center gap-1"
-          onClick={onSave}
-        >
-          <Save className="h-4 w-4" />
-          保存
-        </Button>
       </div>
     </div>
   );
