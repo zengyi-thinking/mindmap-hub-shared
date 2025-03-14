@@ -52,8 +52,8 @@ const MaterialBrowser: React.FC = () => {
   // 根据当前文件夹路径获取子文件夹和文件
   useEffect(() => {
     if (activeTab === 'folders') {
-      const subFolderList = userFilesService.getSubFolders(currentFolderPath);
-      setSubFolders(Array.isArray(subFolderList) ? subFolderList as string[] : []);
+      const subFolders = userFilesService.getSubFolders(currentFolderPath);
+      setSubFolders(subFolders);
       
       const filesInFolder = userFilesService.getByDirectFolder(currentFolderPath);
       setFolderMaterials(filesInFolder.filter(file => file.approved));

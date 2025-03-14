@@ -337,8 +337,8 @@ const MindMapView: React.FC = () => {
                           <div className="text-xs text-muted-foreground">
                             {material.file && material.file.type && `${material.file.type.split('/')[1]} · `}
                             {material.file && material.file.size && `${(material.file.size / 1024 / 1024).toFixed(2)} MB`}
-                            {material.fileType && !material.file && `${material.fileType} · `}
-                            {material.fileSize && !material.file && `${(material.fileSize / 1024 / 1024).toFixed(2)} MB`}
+                            {material.fileType && `${material.fileType} · `}
+                            {material.fileSize && `${(material.fileSize / 1024 / 1024).toFixed(2)} MB`}
                           </div>
                           <Button 
                             size="sm" 

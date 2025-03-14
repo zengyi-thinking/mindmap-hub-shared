@@ -5,34 +5,20 @@ import { Shield, ShieldAlert, ShieldCheck } from 'lucide-react';
 
 // 用户角色类型
 export type UserRole = 'user' | 'admin';
-export type SyncStatus = 'synced' | 'syncing' | 'pending';
 
 // 用户信息接口
 export interface User {
   id: number;
   username: string;
   email?: string;
-  phone?: string; // 手机号字段是可选的
+  phone?: string; // 新增手机号字段
   role: UserRole;
   avatar?: string;
   bio?: string; // 个人签名
   lastLogin?: string; // 上次登录时间
   createdAt: string;
   updatedAt?: string; // 最后更新时间
-  syncStatus?: SyncStatus; // 同步状态
-}
-
-// 存储用户的完整信息（包含密码）
-interface UserWithPassword {
-  id: number;
-  username: string;
-  password: string;
-  email: string;
-  phone?: string; // 修改为可选
-  role: UserRole;
-  createdAt: string;
-  updatedAt: string;
-  syncStatus: SyncStatus;
+  syncStatus?: 'synced' | 'syncing' | 'pending'; // 同步状态
 }
 
 // 用户操作日志接口
@@ -62,7 +48,7 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 // 模拟用户数据
-const USERS: UserWithPassword[] = [
+const USERS = [
   {
     id: 1,
     username: 'admin',
@@ -71,7 +57,7 @@ const USERS: UserWithPassword[] = [
     role: 'admin' as UserRole,
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
-    syncStatus: 'synced' as SyncStatus,
+    syncStatus: 'synced' as 'synced' | 'syncing' | 'pending',
   },
   {
     id: 2,
@@ -82,7 +68,7 @@ const USERS: UserWithPassword[] = [
     role: 'user' as UserRole,
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
-    syncStatus: 'synced' as SyncStatus,
+    syncStatus: 'synced' as 'synced' | 'syncing' | 'pending',
   }
 ];
 
@@ -164,10 +150,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     if (foundUser) {
       // 创建不包含密码的用户对象
       const { password, ...userWithoutPassword } = foundUser;
-      const userToSet: User = {
+      const userToSet = {
         ...userWithoutPassword,
         lastLogin: new Date().toISOString(),
-        syncStatus: 'synced' as SyncStatus
+        syncStatus: 'synced' as 'synced' | 'syncing' | 'pending'
       };
       
       setUser(userToSet);
@@ -194,16 +180,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
     
     // 创建新用户(在实际应用中，这里应该是API请求)
-    const newUser: UserWithPassword = {
+    const newUser = {
       id: USERS.length + 1,
       username,
       password,
       email,
-      phone, // 可选字段
+      phone,
       role: 'user' as UserRole,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
-      syncStatus: 'synced' as SyncStatus
+      syncStatus: 'synced' as 'synced' | 'syncing' | 'pending'
     };
     
     // 添加到用户列表(实际应用中不需要这一步，因为数据会存储在服务器)
@@ -211,15 +197,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     
     // 创建不包含密码的用户对象
     const { password: _, ...userWithoutPassword } = newUser;
-    
-    const userToSet: User = {
-      ...userWithoutPassword,
-      syncStatus: 'synced' as SyncStatus
-    };
-    
-    setUser(userToSet);
+    setUser(userWithoutPassword);
     // 将用户信息存储到本地存储
-    localStorage.setItem('user', JSON.stringify(userToSet));
+    localStorage.setItem('user', JSON.stringify(userWithoutPassword));
     
     // 添加注册日志
     addUserLog(newUser.id, '注册', `用户 ${username} 完成注册`);
@@ -257,16 +237,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     if (!user) return false;
     
     // 标记为同步中
-    setUser(prev => prev ? { ...prev, syncStatus: 'syncing' as SyncStatus } : null);
+    setUser(prev => prev ? { ...prev, syncStatus: 'syncing' } : null);
     
     // 模拟API请求延迟
     await new Promise(resolve => setTimeout(resolve, 1000));
     
-    const updatedUser: User = { 
+    const updatedUser = { 
       ...user, 
       ...updates,
       updatedAt: new Date().toISOString(),
-      syncStatus: 'synced' as SyncStatus 
+      syncStatus: 'synced' 
     };
     
     // 更新本地存储

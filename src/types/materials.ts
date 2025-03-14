@@ -1,4 +1,3 @@
-
 export interface Material {
   id: number | string;
   title: string;
@@ -19,18 +18,6 @@ export interface Material {
   userId?: number | string;
   status?: string;
   folderPath?: string[];
-  file?: {
-    name: string;
-    type: string;
-    size: number;
-    dataUrl?: string;
-  };
-  // Add favorite information
-  favoriteInfo?: {
-    timestamp: string;
-    path: string[];
-    note?: string;
-  };
 }
 
 export interface Comment {

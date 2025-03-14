@@ -1,75 +1,110 @@
 
 import React from 'react';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import { icons } from 'lucide-react';
+import { 
+  Brain, 
+  BookOpen, 
+  FileText, 
+  Globe, 
+  Star, 
+  Users, 
+  Target, 
+  Settings, 
+  Home, 
+  Layers, 
+  Image, 
+  Video, 
+  Music, 
+  Film, 
+  Book, 
+  BarChart, 
+  Calendar, 
+  Cloud, 
+  Code, 
+  Coffee, 
+  Database, 
+  Flag, 
+  Folder, 
+  Gift, 
+  Heart, 
+  Info, 
+  Key, 
+  LucideIcon,
+  Mail, 
+  Map, 
+  MessageSquare, 
+  Phone, 
+  Search, 
+  Shield, 
+  ShoppingCart, 
+  Tag, 
+  Truck, 
+  User, 
+  Zap
+} from 'lucide-react';
+import { Button } from '@/components/ui/button';
 
 interface NodeIconSelectorProps {
   onSelect: (iconName: string) => void;
 }
 
 const NodeIconSelector: React.FC<NodeIconSelectorProps> = ({ onSelect }) => {
-  // Get all icon names from lucide-react
-  const iconNames = Object.keys(icons);
-  
-  // Common icon categories for mind maps
-  const recommendedIcons = [
-    'Brain', 'Lightbulb', 'GraduationCap', 'Book', 'BookOpen', 
-    'FileText', 'Files', 'FolderOpen', 'Folder', 'Landmark',
-    'Library', 'MessagesSquare', 'Newspaper', 'PenTool', 'Presentation',
-    'ScrollText', 'Search', 'Star', 'Target', 'Award',
-    'BadgeCheck', 'Briefcase', 'Building', 'Calendar', 'Code',
-    'Cpu', 'Database', 'Flag', 'Globe', 'Heart',
-    'Home', 'Image', 'Info', 'Link', 'List',
-    'Lock', 'Map', 'MapPin', 'User', 'Users'
+  // Define available icons with their components and names
+  const icons: { icon: React.ReactNode; name: string }[] = [
+    { icon: <Brain />, name: 'Brain' },
+    { icon: <BookOpen />, name: 'BookOpen' },
+    { icon: <FileText />, name: 'FileText' },
+    { icon: <Globe />, name: 'Globe' },
+    { icon: <Star />, name: 'Star' },
+    { icon: <Users />, name: 'Users' },
+    { icon: <Target />, name: 'Target' },
+    { icon: <Settings />, name: 'Settings' },
+    { icon: <Home />, name: 'Home' },
+    { icon: <Layers />, name: 'Layers' },
+    { icon: <Image />, name: 'Image' },
+    { icon: <Video />, name: 'Video' },
+    { icon: <Music />, name: 'Music' },
+    { icon: <Film />, name: 'Film' },
+    { icon: <Book />, name: 'Book' },
+    { icon: <BarChart />, name: 'BarChart' },
+    { icon: <Calendar />, name: 'Calendar' },
+    { icon: <Cloud />, name: 'Cloud' },
+    { icon: <Code />, name: 'Code' },
+    { icon: <Coffee />, name: 'Coffee' },
+    { icon: <Database />, name: 'Database' },
+    { icon: <Flag />, name: 'Flag' },
+    { icon: <Folder />, name: 'Folder' },
+    { icon: <Gift />, name: 'Gift' },
+    { icon: <Heart />, name: 'Heart' },
+    { icon: <Info />, name: 'Info' },
+    { icon: <Key />, name: 'Key' },
+    { icon: <Mail />, name: 'Mail' },
+    { icon: <Map />, name: 'Map' },
+    { icon: <MessageSquare />, name: 'MessageSquare' },
+    { icon: <Phone />, name: 'Phone' },
+    { icon: <Search />, name: 'Search' },
+    { icon: <Shield />, name: 'Shield' },
+    { icon: <ShoppingCart />, name: 'ShoppingCart' },
+    { icon: <Tag />, name: 'Tag' },
+    { icon: <Truck />, name: 'Truck' },
+    { icon: <User />, name: 'User' },
+    { icon: <Zap />, name: 'Zap' }
   ];
-
-  // Filter only recommended icons first
-  const filteredIcons = iconNames.filter(name => 
-    recommendedIcons.includes(name)
-  );
-
+  
   return (
-    <div className="w-full p-2">
-      <h3 className="text-sm font-medium mb-2">推荐图标</h3>
-      <div className="grid grid-cols-5 gap-2">
-        {filteredIcons.map(iconName => {
-          const IconComponent = icons[iconName];
-          return (
-            <button
-              key={iconName}
-              className="flex flex-col items-center justify-center p-2 rounded-md hover:bg-muted transition-colors"
-              onClick={() => onSelect(iconName)}
-            >
-              <IconComponent className="h-6 w-6 mb-1" />
-              <span className="text-xs text-center overflow-hidden text-ellipsis w-full">
-                {iconName}
-              </span>
-            </button>
-          );
-        })}
-      </div>
-      
-      <h3 className="text-sm font-medium mt-4 mb-2">所有图标</h3>
-      <ScrollArea className="h-40">
-        <div className="grid grid-cols-5 gap-2">
-          {iconNames.map(iconName => {
-            if (recommendedIcons.includes(iconName)) return null;
-            const IconComponent = icons[iconName];
-            return (
-              <button
-                key={iconName}
-                className="flex flex-col items-center justify-center p-2 rounded-md hover:bg-muted transition-colors"
-                onClick={() => onSelect(iconName)}
-              >
-                <IconComponent className="h-6 w-6 mb-1" />
-                <span className="text-xs text-center overflow-hidden text-ellipsis w-full">
-                  {iconName}
-                </span>
-              </button>
-            );
-          })}
-        </div>
-      </ScrollArea>
+    <div className="grid grid-cols-4 gap-3 p-1">
+      {icons.map((item, index) => (
+        <Button
+          key={index}
+          variant="outline"
+          className="flex flex-col items-center justify-center h-20 p-2 hover:bg-primary/10"
+          onClick={() => onSelect(item.name)}
+        >
+          <div className="h-8 w-8 flex items-center justify-center">
+            {item.icon}
+          </div>
+          <span className="text-xs mt-1 truncate w-full text-center">{item.name}</span>
+        </Button>
+      ))}
     </div>
   );
 };
