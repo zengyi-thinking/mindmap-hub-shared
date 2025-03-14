@@ -84,7 +84,7 @@ const MindMapEditor: React.FC = () => {
   const [attachedMaterials, setAttachedMaterials] = useState<Record<string, Material[]>>({});
   
   const { addNode, deleteNode, updateNode, attachMaterials, createConnection } = useMindMapNodes(setNodes, setEdges);
-  const { autoLayout } = useMindMapLayout();
+  const { autoLayout } = useMindMapLayout(setNodes);
   
   useEffect(() => {
     const content = loadMindMap();
@@ -195,11 +195,8 @@ const MindMapEditor: React.FC = () => {
   }, [nodes, edges, saveMindMap]);
   
   const handleAutoLayout = useCallback(() => {
-    const layoutedNodes = autoLayout(nodes, edges, reactFlowInstance);
-    if (layoutedNodes) {
-      setNodes(layoutedNodes);
-    }
-  }, [nodes, edges, reactFlowInstance, autoLayout, setNodes]);
+    autoLayout(nodes, edges, reactFlowInstance);
+  }, [nodes, edges, reactFlowInstance, autoLayout]);
   
   const setNodeIconAndClose = useCallback((icon: string) => {
     setNodeIcon(icon);
@@ -252,7 +249,9 @@ const MindMapEditor: React.FC = () => {
             }
             
             if (node.data.materials && node.data.materials.length > 0) {
-              navigate(`/mindmap-materials/${isNew ? 'new' : useParams().id}/${node.id}`);
+              const { id } = useParams<{ id: string }>();
+              const navigate = useNavigate();
+              navigate(`/mindmap-materials/${id}/${node.id}`);
             }
           }}
           onInit={setReactFlowInstance}
