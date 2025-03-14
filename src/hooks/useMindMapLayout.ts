@@ -1,81 +1,57 @@
 
 import { useCallback } from 'react';
+import dagre from 'dagre';
 import { MindMapNode, MindMapEdge } from '@/types/mindmap';
 
-export function useMindMapLayout(setNodes: any) {
-  // Auto layout function
-  const autoLayout = useCallback((
-    nodes: MindMapNode[], 
-    edges: MindMapEdge[], 
-    reactFlowInstance: any
-  ) => {
-    // Simple auto layout (horizontal tree layout)
-    if (nodes.length === 0) return;
-    
-    // Find the root node (assuming it's the first node)
-    const rootNode = nodes[0];
-    const rootId = rootNode.id;
-    
-    // Calculate levels for each node based on distance from root
-    const nodeLevels: Record<string, number> = {};
-    nodeLevels[rootId] = 0;
-    
-    // Calculate levels using BFS
-    const queue = [rootId];
-    while (queue.length > 0) {
-      const currentId = queue.shift()!;
-      const childEdges = edges.filter(edge => edge.source === currentId);
-      
-      childEdges.forEach(edge => {
-        const targetId = edge.target;
-        if (nodeLevels[targetId] === undefined) {
-          nodeLevels[targetId] = nodeLevels[currentId] + 1;
-          queue.push(targetId);
-        }
+export function useMindMapLayout() {
+  // Auto layout function for organizing nodes
+  const autoLayout = useCallback((nodes: MindMapNode[], edges: MindMapEdge[], reactFlowInstance: any) => {
+    if (!nodes.length) return;
+
+    const g = new dagre.graphlib.Graph().setDefaultEdgeLabel(() => ({}));
+    g.setGraph({ rankdir: 'TB', nodesep: 100, ranksep: 100 });
+
+    // Add nodes to the graph
+    nodes.forEach((node) => {
+      g.setNode(node.id, { 
+        width: node.style?.width || 150, 
+        height: node.style?.height || 80 
       });
-    }
-    
-    // Get max level
-    const maxLevel = Math.max(...Object.values(nodeLevels));
-    
-    // Count nodes at each level
-    const nodesPerLevel: Record<number, number> = {};
-    Object.values(nodeLevels).forEach(level => {
-      nodesPerLevel[level] = (nodesPerLevel[level] || 0) + 1;
     });
-    
-    // Set positions based on levels
-    const levelWidth = 250;
-    const levelHeight = 150;
-    const newNodes = nodes.map(node => {
-      const level = nodeLevels[node.id] || 0;
-      const nodesInThisLevel = nodesPerLevel[level] || 1;
-      
-      // Find position of this node within its level
-      const nodesAtSameLevel = Object.entries(nodeLevels)
-        .filter(([_, l]) => l === level)
-        .map(([id]) => id);
-      
-      const positionInLevel = nodesAtSameLevel.indexOf(node.id);
-      const levelStartY = 300 - (nodesInThisLevel * levelHeight / 2);
+
+    // Add edges to the graph
+    edges.forEach((edge) => {
+      g.setEdge(edge.source, edge.target);
+    });
+
+    // Calculate the layout
+    dagre.layout(g);
+
+    // Retrieve the positions from the layout
+    const layoutedNodes = nodes.map((node) => {
+      const nodeWithPosition = g.node(node.id);
       
       return {
         ...node,
         position: {
-          x: 400 + (level - maxLevel / 2) * levelWidth,
-          y: levelStartY + positionInLevel * levelHeight
+          x: nodeWithPosition.x - (nodeWithPosition.width / 2),
+          y: nodeWithPosition.y - (nodeWithPosition.height / 2)
         }
       };
     });
-    
-    setNodes(newNodes);
-    
+
+    // Apply the layout and fit the view
     if (reactFlowInstance) {
       setTimeout(() => {
-        reactFlowInstance.fitView();
+        reactFlowInstance.fitView({
+          padding: 0.2,
+          includeHiddenNodes: false,
+        });
       }, 100);
     }
-  }, [setNodes]);
+
+    return layoutedNodes;
+  }, []);
 
   return { autoLayout };
 }
