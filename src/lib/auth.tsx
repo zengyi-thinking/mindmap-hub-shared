@@ -1,3 +1,4 @@
+
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { toast } from '@/components/ui/use-toast';
 import { Shield, ShieldAlert, ShieldCheck } from 'lucide-react';
@@ -19,6 +20,19 @@ export interface User {
   createdAt: string;
   updatedAt?: string; // 最后更新时间
   syncStatus?: SyncStatus; // 同步状态
+}
+
+// 存储用户的完整信息（包含密码）
+interface UserWithPassword {
+  id: number;
+  username: string;
+  password: string;
+  email: string;
+  phone?: string; // 修改为可选
+  role: UserRole;
+  createdAt: string;
+  updatedAt: string;
+  syncStatus: SyncStatus;
 }
 
 // 用户操作日志接口
@@ -48,7 +62,7 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 // 模拟用户数据
-const USERS = [
+const USERS: UserWithPassword[] = [
   {
     id: 1,
     username: 'admin',
@@ -180,12 +194,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
     
     // 创建新用户(在实际应用中，这里应该是API请求)
-    const newUser = {
+    const newUser: UserWithPassword = {
       id: USERS.length + 1,
       username,
       password,
       email,
-      phone,
+      phone, // 可选字段
       role: 'user' as UserRole,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
