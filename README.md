@@ -53,11 +53,58 @@ npm run dev
 http://localhost:8080
 ```
 
+5. 构建项目并预览
+
+```sh
+npm run build
+npm start
+```
+
 ## 部署信息
 
 该项目已部署在 GitHub Pages 上，可通过以下链接访问：
 
 **在线体验地址**: [https://zengyi-thinking.github.io/mindmap-hub-shared/](https://zengyi-thinking.github.io/mindmap-hub-shared/)
+
+### GitHub Pages 部署步骤
+
+1. 构建项目
+
+```sh
+npm run build
+```
+
+2. 推送代码到 GitHub
+
+```sh
+git add .
+git commit -m "Update build for GitHub Pages"
+git push
+```
+
+3. GitHub Actions 会自动部署最新代码到 GitHub Pages
+   - 部署工作流配置在 `.github/workflows/deploy.yml`
+   - 构建后的文件会被部署到 `gh-pages` 分支
+
+## 常见问题解决
+
+### "npm start"脚本找不到
+
+如果遇到 "Missing script: start" 错误，请确保 package.json 中包含了 start 脚本：
+
+```json
+"scripts": {
+  "start": "vite preview --port 8080"
+}
+```
+
+### 部署后资源路径错误
+
+确保 vite.config.ts 中设置了正确的 base 路径：
+
+```ts
+base: '/mindmap-hub-shared/', // 替换为你的GitHub仓库名
+```
 
 ## 用户指南
 

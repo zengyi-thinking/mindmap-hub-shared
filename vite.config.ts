@@ -10,6 +10,15 @@ export default defineConfig(({ mode }) => ({
     host: "::",
     port: 8080,
   },
+  preview: {
+    port: 8080,
+  },
+  build: {
+    outDir: 'dist',
+    sourcemap: mode !== 'production',
+    minify: mode === 'production',
+    assetsDir: 'assets',
+  },
   plugins: [
     react(),
     mode === 'development' &&
