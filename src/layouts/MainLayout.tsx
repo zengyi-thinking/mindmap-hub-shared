@@ -1,10 +1,14 @@
+
 import React, { useEffect } from 'react';
 import { Outlet, useLocation } from 'react-router-dom';
 import Sidebar from '@/components/Sidebar';
 import { AnimatePresence, motion } from 'framer-motion';
-import { useAuth } from '@/lib/auth';
+import { useAuth, DataIsolationIcon } from '@/lib/auth';
 import { cn } from '@/lib/utils';
 import ParticleBackground from '@/components/ui/ParticleBackground';
+import { Shield, RefreshCw } from 'lucide-react';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
 const MainLayout: React.FC = () => {
   const location = useLocation();
@@ -72,20 +76,79 @@ const MainLayout: React.FC = () => {
             showAnimeCharacters={true}
           >
             <div className="container mx-auto p-4 backdrop-blur-sm bg-gradient-to-r from-primary/10 to-primary/5">
-              <motion.h2 
-                initial={{ opacity: 0, y: -10 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="text-lg font-medium"
-              >
-                {getGreeting()}, {user?.username || '用户'}
-              </motion.h2>
-              <motion.p 
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1, transition: { delay: 0.1 } }}
-                className="text-sm text-muted-foreground mt-1"
-              >
-                {getWelcomeMessage()}
-              </motion.p>
+              <div className="flex items-center justify-between">
+                <div>
+                  <motion.h2 
+                    initial={{ opacity: 0, y: -10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="text-lg font-medium flex items-center gap-2"
+                  >
+                    {getGreeting()}, {user?.username || '用户'}
+                    
+                    {/* 数据隔离状态指示器 */}
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <span className="inline-flex">
+                            <DataIsolationIcon className="h-4 w-4 text-green-500" />
+                          </span>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p>数据已隔离 - 您的个人数据受到保护</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                    
+                    {/* 同步状态指示器 */}
+                    {user?.syncStatus === 'syncing' && (
+                      <TooltipProvider>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <span className="inline-flex">
+                              <RefreshCw className="h-4 w-4 text-blue-500 animate-spin" />
+                            </span>
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            <p>数据同步中...</p>
+                          </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
+                    )}
+                  </motion.h2>
+                  <motion.p 
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1, transition: { delay: 0.1 } }}
+                    className="text-sm text-muted-foreground mt-1"
+                  >
+                    {getWelcomeMessage()}
+                  </motion.p>
+                </div>
+                
+                {/* 用户头像 */}
+                {user && (
+                  <motion.div
+                    initial={{ scale: 0.8, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    transition={{ delay: 0.2 }}
+                  >
+                    <Avatar className="h-10 w-10 border-2 border-primary/20">
+                      {user.avatar ? (
+                        <AvatarImage src={user.avatar} alt={user.username} />
+                      ) : (
+                        <AvatarFallback>{user.username?.[0]?.toUpperCase()}</AvatarFallback>
+                      )}
+                      
+                      {/* 同步状态指示器 - 头像上的小标记 */}
+                      {user.syncStatus === 'syncing' && (
+                        <div className="absolute -top-1 -right-1 h-3 w-3 bg-blue-500 rounded-full animate-pulse" />
+                      )}
+                      {user.syncStatus === 'synced' && (
+                        <div className="absolute -top-1 -right-1 h-3 w-3 bg-green-500 rounded-full" />
+                      )}
+                    </Avatar>
+                  </motion.div>
+                )}
+              </div>
             </div>
           </ParticleBackground>
           
@@ -115,6 +178,21 @@ const MainLayout: React.FC = () => {
                 <div className="text-xs text-muted-foreground/70">
                   教育资源集合与思维导图平台
                 </div>
+                
+                {/* 添加数据隔离指示器 */}
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <div className="flex items-center gap-1 text-xs text-green-500">
+                        <DataIsolationIcon className="h-3 w-3" />
+                        <span>数据隔离保护中</span>
+                      </div>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>您的数据受到严格隔离保护，只有您能看到您的个人资料</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
               </div>
             </div>
           </footer>
@@ -144,7 +222,9 @@ const getWelcomeMessage = () => {
     '思维导图让知识更有条理',
     '探索新知识的旅程从这里开始',
     '组织思维，连接知识点',
-    '今天是学习的好日子'
+    '今天是学习的好日子',
+    '您的数据受到严格隔离保护',
+    '所有更新将实时同步到您的设备'
   ];
   return messages[Math.floor(Math.random() * messages.length)];
 };
