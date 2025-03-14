@@ -1,48 +1,28 @@
 
-import React, { useState, useCallback, useEffect, useRef } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import React, { useRef, useState, useCallback, useEffect } from 'react';
+import { useNodesState, useEdgesState } from '@xyflow/react';
+import '@xyflow/react/dist/style.css';
 import { toast } from '@/components/ui/use-toast';
 import { Textarea } from '@/components/ui/textarea';
-import {
-  ReactFlow,
-  Background,
-  Controls,
-  useNodesState,
-  useEdgesState,
-  addEdge,
-  Panel,
-  BackgroundVariant,
-  NodeTypes,
-  Connection,
-  MarkerType,
-} from '@xyflow/react';
-import '@xyflow/react/dist/style.css';
-import {
-  ZoomIn,
-  ZoomOut,
-  Maximize2,
-} from 'lucide-react';
-import { Button } from '@/components/ui/button';
 import { Material } from '@/types/materials';
 import { userFilesService } from '@/lib/storage';
-import MaterialNode from '@/components/mindmap/MaterialNode';
 import { MindMapNode, MindMapEdge } from '@/types/mindmap';
 import AttachMaterialDialog from '@/components/mindmap/AttachMaterialDialog';
 import NodeIconSelector from '@/components/mindmap/NodeIconSelector';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
 
 import MindMapHeader from '@/components/mindmap/MindMapHeader';
 import MindMapTags from '@/components/mindmap/MindMapTags';
 import NodeEditDialog from '@/components/mindmap/NodeEditDialog';
+import MindMapWorkspace from '@/components/mindmap/MindMapWorkspace';
 
 import { useMindMapData } from '@/hooks/useMindMapData';
 import { useMindMapNodes } from '@/hooks/useMindMapNodes';
 import { useMindMapLayout } from '@/hooks/useMindMapLayout';
-
-const nodeTypes: NodeTypes = {
-  materialNode: MaterialNode
-};
+import { useMindMapNodeEdit } from '@/hooks/useMindMapNodeEdit';
+import { useMindMapConnections } from '@/hooks/useMindMapConnections';
 
 const MindMapEditor: React.FC = () => {
   const reactFlowWrapper = useRef<HTMLDivElement>(null);
@@ -68,25 +48,45 @@ const MindMapEditor: React.FC = () => {
   const [edges, setEdges, onEdgesChange] = useEdgesState<MindMapEdge>([]);
   const [reactFlowInstance, setReactFlowInstance] = useState<any>(null);
   
-  const [connectingNodeId, setConnectingNodeId] = useState<string | null>(null);
+  const {
+    selectedNode,
+    setSelectedNode,
+    editDialogOpen,
+    setEditDialogOpen,
+    nodeName,
+    setNodeName,
+    nodeNotes,
+    setNodeNotes,
+    nodeColor,
+    setNodeColor,
+    nodeIcon,
+    setNodeIcon,
+    nodeUrl,
+    setNodeUrl,
+    nodeIconDialogOpen,
+    setNodeIconDialogOpen,
+    attachDialogOpen,
+    setAttachDialogOpen,
+    attachedMaterials,
+    selectNodeForEdit,
+    setNodeIconAndClose,
+    handleAttachMaterials
+  } = useMindMapNodeEdit();
   
-  const [selectedNode, setSelectedNode] = useState<MindMapNode | null>(null);
-  const [editDialogOpen, setEditDialogOpen] = useState(false);
-  const [nodeName, setNodeName] = useState('');
-  const [nodeNotes, setNodeNotes] = useState('');
-  const [nodeColor, setNodeColor] = useState('#ffffff');
-  const [nodeIcon, setNodeIcon] = useState('');
-  const [nodeUrl, setNodeUrl] = useState('');
-  const [nodeIconDialogOpen, setNodeIconDialogOpen] = useState(false);
+  const {
+    connectingNodeId,
+    onConnect,
+    startConnecting,
+    createConnection
+  } = useMindMapConnections(setEdges);
   
-  const [attachDialogOpen, setAttachDialogOpen] = useState(false);
   const [materials, setMaterials] = useState<Material[]>([]);
-  const [attachedMaterials, setAttachedMaterials] = useState<Record<string, Material[]>>({});
   
-  const { addNode, deleteNode, updateNode, attachMaterials, createConnection } = useMindMapNodes(setNodes, setEdges);
+  const { addNode, deleteNode, updateNode, attachMaterials } = useMindMapNodes(setNodes, setEdges);
   const { autoLayout } = useMindMapLayout(setNodes);
   
-  useEffect(() => {
+  // Load mindmap data on initial render
+  React.useEffect(() => {
     const content = loadMindMap();
     if (content) {
       setNodes(content.nodes || []);
@@ -97,88 +97,54 @@ const MindMapEditor: React.FC = () => {
     setMaterials(allMaterials);
   }, [loadMindMap]);
   
-  const onConnect = useCallback((params: Connection) => {
-    setEdges((eds) => addEdge({
-      ...params,
-      type: 'smoothstep',
-      animated: false,
-      markerEnd: {
-        type: MarkerType.ArrowClosed,
-      },
-      style: { stroke: 'hsl(var(--border))', strokeWidth: 2 }
-    }, eds));
-    setConnectingNodeId(null);
-  }, [setEdges]);
-  
-  const onNodeClick = useCallback((event: React.MouseEvent, node: MindMapNode) => {
+  // Handle node click
+  const onNodeClick = React.useCallback((event: React.MouseEvent, node: MindMapNode) => {
     if (connectingNodeId) {
       if (connectingNodeId !== node.id) {
         createConnection(connectingNodeId, node.id);
       }
       setConnectingNodeId(null);
     } else {
-      setSelectedNode(node);
-      setNodeName(node.data.label);
-      setNodeNotes(node.data.notes || '');
-      setNodeColor(node.style?.background || '#ffffff');
-      setNodeIcon(node.data.icon || '');
-      setNodeUrl(node.data.url || '');
-      setEditDialogOpen(true);
+      selectNodeForEdit(node);
     }
-  }, [connectingNodeId, createConnection]);
+  }, [connectingNodeId, createConnection, selectNodeForEdit]);
   
-  const startConnecting = useCallback((nodeId: string) => {
-    setConnectingNodeId(nodeId);
-    setEditDialogOpen(false);
-    toast({
-      title: "连接模式",
-      description: "点击另一个节点来创建连接",
-    });
-  }, []);
-  
-  const handleAddNode = useCallback(() => {
+  // Add a new node
+  const handleAddNode = React.useCallback(() => {
     if (!reactFlowInstance) return;
     
     const newNode = addNode(reactFlowInstance, reactFlowWrapper);
     
     if (newNode) {
-      setSelectedNode(newNode);
-      setNodeName(newNode.data.label);
-      setNodeNotes('');
-      setNodeColor('#ffffff');
-      setNodeIcon('');
-      setNodeUrl('');
-      setEditDialogOpen(true);
+      selectNodeForEdit(newNode);
     }
-  }, [reactFlowInstance, addNode]);
+  }, [reactFlowInstance, addNode, selectNodeForEdit]);
   
-  const handleDeleteNode = useCallback(() => {
+  // Delete a node
+  const handleDeleteNode = React.useCallback(() => {
     if (deleteNode(selectedNode)) {
       setEditDialogOpen(false);
       setSelectedNode(null);
     }
-  }, [selectedNode, deleteNode]);
+  }, [selectedNode, deleteNode, setEditDialogOpen, setSelectedNode]);
   
-  const handleUpdateNode = useCallback(() => {
+  // Update a node
+  const handleUpdateNode = React.useCallback(() => {
     if (updateNode(selectedNode, nodeName, nodeNotes, nodeColor, nodeIcon, nodeUrl)) {
       setEditDialogOpen(false);
     }
-  }, [selectedNode, nodeName, nodeNotes, nodeColor, nodeIcon, nodeUrl, updateNode]);
+  }, [selectedNode, nodeName, nodeNotes, nodeColor, nodeIcon, nodeUrl, updateNode, setEditDialogOpen]);
   
-  const handleAttachMaterials = useCallback((selectedMaterials: Material[]) => {
+  // Attach materials to a node
+  const handleAttachMaterialsToNode = React.useCallback((selectedMaterials: Material[]) => {
     if (selectedNode) {
       attachMaterials(selectedNode, selectedMaterials);
-      
-      setAttachedMaterials({
-        ...attachedMaterials,
-        [selectedNode.id]: selectedMaterials
-      });
-      
-      setAttachDialogOpen(false);
+      handleAttachMaterials(selectedNode, selectedMaterials);
     }
-  }, [selectedNode, attachMaterials, attachedMaterials]);
+  }, [selectedNode, attachMaterials, handleAttachMaterials]);
   
-  const openAttachMaterialDialog = useCallback(() => {
+  // Open material attachment dialog
+  const openAttachMaterialDialog = React.useCallback(() => {
     if (selectedNode) {
       setAttachDialogOpen(true);
     } else {
@@ -188,20 +154,17 @@ const MindMapEditor: React.FC = () => {
         variant: "destructive"
       });
     }
-  }, [selectedNode]);
+  }, [selectedNode, setAttachDialogOpen]);
   
-  const handleSaveMindMap = useCallback(() => {
+  // Handle save mindmap
+  const handleSaveMindMap = React.useCallback(() => {
     saveMindMap(nodes, edges);
   }, [nodes, edges, saveMindMap]);
   
-  const handleAutoLayout = useCallback(() => {
+  // Handle auto layout
+  const handleAutoLayout = React.useCallback(() => {
     autoLayout(nodes, edges, reactFlowInstance);
   }, [nodes, edges, reactFlowInstance, autoLayout]);
-  
-  const setNodeIconAndClose = useCallback((icon: string) => {
-    setNodeIcon(icon);
-    setNodeIconDialogOpen(false);
-  }, []);
   
   return (
     <div className="w-full h-screen flex flex-col">
@@ -235,74 +198,16 @@ const MindMapEditor: React.FC = () => {
       </div>
       
       <div className="flex-1 w-full h-full" ref={reactFlowWrapper}>
-        <ReactFlow
+        <MindMapWorkspace
           nodes={nodes}
           edges={edges}
           onNodesChange={onNodesChange}
           onEdgesChange={onEdgesChange}
           onConnect={onConnect}
           onNodeClick={onNodeClick}
-          onNodeDoubleClick={(_, node) => {
-            if (node.data.url) {
-              window.open(node.data.url, '_blank');
-              return;
-            }
-            
-            if (node.data.materials && node.data.materials.length > 0) {
-              const { id } = useParams<{ id: string }>();
-              const navigate = useNavigate();
-              navigate(`/mindmap-materials/${id}/${node.id}`);
-            }
-          }}
-          onInit={setReactFlowInstance}
-          fitView
-          nodeTypes={nodeTypes}
-          deleteKeyCode="Delete"
-          multiSelectionKeyCode="Control"
-        >
-          <Background 
-            variant={"dots" as BackgroundVariant}
-            gap={20} 
-            size={1} 
-            color="hsl(var(--muted-foreground) / 0.3)"
-          />
-          <Controls 
-            position="bottom-right"
-            style={{
-              borderRadius: '8px',
-              backgroundColor: 'hsl(var(--background))',
-              border: '1px solid hsl(var(--border))'
-            }}
-          />
-          <Panel position="top-right">
-            <div className="flex gap-2 bg-background border border-border p-2 rounded-md shadow-sm">
-              <Button
-                variant="outline"
-                size="icon"
-                className="h-8 w-8"
-                onClick={() => reactFlowInstance?.zoomIn()}
-              >
-                <ZoomIn className="h-4 w-4" />
-              </Button>
-              <Button
-                variant="outline"
-                size="icon"
-                className="h-8 w-8"
-                onClick={() => reactFlowInstance?.zoomOut()}
-              >
-                <ZoomOut className="h-4 w-4" />
-              </Button>
-              <Button
-                variant="outline"
-                size="icon"
-                className="h-8 w-8"
-                onClick={() => reactFlowInstance?.fitView()}
-              >
-                <Maximize2 className="h-4 w-4" />
-              </Button>
-            </div>
-          </Panel>
-        </ReactFlow>
+          reactFlowInstance={reactFlowInstance}
+          setReactFlowInstance={setReactFlowInstance}
+        />
       </div>
       
       <NodeEditDialog
@@ -331,7 +236,7 @@ const MindMapEditor: React.FC = () => {
         onOpenChange={setAttachDialogOpen}
         materials={materials}
         selectedMaterials={selectedNode?.data.materials || []}
-        onConfirm={handleAttachMaterials}
+        onConfirm={handleAttachMaterialsToNode}
       />
       
       <Dialog open={nodeIconDialogOpen} onOpenChange={setNodeIconDialogOpen}>
