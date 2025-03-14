@@ -1,612 +1,207 @@
-import { SharedMindMap, MindMapComment } from "@/types/mindmap";
-import { Material } from "@/types/materials";
-// Don't import DiscussionTopic and DiscussionComment to avoid conflicts
+// src/lib/storage.ts
 
-// Define User type
-export interface User {
-  id: number;
-  username: string;
-  password: string;
-  email: string;
-  role: "user" | "admin";
-  avatar?: string; 
-  name?: string;   
-  createdAt: string;
-}
+import { v4 as uuidv4 } from 'uuid';
 
-// Define the discussion types locally to avoid import conflicts
-export interface DiscussionTopic {
-  id: number;
+// Define the type for a file object
+export interface File {
+  id: string | number;
   title: string;
-  content: string;
-  author: string;
-  authorId: number;
-  createdAt: string;
-  updatedAt?: string;
-  views: number;
-  likes: number;
+  description: string;
+  fileUrl: string;
+  fileType: string;
+  fileSize: number;
+  uploadDate: string;
   tags: string[];
+  isFavorite: boolean;
+  favoriteInfo: {
+    timestamp: string;
+    path: string[];
+    note: string;
+  } | null;
 }
 
-export interface DiscussionComment {
-  id: number;
-  topicId: number;
-  content: string;
-  author: string;
-  authorId: number;
-  createdAt: string;
-  updatedAt?: string;
-  likes: number;
-  parentId?: number;
-}
-
-// 初始化本地存储
+// Initialize local storage
 export const initializeStorage = () => {
-  if (typeof localStorage === 'undefined') {
-    console.warn('localStorage is not available in this environment');
-    return;
-  }
-
-  if (!localStorage.getItem('mindmaps')) {
-    localStorage.setItem('mindmaps', JSON.stringify([]));
-  }
-
-  if (!localStorage.getItem('sharedMindMaps')) {
-    localStorage.setItem('sharedMindMaps', JSON.stringify([]));
-  }
-
-  if (!localStorage.getItem('mindmapComments')) {
-    localStorage.setItem('mindmapComments', JSON.stringify([]));
-  }
-
-  if (!localStorage.getItem('users')) {
-    const initialAdminUser = {
-      id: 1,
-      username: 'admin',
-      password: 'password', // 实际应用中需要加密
-      email: 'admin@example.com',
-      role: 'admin',
-      createdAt: new Date().toISOString(),
-    };
-    localStorage.setItem('users', JSON.stringify([initialAdminUser]));
-  }
-
-  if (!localStorage.getItem('materials')) {
-    localStorage.setItem('materials', JSON.stringify([]));
-  }
-
-  if (!localStorage.getItem('discussionTopics')) {
-    localStorage.setItem('discussionTopics', JSON.stringify([]));
-  }
-
-  if (!localStorage.getItem('discussionComments')) {
-    localStorage.setItem('discussionComments', JSON.stringify([]));
+  if (!localStorage.getItem('userFiles')) {
+    localStorage.setItem('userFiles', JSON.stringify([]));
   }
 };
 
-// User files service
+// Add a new file to local storage
+export const addFileToStorage = (file: Omit<File, 'id' | 'uploadDate' | 'isFavorite' | 'favoriteInfo'>) => {
+  const files = JSON.parse(localStorage.getItem('userFiles') || '[]');
+  const newFile = {
+    id: uuidv4(),
+    uploadDate: new Date().toISOString(),
+    isFavorite: false,
+    favoriteInfo: null,
+    ...file,
+  };
+  files.push(newFile);
+  localStorage.setItem('userFiles', JSON.stringify(files));
+  return newFile;
+};
+
+// Get all files from local storage
+export const getFilesFromStorage = () => {
+  return JSON.parse(localStorage.getItem('userFiles') || '[]');
+};
+
+// Update a file in local storage
+export const updateFileInStorage = (id: string | number, updatedFile: Partial<File>) => {
+  const files = JSON.parse(localStorage.getItem('userFiles') || '[]');
+  const updatedFiles = files.map(file => {
+    if (file.id === id) {
+      return { ...file, ...updatedFile };
+    }
+    return file;
+  });
+  localStorage.setItem('userFiles', JSON.stringify(updatedFiles));
+  return true;
+};
+
+// Delete a file from local storage
+export const deleteFileFromStorage = (id: string | number) => {
+  const files = JSON.parse(localStorage.getItem('userFiles') || '[]');
+  const updatedFiles = files.filter(file => file.id !== id);
+  localStorage.setItem('userFiles', JSON.stringify(updatedFiles));
+  return true;
+};
+
+// Add the following methods to the userFilesService
 export const userFilesService = {
-  add: (fileData) => {
-    if (typeof localStorage === 'undefined') return null;
-    
+  addFile: addFileToStorage,
+  getFiles: getFilesFromStorage,
+  updateFile: updateFileInStorage,
+  deleteFile: deleteFileFromStorage,
+
+  // Add getRecentFiles method
+  getRecentFiles: (limit = 10) => {
     const files = JSON.parse(localStorage.getItem('userFiles') || '[]');
-    const newFile = {
-      id: Date.now(),
-      ...fileData,
-      views: 0,
-      downloads: 0,
-      approved: fileData.approved || false,
-      folderPath: fileData.folderPath || [],
-    };
-    
-    files.push(newFile);
-    localStorage.setItem('userFiles', JSON.stringify(files));
-    
-    return newFile;
-  },
-  
-  getAll: () => {
-    if (typeof localStorage === 'undefined') return [];
-    
-    return JSON.parse(localStorage.getItem('userFiles') || '[]');
-  },
-  
-  getApprovedFiles: () => {
-    if (typeof localStorage === 'undefined') return [];
-    
-    const files = JSON.parse(localStorage.getItem('userFiles') || '[]');
-    return files.filter(file => file.approved);
-  },
-  
-  getById: (id) => {
-    if (typeof localStorage === 'undefined') return null;
-    
-    const files = JSON.parse(localStorage.getItem('userFiles') || '[]');
-    return files.find(file => file.id === id) || null;
-  },
-  
-  update: (id, updateData) => {
-    if (typeof localStorage === 'undefined') return null;
-    
-    const files = JSON.parse(localStorage.getItem('userFiles') || '[]');
-    const index = files.findIndex(file => file.id === id);
-    
-    if (index === -1) return null;
-    
-    files[index] = { ...files[index], ...updateData };
-    localStorage.setItem('userFiles', JSON.stringify(files));
-    
-    return files[index];
-  },
-  
-  delete: (id) => {
-    if (typeof localStorage === 'undefined') return false;
-    
-    const files = JSON.parse(localStorage.getItem('userFiles') || '[]');
-    const index = files.findIndex(file => file.id === id);
-    
-    if (index === -1) return false;
-    
-    files.splice(index, 1);
-    localStorage.setItem('userFiles', JSON.stringify(files));
-    
-    return true;
-  },
-  
-  incrementViews: (id) => {
-    if (typeof localStorage === 'undefined') return null;
-    
-    const files = JSON.parse(localStorage.getItem('userFiles') || '[]');
-    const index = files.findIndex(file => file.id === id);
-    
-    if (index === -1) return null;
-    
-    files[index].views = (files[index].views || 0) + 1;
-    localStorage.setItem('userFiles', JSON.stringify(files));
-    
-    return files[index];
-  },
-  
-  incrementDownloads: (id) => {
-    if (typeof localStorage === 'undefined') return null;
-    
-    const files = JSON.parse(localStorage.getItem('userFiles') || '[]');
-    const index = files.findIndex(file => file.id === id);
-    
-    if (index === -1) return null;
-    
-    files[index].downloads = (files[index].downloads || 0) + 1;
-    localStorage.setItem('userFiles', JSON.stringify(files));
-    
-    return files[index];
-  },
-  
-  getRecent: (limit = 3) => {
-    if (typeof localStorage === 'undefined') return [];
-    
-    const files = JSON.parse(localStorage.getItem('userFiles') || '[]');
-    return [...files]
-      .sort((a, b) => new Date(b.uploadDate).getTime() - new Date(a.uploadDate).getTime())
+    // Sort by upload date descending
+    return files
+      .sort((a, b) => new Date(b.uploadDate || 0).getTime() - new Date(a.uploadDate || 0).getTime())
       .slice(0, limit);
   },
-  
-  getStarredFiles: () => {
-    if (typeof localStorage === 'undefined') return [];
-    
+
+  // Add getFavoriteFiles method
+  getFavoriteFiles: () => {
     const files = JSON.parse(localStorage.getItem('userFiles') || '[]');
-    return files.filter(file => file.starred);
+    return files.filter(file => file.isFavorite);
   },
-  
-  toggleStarred: (id) => {
-    if (typeof localStorage === 'undefined') return null;
-    
+
+  // Add removeFavoriteFile method
+  removeFavoriteFile: (id) => {
     const files = JSON.parse(localStorage.getItem('userFiles') || '[]');
-    const index = files.findIndex(file => file.id === id);
-    
-    if (index === -1) return null;
-    
-    files[index].starred = !files[index].starred;
-    localStorage.setItem('userFiles', JSON.stringify(files));
-    
-    return files[index];
+    const updatedFiles = files.map(file => {
+      if (file.id === id) {
+        return { ...file, isFavorite: false, favoriteInfo: null };
+      }
+      return file;
+    });
+    localStorage.setItem('userFiles', JSON.stringify(updatedFiles));
+    return true;
   },
-  
-  getByFolderPath: (folderPath) => {
-    if (typeof localStorage === 'undefined') return [];
-    
+
+  // Add toggleFavorite method
+  toggleFavorite: (id, favoriteInfo = {}) => {
     const files = JSON.parse(localStorage.getItem('userFiles') || '[]');
-    if (!folderPath || folderPath.length === 0) {
-      return files;
+    const updatedFiles = files.map(file => {
+      if (file.id === id) {
+        const isFavorite = !file.isFavorite;
+        return { 
+          ...file, 
+          isFavorite,
+          favoriteInfo: isFavorite ? {
+            timestamp: new Date().toISOString(),
+            ...favoriteInfo
+          } : null
+        };
+      }
+      return file;
+    });
+    localStorage.setItem('userFiles', JSON.stringify(updatedFiles));
+    return true;
+  }
+};
+
+// MindMap Storage
+export const initializeMindMapStorage = () => {
+  if (!localStorage.getItem('mindMaps')) {
+    localStorage.setItem('mindMaps', JSON.stringify([]));
+  }
+};
+
+// Add a new mind map to local storage
+export const addMindMapToStorage = (mindMap) => {
+  const mindMaps = JSON.parse(localStorage.getItem('mindMaps') || '[]');
+  const newMindMap = {
+    id: uuidv4(),
+    createdAt: new Date().toISOString(),
+    ...mindMap,
+  };
+  mindMaps.push(newMindMap);
+  localStorage.setItem('mindMaps', JSON.stringify(mindMaps));
+  return newMindMap;
+};
+
+// Get all mind maps from local storage
+export const getMindMapsFromStorage = () => {
+  return JSON.parse(localStorage.getItem('mindMaps') || '[]');
+};
+
+// Get a mind map by ID from local storage
+export const getMindMapByIdFromStorage = (id) => {
+  const mindMaps = JSON.parse(localStorage.getItem('mindMaps') || '[]');
+  return mindMaps.find(mindMap => mindMap.id === id);
+};
+
+// Update a mind map in local storage
+export const updateMindMapInStorage = (id, updatedMindMap) => {
+  const mindMaps = JSON.parse(localStorage.getItem('mindMaps') || '[]');
+  const updatedMindMaps = mindMaps.map(mindMap => {
+    if (mindMap.id === id) {
+      return { ...mindMap, ...updatedMindMap };
+    }
+    return mindMap;
+  });
+  localStorage.setItem('mindMaps', JSON.stringify(updatedMindMaps));
+  return true;
+};
+
+// Delete a mind map from local storage
+export const deleteMindMapFromStorage = (id) => {
+  const mindMaps = JSON.parse(localStorage.getItem('mindMaps') || '[]');
+  const updatedMindMaps = mindMaps.filter(mindMap => mindMap.id !== id);
+  localStorage.setItem('mindMaps', JSON.stringify(updatedMindMaps));
+  return true;
+};
+
+export const mindMapStorage = {
+  saveMindMap: (mindMap) => {
+    const mindMaps = JSON.parse(localStorage.getItem('mindMaps') || '[]');
+    
+    // Check if the mind map already exists
+    const existingIndex = mindMaps.findIndex(map => map.id === mindMap.id);
+    
+    if (existingIndex !== -1) {
+      // Update existing mind map
+      mindMaps[existingIndex] = mindMap;
+    } else {
+      // Add new mind map
+      mindMaps.push(mindMap);
     }
     
-    return files.filter(file => {
-      if (!file.folderPath || !Array.isArray(file.folderPath)) return false;
-      
-      if (file.folderPath.length < folderPath.length) return false;
-      
-      for (let i = 0; i < folderPath.length; i++) {
-        if (file.folderPath[i] !== folderPath[i]) {
-          return false;
-        }
-      }
-      return true;
-    });
+    localStorage.setItem('mindMaps', JSON.stringify(mindMaps));
   },
-  
-  getByDirectFolder: (folderPath) => {
-    if (typeof localStorage === 'undefined') return [];
-    
-    const files = JSON.parse(localStorage.getItem('userFiles') || '[]');
-    if (!folderPath) return files.filter(file => !file.folderPath || file.folderPath.length === 0);
-    
-    return files.filter(file => {
-      if (!file.folderPath || !Array.isArray(file.folderPath)) return false;
-      if (file.folderPath.length !== folderPath.length) return false;
-      
-      for (let i = 0; i < folderPath.length; i++) {
-        if (file.folderPath[i] !== folderPath[i]) {
-          return false;
-        }
-      }
-      return true;
-    });
+  getMindMapById: (id) => {
+    const mindMaps = JSON.parse(localStorage.getItem('mindMaps') || '[]');
+    return mindMaps.find(map => map.id === id);
   },
-  
-  getSubFolders: (folderPath) => {
-    if (typeof localStorage === 'undefined') return [];
-    
-    const files = JSON.parse(localStorage.getItem('userFiles') || '[]');
-    const subFolders = new Set();
-    
-    files.forEach(file => {
-      if (!file.folderPath || !Array.isArray(file.folderPath)) return;
-      
-      let isInFolder = true;
-      for (let i = 0; folderPath && i < folderPath.length; i++) {
-        if (file.folderPath[i] !== folderPath[i]) {
-          isInFolder = false;
-          break;
-        }
-      }
-      
-      if (isInFolder && file.folderPath.length > (folderPath ? folderPath.length : 0)) {
-        const nextFolderLevel = file.folderPath[folderPath ? folderPath.length : 0];
-        subFolders.add(nextFolderLevel);
-      }
-    });
-    
-    return Array.from(subFolders);
-  },
-  
-  // Add new methods for favorites
-  getRecentFiles: (limit = 5) => {
-    if (typeof localStorage === 'undefined') return [];
-    
-    const files = JSON.parse(localStorage.getItem('userFiles') || '[]');
-    return [...files]
-      .sort((a, b) => new Date(b.uploadTime).getTime() - new Date(a.uploadTime).getTime())
-      .slice(0, limit);
-  },
-  
-  getFavoriteFiles: () => {
-    if (typeof localStorage === 'undefined') return [];
-    
-    const files = JSON.parse(localStorage.getItem('userFiles') || '[]');
-    return files.filter(file => file.favoriteInfo);
-  },
-  
-  addFavoriteFile: (id, favoriteInfo) => {
-    if (typeof localStorage === 'undefined') return null;
-    
-    const files = JSON.parse(localStorage.getItem('userFiles') || '[]');
-    const index = files.findIndex(file => file.id === id);
-    
-    if (index === -1) return null;
-    
-    files[index].favoriteInfo = {
-      timestamp: new Date().toISOString(),
-      ...favoriteInfo
-    };
-    
-    localStorage.setItem('userFiles', JSON.stringify(files));
-    return files[index];
-  },
-  
-  removeFavoriteFile: (id) => {
-    if (typeof localStorage === 'undefined') return null;
-    
-    const files = JSON.parse(localStorage.getItem('userFiles') || '[]');
-    const index = files.findIndex(file => file.id === id);
-    
-    if (index === -1) return null;
-    
-    delete files[index].favoriteInfo;
-    localStorage.setItem('userFiles', JSON.stringify(files));
-    return files[index];
-  }
-};
-
-// Materials service
-export const materialsService = {
-  add: (materialData) => {
-    if (typeof localStorage === 'undefined') return null;
-    
-    const materials = JSON.parse(localStorage.getItem('materials') || '[]');
-    const newMaterial = {
-      id: Date.now(),
-      ...materialData,
-      downloads: 0,
-      likes: 0,
-      favorites: 0,
-    };
-    
-    materials.push(newMaterial);
-    localStorage.setItem('materials', JSON.stringify(materials));
-    
-    return newMaterial;
-  },
-  
-  getAll: () => {
-    if (typeof localStorage === 'undefined') return [];
-    
-    return JSON.parse(localStorage.getItem('materials') || '[]');
-  },
-  
-  getById: (id) => {
-    if (typeof localStorage === 'undefined') return null;
-    
-    const materials = JSON.parse(localStorage.getItem('materials') || '[]');
-    return materials.find(material => material.id === id) || null;
-  },
-  
-  update: (id, updateData) => {
-    if (typeof localStorage === 'undefined') return null;
-    
-    const materials = JSON.parse(localStorage.getItem('materials') || '[]');
-    const index = materials.findIndex(material => material.id === id);
-    
-    if (index === -1) return null;
-    
-    materials[index] = { ...materials[index], ...updateData };
-    localStorage.setItem('materials', JSON.stringify(materials));
-    
-    return materials[index];
-  },
-  
-  delete: (id) => {
-    if (typeof localStorage === 'undefined') return false;
-    
-    const materials = JSON.parse(localStorage.getItem('materials') || '[]');
-    const index = materials.findIndex(material => material.id === id);
-    
-    if (index === -1) return false;
-    
-    materials.splice(index, 1);
-    localStorage.setItem('materials', JSON.stringify(materials));
-    
-    return true;
-  },
-};
-
-// Topics service
-export const topicsService = {
-  add: (topicData) => {
-    if (typeof localStorage === 'undefined') return null;
-    
-    const topics = JSON.parse(localStorage.getItem('discussionTopics') || '[]');
-    const newTopic = {
-      id: Date.now(),
-      ...topicData,
-      views: topicData.views || 0,
-      likes: topicData.likes || 0,
-    };
-    
-    topics.push(newTopic);
-    localStorage.setItem('discussionTopics', JSON.stringify(topics));
-    
-    return newTopic;
-  },
-  
-  getAll: () => {
-    if (typeof localStorage === 'undefined') return [];
-    
-    return JSON.parse(localStorage.getItem('discussionTopics') || '[]');
-  },
-  
-  getById: (id) => {
-    if (typeof localStorage === 'undefined') return null;
-    
-    const topics = JSON.parse(localStorage.getItem('discussionTopics') || '[]');
-    return topics.find(topic => topic.id === id) || null;
-  },
-  
-  update: (id, updateData) => {
-    if (typeof localStorage === 'undefined') return null;
-    
-    const topics = JSON.parse(localStorage.getItem('discussionTopics') || '[]');
-    const index = topics.findIndex(topic => topic.id === id);
-    
-    if (index === -1) return null;
-    
-    topics[index] = { ...topics[index], ...updateData };
-    localStorage.setItem('discussionTopics', JSON.stringify(topics));
-    
-    return topics[index];
-  },
-  
-  delete: (id) => {
-    if (typeof localStorage === 'undefined') return false;
-    
-    const topics = JSON.parse(localStorage.getItem('discussionTopics') || '[]');
-    const index = topics.findIndex(topic => topic.id === id);
-    
-    if (index === -1) return false;
-    
-    topics.splice(index, 1);
-    localStorage.setItem('discussionTopics', JSON.stringify(topics));
-    
-    return true;
-  },
-};
-
-// Comments service
-export const commentsService = {
-  add: (commentData) => {
-    if (typeof localStorage === 'undefined') return null;
-    
-    const comments = JSON.parse(localStorage.getItem('discussionComments') || '[]');
-    const newComment = {
-      id: Date.now(),
-      ...commentData,
-      likes: commentData.likes || 0,
-      liked: false,
-      createdAt: commentData.createdAt || new Date().toISOString(),
-      replies: commentData.replies || [], // 支持回复
-    };
-    
-    comments.push(newComment);
-    localStorage.setItem('discussionComments', JSON.stringify(comments));
-    
-    return newComment;
-  },
-  
-  getAll: () => {
-    if (typeof localStorage === 'undefined') return [];
-    
-    return JSON.parse(localStorage.getItem('discussionComments') || '[]');
-  },
-  
-  getByTopicId: (topicId) => {
-    if (typeof localStorage === 'undefined') return [];
-    
-    const comments = JSON.parse(localStorage.getItem('discussionComments') || '[]');
-    return comments.filter(comment => comment.topicId === topicId);
-  },
-
-  getByMaterialId: (materialId) => {
-    if (typeof localStorage === 'undefined') return [];
-    
-    const comments = JSON.parse(localStorage.getItem('discussionComments') || '[]');
-    return comments.filter(comment => comment.materialId === materialId);
-  },
-
-  getNestedCommentsByMaterialId: (materialId) => {
-    if (typeof localStorage === 'undefined') return [];
-    
-    const allComments = JSON.parse(localStorage.getItem('discussionComments') || '[]');
-    const materialComments = allComments.filter(comment => comment.materialId === materialId);
-    
-    // 获取顶级评论
-    const topLevelComments = materialComments.filter(comment => !comment.parentId);
-    
-    // 构建评论树
-    const buildCommentTree = (comments) => {
-      return comments.map(comment => {
-        // 获取当前评论的所有回复
-        const replies = materialComments
-          .filter(reply => reply.parentId === comment.id)
-          .sort((a, b) => new Date(a.createdAt || a.timestamp).getTime() - new Date(b.createdAt || b.timestamp).getTime());
-          
-        // 递归构建回复的回复
-        return {
-          ...comment,
-          replies: replies.length > 0 ? buildCommentTree(replies) : []
-        };
-      });
-    };
-    
-    // 按创建时间排序顶级评论
-    const sortedTopLevelComments = topLevelComments.sort(
-      (a, b) => new Date(b.createdAt || b.timestamp).getTime() - new Date(a.createdAt || a.timestamp).getTime()
-    );
-    
-    return buildCommentTree(sortedTopLevelComments);
-  },
-  
-  update: (id, updateData) => {
-    if (typeof localStorage === 'undefined') return null;
-    
-    const comments = JSON.parse(localStorage.getItem('discussionComments') || '[]');
-    const index = comments.findIndex(comment => comment.id === id);
-    
-    if (index === -1) return null;
-    
-    comments[index] = { ...comments[index], ...updateData };
-    localStorage.setItem('discussionComments', JSON.stringify(comments));
-    
-    return comments[index];
-  },
-  
-  delete: (id) => {
-    if (typeof localStorage === 'undefined') return false;
-    
-    const comments = JSON.parse(localStorage.getItem('discussionComments') || '[]');
-    const index = comments.findIndex(comment => comment.id === id);
-    
-    if (index === -1) return false;
-    
-    comments.splice(index, 1);
-    localStorage.setItem('discussionComments', JSON.stringify(comments));
-    
-    return true;
-  },
-};
-
-// Mind Maps service
-export const mindMapsService = {
-  add: (mindMapData) => {
-    if (typeof localStorage === 'undefined') return null;
-    
-    const mindMaps = JSON.parse(localStorage.getItem('mindmaps') || '[]');
-    const newMindMap = {
-      id: mindMapData.id || Date.now(),
-      ...mindMapData,
-    };
-    
-    mindMaps.push(newMindMap);
-    localStorage.setItem('mindmaps', JSON.stringify(mindMaps));
-    
-    return newMindMap;
-  },
-  
-  getAll: () => {
-    if (typeof localStorage === 'undefined') return [];
-    
-    return JSON.parse(localStorage.getItem('mindmaps') || '[]');
-  },
-  
-  getById: (id) => {
-    if (typeof localStorage === 'undefined') return null;
-    
-    const mindMaps = JSON.parse(localStorage.getItem('mindmaps') || '[]');
-    return mindMaps.find(map => map.id === id) || null;
-  },
-  
-  update: (id, updateData) => {
-    if (typeof localStorage === 'undefined') return null;
-    
-    const mindMaps = JSON.parse(localStorage.getItem('mindmaps') || '[]');
-    const index = mindMaps.findIndex(map => map.id === id);
-    
-    if (index === -1) return null;
-    
-    mindMaps[index] = { ...mindMaps[index], ...updateData };
-    localStorage.setItem('mindmaps', JSON.stringify(mindMaps));
-    
-    return mindMaps[index];
-  },
-  
-  delete: (id) => {
-    if (typeof localStorage === 'undefined') return false;
-    
-    const mindMaps = JSON.parse(localStorage.getItem('mindmaps') || '[]');
-    const index = mindMaps.findIndex(map => map.id === id);
-    
-    if (index === -1) return false;
-    
-    mindMaps.splice(index, 1);
-    localStorage.setItem('mindmaps', JSON.stringify(mindMaps));
-    
+  deleteMindMap: (id) => {
+    const mindMaps = JSON.parse(localStorage.getItem('mindMaps') || '[]');
+    const updatedMindMaps = mindMaps.filter(mindMap => mindMap.id !== id);
+    localStorage.setItem('mindMaps', JSON.stringify(updatedMindMaps));
     return true;
   },
 };

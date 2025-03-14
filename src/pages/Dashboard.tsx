@@ -49,6 +49,7 @@ const Dashboard = () => {
     });
   };
 
+  // Define proper motion variants
   const container = {
     hidden: { opacity: 0 },
     show: {
