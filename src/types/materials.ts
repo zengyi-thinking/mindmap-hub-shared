@@ -1,3 +1,4 @@
+
 export interface Material {
   id: number | string;
   title: string;
@@ -18,6 +19,12 @@ export interface Material {
   userId?: number | string;
   status?: string;
   folderPath?: string[];
+  file?: {
+    name: string;
+    type: string;
+    size: number;
+    dataUrl?: string;
+  };
 }
 
 export interface Comment {
