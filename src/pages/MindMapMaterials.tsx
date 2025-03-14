@@ -100,6 +100,19 @@ const MindMapMaterials: React.FC = () => {
                     ))}
                   </div>
                 )}
+                {material.favoriteInfo && (
+                  <div className="mt-2 text-xs text-muted-foreground">
+                    <div className="flex items-center gap-1">
+                      <span className="font-medium">收藏路径:</span> 
+                      {material.favoriteInfo.path.join(' > ')}
+                    </div>
+                    {material.favoriteInfo.note && (
+                      <div className="mt-1">
+                        <span className="font-medium">收藏备注:</span> {material.favoriteInfo.note}
+                      </div>
+                    )}
+                  </div>
+                )}
               </CardContent>
               <CardFooter className="p-4 pt-2 flex justify-between">
                 <div className="text-sm text-muted-foreground">

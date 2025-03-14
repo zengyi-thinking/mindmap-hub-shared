@@ -2,11 +2,12 @@
 import { useCallback } from 'react';
 import { MindMapNode, MindMapEdge } from '@/types/mindmap';
 import { MarkerType } from '@xyflow/react';
+import { Material } from '@/types/materials';
 
 export function useMindMapNodes(setNodes: any, setEdges: any) {
   // Add a new node
   const addNode = useCallback((reactFlowInstance: any, reactFlowWrapper: React.RefObject<HTMLDivElement>) => {
-    if (!reactFlowInstance) return;
+    if (!reactFlowInstance) return null;
     
     const id = `node_${Date.now()}`;
     const position = reactFlowInstance.project({
@@ -87,7 +88,7 @@ export function useMindMapNodes(setNodes: any, setEdges: any) {
   }, [setNodes]);
 
   // Attach materials to a node
-  const attachMaterials = useCallback((selectedNode: MindMapNode | null, selectedMaterials: any[]) => {
+  const attachMaterials = useCallback((selectedNode: MindMapNode | null, selectedMaterials: Material[]) => {
     if (selectedNode) {
       setNodes((nds: MindMapNode[]) => 
         nds.map(node => {
@@ -109,7 +110,7 @@ export function useMindMapNodes(setNodes: any, setEdges: any) {
     return false;
   }, [setNodes]);
 
-  // Start connecting nodes
+  // Create a connection between nodes
   const createConnection = useCallback((source: string, target: string) => {
     if (source && target && source !== target) {
       const newEdge = {

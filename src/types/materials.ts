@@ -25,6 +25,12 @@ export interface Material {
     size: number;
     dataUrl?: string;
   };
+  // Add favorite information
+  favoriteInfo?: {
+    timestamp: string;
+    path: string[];
+    note?: string;
+  };
 }
 
 export interface Comment {
