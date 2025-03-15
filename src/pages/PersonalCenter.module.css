@@ -1,4 +1,3 @@
-
 /* 个人中心界面美化样式 */
 
 /* 一、色彩系统优化 */
@@ -30,9 +29,6 @@
   background: rgba(255, 255, 255, 0.7);
   border: 1px solid rgba(255, 255, 255, 0.2);
   box-shadow: 0 8px 32px rgba(31, 38, 135, 0.1);
-  border-radius: 16px;
-  padding: 1.5rem;
-  margin-bottom: 1.5rem;
 }
 
 .dark .glassCard {
@@ -47,10 +43,10 @@
     rgba(33, 150, 243, 0.1) 0%,
     rgba(156, 39, 176, 0.1) 100%
   );
-  border-radius: 16px;
-  padding: 1.75rem;
-  margin-bottom: 2.5rem;
-  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 12px;
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+  border: 1px solid rgba(255, 255, 255, 0.1);
   position: relative;
   overflow: hidden;
 }
@@ -75,21 +71,21 @@
 .userStats {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 1.25rem;
-  margin-top: 1.75rem;
+  gap: 1rem;
+  margin-top: 1.5rem;
 }
 
 .statCard {
   background: rgba(255, 255, 255, 0.1);
-  border-radius: 12px;
-  padding: 1.25rem;
+  border-radius: 8px;
+  padding: 1rem;
   text-align: center;
   transition: all 0.3s ease;
 }
 
 .statCard:hover {
   transform: translateY(-5px);
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
 }
 
 /* 二、交互体验优化 */
@@ -97,35 +93,33 @@
 /* 1. 标签页切换效果 */
 .tabsContainer {
   position: relative;
-  margin-bottom: 2.5rem;
+  margin-bottom: 2rem;
 }
 
 .tabsList {
-  background: rgba(255, 255, 255, 0.15);
-  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
   padding: 0.5rem;
   display: flex;
   position: relative;
   z-index: 1;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
 }
 
 .tabTrigger {
   position: relative;
   z-index: 2;
   transition: all 0.3s ease;
-  border-radius: 12px;
+  border-radius: 8px;
   padding: 0.75rem 1.5rem;
-  font-weight: 500;
 }
 
 .tabTrigger:hover {
-  background: rgba(255, 255, 255, 0.15);
+  background: rgba(255, 255, 255, 0.1);
 }
 
 .activeTab {
-  background: rgba(33, 150, 243, 0.25);
-  box-shadow: 0 4px 15px rgba(33, 150, 243, 0.15);
+  background: rgba(33, 150, 243, 0.2);
+  box-shadow: 0 2px 10px rgba(33, 150, 243, 0.1);
 }
 
 /* 2. 内容区域动画 */
@@ -147,12 +141,12 @@
 /* 3. 活动日志时间线样式 */
 .timeline {
   position: relative;
-  padding-left: 2.5rem;
+  padding-left: 2rem;
 }
 
 .timelineItem {
   position: relative;
-  padding-bottom: 2rem;
+  padding-bottom: 1.5rem;
 }
 
 .timelineItem::before {
@@ -189,18 +183,17 @@
     rgba(76, 175, 80, 0.1) 0%,
     rgba(33, 150, 243, 0.05) 100%
   );
-  border-radius: 16px;
+  border-radius: 12px;
   border: 1px solid rgba(76, 175, 80, 0.2);
   overflow: hidden;
-  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.05);
 }
 
 .securityHeader {
   background: rgba(76, 175, 80, 0.15);
-  padding: 1.25rem 1.75rem;
+  padding: 1rem 1.5rem;
   display: flex;
   align-items: center;
-  gap: 1.25rem;
+  gap: 1rem;
 }
 
 .securityIcon {
@@ -214,24 +207,23 @@
 
 .securityGrid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-  gap: 1.25rem;
-  padding: 1.75rem;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 1rem;
+  padding: 1.5rem;
 }
 
 .securityItem {
-  background: rgba(255, 255, 255, 0.6);
-  border-radius: 12px;
-  padding: 1.25rem;
+  background: rgba(255, 255, 255, 0.5);
+  border-radius: 8px;
+  padding: 1rem;
   transition: all 0.3s ease;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.03);
 }
 
 .dark .securityItem {
-  background: rgba(30, 30, 40, 0.6);
+  background: rgba(30, 30, 40, 0.5);
 }
 
 .securityItem:hover {
   transform: translateY(-3px);
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
 }
