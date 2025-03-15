@@ -12,20 +12,21 @@ const PersonalCenter = () => {
   const { user } = useAuth();
 
   return (
-    <div className={`space-y-6 ${styles.pageBackground}`}>
+    <div className={`p-6 md:p-8 space-y-8 ${styles.pageBackground}`}>
       <div className={styles.gradientOverlay}></div>
       <motion.div
         initial={{ opacity: 0, y: -10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.3 }}
+        className="max-w-6xl mx-auto"
       >
-        <h1 className="text-3xl font-bold tracking-tight">个人中心</h1>
-        <p className="text-muted-foreground mt-1">
+        <h1 className="text-3xl font-bold tracking-tight mb-2">个人中心</h1>
+        <p className="text-muted-foreground">
           管理您的个人资料和账户设置
         </p>
       </motion.div>
 
-      <Tabs defaultValue="profile" className={`w-full ${styles.tabsContainer}`}>
+      <Tabs defaultValue="profile" className={`w-full ${styles.tabsContainer} max-w-6xl mx-auto`}>
         <TabsList className={`grid grid-cols-3 mb-8 ${styles.tabsList}`}>
           <TabsTrigger value="profile" className={`flex items-center gap-1.5 ${styles.tabTrigger} data-[state=active]:${styles.activeTab}`}>
             <User className="h-4 w-4" />
@@ -41,15 +42,15 @@ const PersonalCenter = () => {
           </TabsTrigger>
         </TabsList>
 
-        <TabsContent value="profile" className={styles.contentFadeIn}>
+        <TabsContent value="profile" className={`${styles.contentFadeIn} p-1`}>
           <UserProfileForm />
         </TabsContent>
 
-        <TabsContent value="activity" className={styles.contentFadeIn}>
+        <TabsContent value="activity" className={`${styles.contentFadeIn} p-1`}>
           <UserActivityLogs />
         </TabsContent>
 
-        <TabsContent value="security" className={styles.contentFadeIn}>
+        <TabsContent value="security" className={`${styles.contentFadeIn} p-1`}>
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}

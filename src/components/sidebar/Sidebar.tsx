@@ -23,7 +23,7 @@ const Sidebar: React.FC = () => {
       animate={expanded ? "expanded" : "collapsed"}
       transition={{ duration: 0.3, ease: "easeInOut" }}
       className={cn(
-        "flex flex-col h-screen bg-card border-r shadow-sm z-20 overflow-y-auto py-6 relative",
+        "flex flex-col h-screen bg-card border-r shadow-sm sticky top-0 left-0 z-30 overflow-y-auto py-6",
         expanded ? "w-64" : "w-16"
       )}
     >

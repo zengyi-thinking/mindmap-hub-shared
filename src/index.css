@@ -1,3 +1,4 @@
+
 @import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap");
 
 @tailwind base;
@@ -44,6 +45,12 @@
     --sidebar-accent-foreground: 222.2 47.4% 11.2%;
     --sidebar-border: 210 40% 90%;
     --sidebar-ring: 210 100% 50%;
+    
+    /* Spacing variables */
+    --page-padding-x: 1.5rem;
+    --page-padding-y: 1.5rem;
+    --card-gap: 1.25rem;
+    --section-gap: 2rem;
   }
 
   .dark {
@@ -94,6 +101,33 @@
   body {
     @apply bg-background text-foreground;
     font-family: "Inter", sans-serif;
+    overflow-x: hidden;
+  }
+  
+  /* Improve spacing for all pages */
+  main {
+    min-height: 100vh;
+    padding-left: max(1rem, calc(var(--page-padding-x)));
+    padding-right: max(1rem, calc(var(--page-padding-x)));
+  }
+  
+  /* Better card spacing */
+  .card, 
+  .glass-card,
+  [class*="glassCard"] {
+    margin-bottom: var(--card-gap);
+  }
+  
+  /* Consistent section spacing */
+  section, 
+  .section {
+    margin-bottom: var(--section-gap);
+  }
+  
+  /* Form group spacing */
+  .form-group:not(:last-child),
+  .form-row:not(:last-child) {
+    margin-bottom: 1.25rem;
   }
 }
 
@@ -141,6 +175,8 @@
   border: 1px solid rgba(255, 255, 255, 0.2);
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.05);
   transition: all 0.3s ease;
+  border-radius: 16px;
+  padding: 1.5rem;
 }
 
 .glass-card:hover {
@@ -198,6 +234,55 @@
 
 .dark .subtle-hover:hover {
   box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
+}
+
+/* Layout utilities */
+.page-container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: var(--page-padding-y) var(--page-padding-x);
+}
+
+.content-container {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: var(--card-gap);
+}
+
+/* Page sections spacing */
+.page-section {
+  margin-bottom: 2.5rem;
+}
+
+.page-section-title {
+  margin-bottom: 1.5rem;
+  font-weight: 600;
+}
+
+/* Consistent card style */
+.ui-card {
+  background: white;
+  border-radius: var(--radius);
+  border: 1px solid hsl(var(--border));
+  padding: 1.5rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.dark .ui-card {
+  background: hsl(var(--card));
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+/* Grid layout utility */
+.auto-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(var(--auto-grid-min, 280px), 1fr));
+  grid-gap: var(--auto-grid-gap, 1.5rem);
 }
 
 /* React Flow Custom Styling */
