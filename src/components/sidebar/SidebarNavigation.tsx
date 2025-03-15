@@ -1,105 +1,80 @@
-
 import React from 'react';
-import { cn } from '@/lib/utils';
-import { 
-  Home, 
-  BrainCircuit, 
-  Search, 
-  BookOpen, 
-  FileUp, 
-  MessageSquare, 
-  User, 
-  LayoutGrid, 
-  Users 
-} from 'lucide-react';
-import { useSidebar } from '@/contexts/SidebarContext';
+import { Layout, Upload, FolderArchive, Search, Globe, Brain, Edit, MessageSquare, Users, UserCircle, FileText } from 'lucide-react';
+import { NavigationItem } from '@/components/sidebar/NavigationItem';
+import { SidebarGroup } from '@/components/sidebar/SidebarGroup';
 import { useAuth } from '@/lib/auth';
-import SidebarNavItem from './SidebarNavItem';
 
 const SidebarNavigation: React.FC = () => {
-  const { expanded } = useSidebar();
-  const { user } = useAuth();
-
-  // 侧边栏导航项
-  const navItems = [
-    {
-      title: '仪表盘',
-      icon: <Home size="1.2rem" />,
-      path: '/dashboard',
-      roles: ['user', 'admin']
-    },
-    {
-      title: '思维导图管理',
-      icon: <BrainCircuit size="1.2rem" />,
-      path: '/mindmaps',
-      roles: ['user', 'admin']
-    },
-    {
-      title: '资料搜索',
-      icon: <Search size="1.2rem" />,
-      path: '/search',
-      roles: ['user', 'admin']
-    },
-    {
-      title: '全平台资料导图',
-      icon: <BookOpen size="1.2rem" />,
-      path: '/global-material-map',
-      roles: ['user', 'admin']
-    },
-    {
-      title: '上传资料',
-      icon: <FileUp size="1.2rem" />,
-      path: '/upload',
-      roles: ['user', 'admin']
-    },
-    {
-      title: '讨论中心',
-      icon: <MessageSquare size="1.2rem" />,
-      path: '/discussion',
-      roles: ['user', 'admin']
-    },
-    {
-      title: '个人中心',
-      icon: <User size="1.2rem" />,
-      path: '/profile',
-      roles: ['user', 'admin']
-    },
-    {
-      title: '管理资料',
-      icon: <LayoutGrid size="1.2rem" />,
-      path: '/admin/materials',
-      roles: ['admin']
-    },
-    {
-      title: '用户管理',
-      icon: <Users size="1.2rem" />,
-      path: '/admin/users',
-      roles: ['admin']
-    }
-  ];
-
-  const filteredNavItems = user
-    ? navItems.filter(item => item.roles.includes(user.role))
-    : navItems.filter(item => item.roles.includes('user'));
+  const { isAdmin } = useAuth();
 
   return (
-    <div className="flex-1 px-3">
-      <div className={cn(
-        "text-xs font-semibold mb-2 text-muted-foreground",
-        !expanded && "text-center"
-      )}>
-        {expanded ? '导航菜单' : '菜单'}
-      </div>
-      <nav className="space-y-0.5">
-        {filteredNavItems.map((item) => (
-          <SidebarNavItem
-            key={item.path}
-            title={item.title}
-            icon={item.icon}
-            path={item.path}
+    <div className="space-y-1">
+      <NavigationItem href="/dashboard" icon={<Layout />} label="仪表盘" />
+      
+      <SidebarGroup title="资料管理">
+        <NavigationItem 
+          href="/material-upload" 
+          icon={<Upload />} 
+          label="资料上传" 
+        />
+        <NavigationItem 
+          href="/material-management" 
+          icon={<FolderArchive />} 
+          label="我的资料" 
+        />
+        <NavigationItem 
+          href="/material-search" 
+          icon={<Search />} 
+          label="资料搜索" 
+        />
+        <NavigationItem 
+          href="/file-map" 
+          icon={<FileText />} 
+          label="文件地图" 
+        />
+        <NavigationItem 
+          href="/global-material-map" 
+          icon={<Globe />} 
+          label="全局资料图谱" 
+        />
+      </SidebarGroup>
+      
+      <SidebarGroup title="思维导图">
+        <NavigationItem 
+          href="/my-mindmaps" 
+          icon={<Brain />} 
+          label="我的思维导图" 
+        />
+        <NavigationItem 
+          href="/mindmap-editor/new" 
+          icon={<Edit />} 
+          label="创建思维导图" 
+        />
+      </SidebarGroup>
+      
+      <SidebarGroup title="社区">
+        <NavigationItem 
+          href="/discussion-center" 
+          icon={<MessageSquare />} 
+          label="讨论中心" 
+        />
+      </SidebarGroup>
+      
+      {isAdmin && (
+        <SidebarGroup title="管理员">
+          <NavigationItem 
+            href="/user-management" 
+            icon={<Users />} 
+            label="用户管理" 
           />
-        ))}
-      </nav>
+        </SidebarGroup>
+      )}
+      
+      <NavigationItem 
+        href="/personal-center" 
+        icon={<UserCircle />} 
+        label="个人中心" 
+      />
     </div>
   );
 };

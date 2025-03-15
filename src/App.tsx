@@ -1,97 +1,191 @@
-import { Toaster } from "@/components/ui/toaster";
-import { Toaster as Sonner } from "@/components/ui/sonner";
-import { TooltipProvider } from "@/components/ui/tooltip";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
-import { AuthProvider } from "./lib/auth";
-import { initializeStorage } from "./lib/storage";
-import { initializeMindMapStorage } from "./lib/mindmapStorage";
-import { useEffect } from "react";
-import ProtectedRoute from "./components/ProtectedRoute";
-import MainLayout from "./layouts/MainLayout";
-import Index from "./pages/Index";
-import Dashboard from "./pages/Dashboard";
-import MyMindMaps from "./pages/MyMindMaps";
-import MaterialUpload from "./pages/MaterialUpload";
-import MaterialSearch from "./pages/MaterialSearch";
-import MaterialDetail from "./pages/MaterialDetail";
-import DiscussionCenter from "./pages/DiscussionCenter";
-import PersonalCenter from "./pages/PersonalCenter";
-import MaterialManagement from "./pages/MaterialManagement";
-import UserManagement from "./pages/UserManagement";
-import NotFound from "./pages/NotFound";
-import Login from "./pages/Login";
-import Register from "./pages/Register";
-import MindMapEditor from './pages/MindMapEditor';
-import MindMapView from './pages/MindMapView';
-import MindMapMaterials from './pages/MindMapMaterials';
-import GlobalMaterialMap from './pages/GlobalMaterialMap';
+import React, { Suspense } from 'react';
+import { Routes, Route } from 'react-router-dom';
+import { QueryClient, QueryClientProvider } from 'react-query';
+import { ThemeProvider } from '@/components/ui/theme-provider';
+import { AuthProvider } from '@/lib/auth';
+import { ProtectedRoute } from '@/components/ProtectedRoute';
+import { PageTransition } from '@/components/PageTransition';
+
+import Index from '@/pages/Index';
+import Login from '@/pages/Login';
+import Register from '@/pages/Register';
+import Dashboard from '@/pages/Dashboard';
+import MaterialUpload from '@/pages/MaterialUpload';
+import MaterialManagement from '@/pages/MaterialManagement';
+import MaterialDetail from '@/pages/MaterialDetail';
+import MaterialSearch from '@/pages/MaterialSearch';
+import GlobalMaterialMap from '@/pages/GlobalMaterialMap';
+import MyMindMaps from '@/pages/MyMindMaps';
+import MindMapEditor from '@/pages/MindMapEditor';
+import MindMapMaterials from '@/pages/MindMapMaterials';
+import MindMapView from '@/pages/MindMapView';
+import PersonalCenter from '@/pages/PersonalCenter';
+import UserManagement from '@/pages/UserManagement';
+import DiscussionCenter from '@/pages/DiscussionCenter';
+import NotFound from '@/pages/NotFound';
+import MainLayout from '@/layouts/MainLayout';
+import FileMapSearch from '@/pages/FileMapSearch';
 
 const queryClient = new QueryClient();
 
-// 为GitHub Pages部署添加baseName
-const baseName = import.meta.env.BASE_URL;
-
 function App() {
-  useEffect(() => {
-    // 初始化本地存储
-    initializeStorage();
-    // 初始化思维导图存储
-    initializeMindMapStorage();
-  }, []);
-
   return (
     <QueryClientProvider client={queryClient}>
-      <TooltipProvider>
-        <AuthProvider>
-          <Toaster />
-          <Sonner />
-          <BrowserRouter basename={baseName}>
+      <AuthProvider>
+        <ThemeProvider defaultTheme="light" storageKey="ui-theme">
+          <Suspense fallback={<div>Loading...</div>}>
             <Routes>
-              <Route path="/" element={<Index />} />
-              <Route path="/login" element={<Login />} />
-              <Route path="/register" element={<Register />} />
-              
-              {/* 受保护的路由 - 需要用户登录 */}
-              <Route element={<ProtectedRoute />}>
-                <Route element={<MainLayout />}>
-                  <Route path="/dashboard" element={<Dashboard />} />
-                  <Route path="/mindmaps" element={<MyMindMaps />} />
-                  <Route path="/upload" element={<MaterialUpload />} />
-                  <Route path="/search" element={<MaterialSearch />} />
-                  <Route path="/material/:id" element={<MaterialDetail />} />
-                  <Route path="/discussion" element={<DiscussionCenter />} />
-                  <Route path="/profile" element={<PersonalCenter />} />
-                  <Route path="/global-material-map" element={<GlobalMaterialMap />} />
-                </Route>
+              <Route path="/" element={<MainLayout />}>
+                <Route index element={<Index />} />
+                <Route path="login" element={<Login />} />
+                <Route path="register" element={<Register />} />
+                
+                <Route
+                  path="dashboard"
+                  element={
+                    <ProtectedRoute>
+                      <PageTransition>
+                        <Dashboard />
+                      </PageTransition>
+                    </ProtectedRoute>
+                  }
+                />
+                
+                <Route 
+                  path="material-upload" 
+                  element={
+                    <ProtectedRoute>
+                      <PageTransition>
+                        <MaterialUpload />
+                      </PageTransition>
+                    </ProtectedRoute>
+                  } 
+                />
+                
+                <Route 
+                  path="material-management" 
+                  element={
+                    <ProtectedRoute>
+                      <PageTransition>
+                        <MaterialManagement />
+                      </PageTransition>
+                    </ProtectedRoute>
+                  } 
+                />
+                
+                <Route 
+                  path="material-detail/:id" 
+                  element={
+                    <PageTransition>
+                      <MaterialDetail />
+                    </PageTransition>
+                  } 
+                />
+                
+                <Route 
+                  path="material-search" 
+                  element={
+                    <PageTransition>
+                      <MaterialSearch />
+                    </PageTransition>
+                  } 
+                />
+                
+                <Route 
+                  path="file-map" 
+                  element={
+                    <PageTransition>
+                      <FileMapSearch />
+                    </PageTransition>
+                  } 
+                />
+                
+                <Route 
+                  path="global-material-map" 
+                  element={
+                    <PageTransition>
+                      <GlobalMaterialMap />
+                    </PageTransition>
+                  } 
+                />
+                
+                <Route 
+                  path="my-mindmaps" 
+                  element={
+                    <ProtectedRoute>
+                      <PageTransition>
+                        <MyMindMaps />
+                      </PageTransition>
+                    </ProtectedRoute>
+                  } 
+                />
+                
+                <Route 
+                  path="mindmap-editor/:id" 
+                  element={
+                    <ProtectedRoute>
+                      <PageTransition>
+                        <MindMapEditor />
+                      </PageTransition>
+                    </ProtectedRoute>
+                  } 
+                />
+                
+                <Route 
+                  path="mindmap-materials/:mindMapId/:nodeId" 
+                  element={
+                    <PageTransition>
+                      <MindMapMaterials />
+                    </PageTransition>
+                  } 
+                />
+                
+                <Route 
+                  path="mindmap-view/:id" 
+                  element={
+                    <PageTransition>
+                      <MindMapView />
+                    </PageTransition>
+                  } 
+                />
+                
+                <Route 
+                  path="personal-center" 
+                  element={
+                    <ProtectedRoute>
+                      <PageTransition>
+                        <PersonalCenter />
+                      </PageTransition>
+                    </ProtectedRoute>
+                  } 
+                />
+                
+                <Route 
+                  path="user-management" 
+                  element={
+                    <ProtectedRoute>
+                      <PageTransition>
+                        <UserManagement />
+                      </PageTransition>
+                    </ProtectedRoute>
+                  } 
+                />
+                
+                <Route 
+                  path="discussion-center" 
+                  element={
+                    <PageTransition>
+                      <DiscussionCenter />
+                    </PageTransition>
+                  } 
+                />
+                
+                <Route path="*" element={<NotFound />} />
               </Route>
-              
-              {/* 受保护的路由 - 需要管理员权限 */}
-              <Route element={<ProtectedRoute requireAdmin={true} />}>
-                <Route element={<MainLayout />}>
-                  <Route path="/admin/materials" element={<MaterialManagement />} />
-                  <Route path="/admin/users" element={<UserManagement />} />
-                </Route>
-              </Route>
-              
-              {/* 重定向从index到dashboard */}
-              <Route path="/app" element={<Navigate to="/dashboard" replace />} />
-              
-              {/* 新增的路由 */}
-              <Route path="/mindmap-editor/:id" element={
-                <ProtectedRoute>
-                  <MindMapEditor />
-                </ProtectedRoute>
-              } />
-              <Route path="/mindmap-view/:id" element={<MindMapView />} />
-              <Route path="/mindmap-materials/:mapId/:nodeId" element={<MindMapMaterials />} />
-              
-              {/* 捕获所有路由 */}
-              <Route path="*" element={<NotFound />} />
             </Routes>
-          </BrowserRouter>
-        </AuthProvider>
-      </TooltipProvider>
+          </Suspense>
+        </ThemeProvider>
+      </AuthProvider>
     </QueryClientProvider>
   );
 }
