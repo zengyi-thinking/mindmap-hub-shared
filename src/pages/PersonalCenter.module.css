@@ -1,0 +1,229 @@
+/* 个人中心界面美化样式 */
+
+/* 一、色彩系统优化 */
+
+/* 1. 主色调渐变背景 */
+.pageBackground {
+  position: relative;
+  overflow: hidden;
+  min-height: calc(100vh - 4rem);
+}
+
+.gradientOverlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(
+    135deg,
+    rgba(33, 150, 243, 0.08) 0%,
+    rgba(156, 39, 176, 0.05) 100%
+  );
+  z-index: -1;
+}
+
+/* 2. 磨砂玻璃效果卡片 */
+.glassCard {
+  backdrop-filter: blur(8px);
+  background: rgba(255, 255, 255, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 8px 32px rgba(31, 38, 135, 0.1);
+}
+
+.dark .glassCard {
+  background: rgba(30, 30, 40, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+/* 3. 用户信息区域样式 */
+.profileHeader {
+  background: linear-gradient(
+    90deg,
+    rgba(33, 150, 243, 0.1) 0%,
+    rgba(156, 39, 176, 0.1) 100%
+  );
+  border-radius: 12px;
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  position: relative;
+  overflow: hidden;
+}
+
+.avatarFrame {
+  position: relative;
+  border-radius: 50%;
+  padding: 4px;
+  background: conic-gradient(from 0deg, #2196f3, #9c27b0, #2196f3);
+  animation: rotate 8s linear infinite;
+}
+
+@keyframes rotate {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.userStats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+  margin-top: 1.5rem;
+}
+
+.statCard {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  padding: 1rem;
+  text-align: center;
+  transition: all 0.3s ease;
+}
+
+.statCard:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+}
+
+/* 二、交互体验优化 */
+
+/* 1. 标签页切换效果 */
+.tabsContainer {
+  position: relative;
+  margin-bottom: 2rem;
+}
+
+.tabsList {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  padding: 0.5rem;
+  display: flex;
+  position: relative;
+  z-index: 1;
+}
+
+.tabTrigger {
+  position: relative;
+  z-index: 2;
+  transition: all 0.3s ease;
+  border-radius: 8px;
+  padding: 0.75rem 1.5rem;
+}
+
+.tabTrigger:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.activeTab {
+  background: rgba(33, 150, 243, 0.2);
+  box-shadow: 0 2px 10px rgba(33, 150, 243, 0.1);
+}
+
+/* 2. 内容区域动画 */
+.contentFadeIn {
+  animation: fadeIn 0.5s ease-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* 3. 活动日志时间线样式 */
+.timeline {
+  position: relative;
+  padding-left: 2rem;
+}
+
+.timelineItem {
+  position: relative;
+  padding-bottom: 1.5rem;
+}
+
+.timelineItem::before {
+  content: "";
+  position: absolute;
+  left: -1.5rem;
+  top: 0.25rem;
+  width: 1rem;
+  height: 1rem;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #2196f3, #9c27b0);
+  z-index: 1;
+}
+
+.timelineItem::after {
+  content: "";
+  position: absolute;
+  left: -1rem;
+  top: 0.75rem;
+  width: 2px;
+  height: calc(100% - 0.5rem);
+  background: rgba(33, 150, 243, 0.3);
+  z-index: 0;
+}
+
+.timelineItem:last-child::after {
+  display: none;
+}
+
+/* 三、数据隐私区域样式 */
+.securityCard {
+  background: linear-gradient(
+    135deg,
+    rgba(76, 175, 80, 0.1) 0%,
+    rgba(33, 150, 243, 0.05) 100%
+  );
+  border-radius: 12px;
+  border: 1px solid rgba(76, 175, 80, 0.2);
+  overflow: hidden;
+}
+
+.securityHeader {
+  background: rgba(76, 175, 80, 0.15);
+  padding: 1rem 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.securityIcon {
+  background: rgba(76, 175, 80, 0.2);
+  border-radius: 50%;
+  padding: 0.75rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.securityGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 1rem;
+  padding: 1.5rem;
+}
+
+.securityItem {
+  background: rgba(255, 255, 255, 0.5);
+  border-radius: 8px;
+  padding: 1rem;
+  transition: all 0.3s ease;
+}
+
+.dark .securityItem {
+  background: rgba(30, 30, 40, 0.5);
+}
+
+.securityItem:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+}
