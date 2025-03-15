@@ -1,10 +1,10 @@
 import React, { Suspense } from 'react';
 import { Routes, Route } from 'react-router-dom';
-import { QueryClient, QueryClientProvider } from 'react-query';
-import { ThemeProvider } from '@/components/ui/theme-provider';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { ThemeProvider } from './components/ui/theme-provider';
 import { AuthProvider } from '@/lib/auth';
-import { ProtectedRoute } from '@/components/ProtectedRoute';
-import { PageTransition } from '@/components/PageTransition';
+import ProtectedRoute from '@/components/ProtectedRoute';
+import PageTransition from '@/components/PageTransition';
 
 import Index from '@/pages/Index';
 import Login from '@/pages/Login';

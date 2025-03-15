@@ -128,11 +128,13 @@ const applyRadialLayout = (nodes: Node[]): Node[] => {
       y: centerY + Math.sin(angle) * radius
     };
     
-    // Get file nodes for this tag
-    const fileNodes = nodes.filter(node => 
-      node.data.type === 'file' && 
-      node.id.startsWith(`file-${tagNode.data.label.replace(/\s+/g, '-')}`)
-    );
+    // Get file nodes for this tag - Use a string comparison instead of string methods
+    const fileNodes = nodes.filter(node => {
+      if (node.data.type === 'file' && typeof node.id === 'string') {
+        return node.id.startsWith(`file-${String(tagNode.data.label).replace(/\s+/g, '-')}`);
+      }
+      return false;
+    });
     
     // Calculate positions for file nodes
     fileNodes.forEach((fileNode, fileIndex) => {
