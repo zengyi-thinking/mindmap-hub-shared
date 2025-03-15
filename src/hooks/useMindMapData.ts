@@ -12,6 +12,7 @@ export function useMindMapData() {
   const navigate = useNavigate();
   const { user } = useAuth();
   const isNew = id === 'new';
+  const mindMapId = id && id !== 'new' ? parseInt(id) : undefined;
   
   // State for the mindmap
   const [title, setTitle] = useState('');
@@ -137,6 +138,7 @@ export function useMindMapData() {
   
   return {
     isNew,
+    id: mindMapId,
     title,
     setTitle,
     description,

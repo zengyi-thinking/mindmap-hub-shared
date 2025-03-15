@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { 
   ReactFlow,
@@ -87,7 +88,7 @@ const MindMapWorkspace: React.FC<MindMapWorkspaceProps> = ({
       elementsSelectable={!readOnly}
     >
       <Background 
-        variant={BackgroundVariant.DOTS}
+        variant={BackgroundVariant.Dots}
         gap={20} 
         size={1} 
         color="hsl(var(--muted-foreground) / 0.3)"

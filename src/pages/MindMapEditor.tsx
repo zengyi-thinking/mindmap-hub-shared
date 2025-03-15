@@ -1,3 +1,4 @@
+
 import React, { useRef, useState, useCallback, useEffect } from 'react';
 import { useNodesState, useEdgesState } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
@@ -22,13 +23,15 @@ import { useMindMapNodes } from '@/hooks/useMindMapNodes';
 import { useMindMapLayout } from '@/hooks/useMindMapLayout';
 import { useMindMapNodeEdit } from '@/hooks/useMindMapNodeEdit';
 import { useMindMapConnections } from '@/hooks/useMindMapConnections';
+import { useParams } from 'react-router-dom';
 
 const MindMapEditor: React.FC = () => {
   const reactFlowWrapper = useRef<HTMLDivElement>(null);
+  const { id: mindMapIdParam } = useParams<{ id: string }>();
+  const mindMapId = mindMapIdParam ? parseInt(mindMapIdParam) : undefined;
   
   const {
     isNew,
-    id: mindMapId,
     title,
     setTitle,
     description,
@@ -75,6 +78,7 @@ const MindMapEditor: React.FC = () => {
   
   const {
     connectingNodeId,
+    setConnectingNodeId,
     onConnect,
     startConnecting,
     createConnection
@@ -111,7 +115,7 @@ const MindMapEditor: React.FC = () => {
     } else {
       selectNodeForEdit(node);
     }
-  }, [connectingNodeId, createConnection, selectNodeForEdit]);
+  }, [connectingNodeId, createConnection, selectNodeForEdit, setConnectingNodeId]);
   
   // Add a new node
   const handleAddNode = React.useCallback(() => {

@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -115,7 +116,7 @@ const MindMapHeader: React.FC<MindMapHeaderProps> = ({
           </Button>
           
           <Button
-            variant="primary"
+            variant="default"
             size="sm"
             onClick={onSave}
             className="flex gap-1 bg-primary text-primary-foreground hover:bg-primary/90"
