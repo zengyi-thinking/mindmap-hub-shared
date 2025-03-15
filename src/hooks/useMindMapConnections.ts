@@ -14,7 +14,8 @@ export function useMindMapConnections(setEdges: any) {
       animated: false,
       markerEnd: {
         type: MarkerType.ArrowClosed,
-      }
+      },
+      style: { stroke: 'hsl(var(--border))', strokeWidth: 2 }
     }, eds));
     setConnectingNodeId(null);
   }, [setEdges]);
@@ -37,7 +38,8 @@ export function useMindMapConnections(setEdges: any) {
         animated: false,
         markerEnd: {
           type: MarkerType.ArrowClosed,
-        }
+        },
+        style: { stroke: 'hsl(var(--border))', strokeWidth: 2 }
       };
       setEdges((edges: any) => [...edges, newEdge]);
       return true;

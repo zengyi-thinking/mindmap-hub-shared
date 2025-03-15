@@ -8,8 +8,7 @@ import { useAuth } from '@/lib/auth';
 import { SidebarProvider } from '@/contexts/SidebarContext';
 
 const MainLayout = () => {
-  const { user } = useAuth();
-  const isAuthenticated = !!user;
+  const { isAuthenticated } = useAuth();
 
   return (
     <SidebarProvider>
