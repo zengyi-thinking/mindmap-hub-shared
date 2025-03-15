@@ -285,7 +285,7 @@ const UsageReport: React.FC = () => {
                         <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                       ))}
                     </Pie>
-                    <Tooltip formatter={(value) => [`${value} 份文件`, name]}/>
+                    <Tooltip formatter={(value, name) => [`${value} 份文件`, name]} />
                     <Legend />
                   </PieChart>
                 </ResponsiveContainer>
@@ -297,7 +297,7 @@ const UsageReport: React.FC = () => {
                   >
                     <XAxis dataKey="name" />
                     <YAxis />
-                    <Tooltip formatter={(value) => [`${value} 份文件`, '文件数']}/>
+                    <Tooltip formatter={(value) => [`${value} 份文件`, '文件数']} />
                     <Legend />
                     <Bar dataKey="value" name="文件数">
                       {fileUsageData.map((entry, index) => (
