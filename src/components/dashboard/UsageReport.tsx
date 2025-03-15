@@ -5,10 +5,8 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
-import { Calendar, Clock, ChartPie, FileText, MessageSquare, Info, Save } from "lucide-react";
-import { ChartContainer, ChartTooltip, ChartTooltipContent, ChartLegend, ChartLegendContent } from "@/components/ui/chart";
+import { BarChart3, Clock, ChartPie, FileText, MessageSquare, Info, Save } from "lucide-react";
 import { PieChart, Pie, Cell, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, Legend } from 'recharts';
-import { cn } from "@/lib/utils";
 import { useToast } from "@/components/ui/use-toast";
 
 // Mock usage time data - in a real app this would come from a service
@@ -79,6 +77,9 @@ const UsageReport: React.FC = () => {
   const [reflection, setReflection] = useState(reflectionService.getReflection());
   const [chartType, setChartType] = useState<"pie" | "bar">("pie");
 
+  // Colors for the chart
+  const COLORS = ['#8884d8', '#82ca9d', '#ffc658'];
+
   // Timer effect to track active time
   useEffect(() => {
     // Start timing when component mounts
@@ -123,9 +124,6 @@ const UsageReport: React.FC = () => {
     };
   }, [timeStarted, todayTime, weekTime]);
 
-  // Colors for the chart
-  const COLORS = ['#8884d8', '#82ca9d', '#ffc658'];
-
   // Save reflection
   const saveReflection = () => {
     reflectionService.saveReflection(reflection);
@@ -164,7 +162,7 @@ const UsageReport: React.FC = () => {
                 <CardHeader className="pb-2">
                   <div className="flex items-center space-x-2">
                     <div className="p-2 rounded-full bg-blue-100 dark:bg-blue-900/30">
-                      <Calendar className="h-5 w-5 text-blue-500" />
+                      <Clock className="h-5 w-5 text-blue-500" />
                     </div>
                     <div>
                       <CardTitle className="text-lg">今日使用时长</CardTitle>
@@ -263,24 +261,16 @@ const UsageReport: React.FC = () => {
                   size="sm" 
                   onClick={() => setChartType("bar")}
                 >
-                  <ChartPie className="h-4 w-4 mr-1" />
+                  <BarChart3 className="h-4 w-4 mr-1" />
                   柱状图
                 </Button>
               </div>
             </div>
             
             <div className="h-80">
-              <ChartContainer
-                config={{
-                  使用1次: { color: COLORS[0] },
-                  使用2_5次: { color: COLORS[1] },
-                  使用超过5次: { color: COLORS[2] },
-                }}
-                className="w-full h-full"
-              >
-                {chartType === "pie" ? (
+              {chartType === "pie" ? (
+                <ResponsiveContainer width="100%" height="100%">
                   <PieChart>
-                    <ChartTooltip content={<ChartTooltipContent />} />
                     <Pie
                       data={fileUsageData}
                       cx="50%"
@@ -295,25 +285,28 @@ const UsageReport: React.FC = () => {
                         <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                       ))}
                     </Pie>
-                    <ChartLegend content={<ChartLegendContent className="mt-4" />} />
+                    <Tooltip formatter={(value) => [`${value} 份文件`, name]}/>
+                    <Legend />
                   </PieChart>
-                ) : (
+                </ResponsiveContainer>
+              ) : (
+                <ResponsiveContainer width="100%" height="100%">
                   <BarChart
                     data={fileUsageData}
                     margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
                   >
                     <XAxis dataKey="name" />
                     <YAxis />
-                    <ChartTooltip content={<ChartTooltipContent />} />
+                    <Tooltip formatter={(value) => [`${value} 份文件`, '文件数']}/>
+                    <Legend />
                     <Bar dataKey="value" name="文件数">
                       {fileUsageData.map((entry, index) => (
                         <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                       ))}
                     </Bar>
-                    <ChartLegend content={<ChartLegendContent className="mt-4" />} />
                   </BarChart>
-                )}
-              </ChartContainer>
+                </ResponsiveContainer>
+              )}
             </div>
             
             <Card className="mt-6">
