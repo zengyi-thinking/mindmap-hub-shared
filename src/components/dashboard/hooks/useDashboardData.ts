@@ -69,7 +69,8 @@ export const useDashboardData = () => {
         type: "mindmap",
       }));
 
-      const starredMaterials = loadUserFavorites(user.id).map((item) => ({
+      // Fix: Convert user.id to string
+      const starredMaterials = loadUserFavorites(user.id.toString()).map((item) => ({
         ...item,
         type: "material",
       }));

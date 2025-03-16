@@ -42,7 +42,11 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
       </div>
       <div className="flex gap-3 relative z-10">
         <div className="relative">
-          <Tabs defaultValue={activeSection} onValueChange={(value) => setActiveSection(value as "overview" | "usage")} className="w-auto">
+          <Tabs 
+            value={activeSection} 
+            onValueChange={(value) => setActiveSection(value as "overview" | "usage")} 
+            className="w-auto"
+          >
             <TabsList className="grid w-[250px] grid-cols-2">
               <TabsTrigger value="overview">概览</TabsTrigger>
               <TabsTrigger value="usage">使用报告</TabsTrigger>
