@@ -1,5 +1,6 @@
 import * as React from "react"
 import * as RechartsPrimitive from "recharts"
+import "./chart.css"
 
 import { cn } from "@/lib/utils"
 
