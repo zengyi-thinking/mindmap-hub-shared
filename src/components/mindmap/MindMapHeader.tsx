@@ -1,130 +1,78 @@
 
 import React from 'react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Switch } from '@/components/ui/switch';
-import { Label } from '@/components/ui/label';
-import { 
-  Brain, 
-  Save, 
-  Plus, 
-  PaperclipIcon, 
-  LayoutGrid,
-  Globe,
-  Lock,
-  EyeIcon,
-  EyeOffIcon
-} from 'lucide-react';
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
-import { useNavigate } from 'react-router-dom';
+import { motion } from 'framer-motion';
+import SearchBar from './SearchBar';
+import CreateMindMapDialog from './CreateMindMapDialog';
 
 interface MindMapHeaderProps {
-  title: string;
-  setTitle: (title: string) => void;
-  isPublic: boolean;
-  setIsPublic: (isPublic: boolean) => void;
-  onAddNode: () => void;
-  onAttachMaterial: () => void;
-  onAutoLayout: () => void;
-  onSave: () => void;
+  searchQuery: string;
+  onSearchChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  createDialogOpen: boolean;
+  setCreateDialogOpen: (open: boolean) => void;
+  newMindMapName: string;
+  setNewMindMapName: (name: string) => void;
+  newMindMapDescription: string;
+  setNewMindMapDescription: (desc: string) => void;
+  newMindMapTags: string;
+  setNewMindMapTags: (tags: string) => void;
+  privacyOption: string;
+  setPrivacyOption: (option: string) => void;
+  onCreateMindMap: () => void;
 }
 
 const MindMapHeader: React.FC<MindMapHeaderProps> = ({
-  title,
-  setTitle,
-  isPublic,
-  setIsPublic,
-  onAddNode,
-  onAttachMaterial,
-  onAutoLayout,
-  onSave
+  searchQuery,
+  onSearchChange,
+  createDialogOpen,
+  setCreateDialogOpen,
+  newMindMapName,
+  setNewMindMapName,
+  newMindMapDescription,
+  setNewMindMapDescription,
+  newMindMapTags,
+  setNewMindMapTags,
+  privacyOption,
+  setPrivacyOption,
+  onCreateMindMap
 }) => {
-  const navigate = useNavigate();
-
   return (
-    <div className="border-b p-4 flex gap-4 items-center justify-between">
-      <div className="flex items-center gap-2">
-        <Brain className="h-6 w-6 text-primary" />
-        <Input
-          value={title}
-          onChange={(e) => setTitle(e.target.value)}
-          placeholder="思维导图标题"
-          className="w-64 text-lg font-semibold border-none focus-visible:ring-0"
-        />
+    <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+      <div>
+        <motion.h1 
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="text-3xl font-bold tracking-tight mainTitle"
+        >
+          我的思维导图
+        </motion.h1>
+        <motion.p 
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1, transition: { delay: 0.1 } }}
+          className="text-muted-foreground subTitle"
+        >
+          创建、编辑和整理您的思维导图
+        </motion.p>
       </div>
       
-      <div className="flex items-center gap-5">
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <div className="flex items-center gap-2">
-              <Switch
-                checked={isPublic}
-                onCheckedChange={setIsPublic}
-                id="public-mode"
-              />
-              <Label htmlFor="public-mode" className="cursor-pointer flex items-center gap-1.5">
-                {isPublic ? (
-                  <>
-                    <Globe className="h-4 w-4 text-green-500" />
-                    <span className="text-sm">公开</span>
-                  </>
-                ) : (
-                  <>
-                    <Lock className="h-4 w-4 text-orange-500" />
-                    <span className="text-sm">私有</span>
-                  </>
-                )}
-              </Label>
-            </div>
-          </TooltipTrigger>
-          <TooltipContent>
-            <p>{isPublic 
-              ? "公开模式: 思维导图将在资料搜索页面对所有用户可见" 
-              : "私有模式: 思维导图仅对您可见"}</p>
-          </TooltipContent>
-        </Tooltip>
+      <div className="flex items-center gap-3 w-full md:w-auto">
+        <SearchBar 
+          searchQuery={searchQuery}
+          onSearchChange={onSearchChange}
+        />
         
-        <div className="flex items-center gap-1">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={onAddNode}
-            className="flex gap-1"
-          >
-            <Plus className="h-4 w-4" />
-            <span>添加节点</span>
-          </Button>
-          
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={onAttachMaterial}
-            className="flex gap-1"
-          >
-            <PaperclipIcon className="h-4 w-4" />
-            <span>附加资料</span>
-          </Button>
-          
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={onAutoLayout}
-            className="flex gap-1"
-          >
-            <LayoutGrid className="h-4 w-4" />
-            <span>自动布局</span>
-          </Button>
-          
-          <Button
-            variant="default"
-            size="sm"
-            onClick={onSave}
-            className="flex gap-1 bg-primary text-primary-foreground hover:bg-primary/90"
-          >
-            <Save className="h-4 w-4" />
-            <span>保存</span>
-          </Button>
-        </div>
+        <CreateMindMapDialog
+          isOpen={createDialogOpen}
+          onOpenChange={setCreateDialogOpen}
+          onCreateMindMap={onCreateMindMap}
+          newMindMapName={newMindMapName}
+          setNewMindMapName={setNewMindMapName}
+          newMindMapDescription={newMindMapDescription}
+          setNewMindMapDescription={setNewMindMapDescription}
+          newMindMapTags={newMindMapTags}
+          setNewMindMapTags={setNewMindMapTags}
+          privacyOption={privacyOption}
+          setPrivacyOption={setPrivacyOption}
+        />
       </div>
     </div>
   );

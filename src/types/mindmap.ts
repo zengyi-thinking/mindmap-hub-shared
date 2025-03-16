@@ -1,4 +1,3 @@
-
 // 思维导图接口定义
 export interface MindMap {
   id: number;
@@ -87,6 +86,7 @@ export interface SharedMindMap {
   tags: string[];
   description?: string;
   previewImage?: string;
+  type?: string; // Add this to match the expected shape in StarredContent
 }
 
 // 思维导图评论接口
