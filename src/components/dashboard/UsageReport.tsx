@@ -88,7 +88,7 @@ const UsageReport: React.FC = () => {
               <CardTitle className="text-xl font-semibold tracking-tight">使用报告</CardTitle>
               <CardDescription>查看您的学习统计和反思</CardDescription>
             </div>
-            <Tabs defaultValue={activeTab} onValueChange={(value) => setActiveTab(value as any)}>
+            <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as any)}>
               <TabsList className="grid w-full grid-cols-3 h-8">
                 <TabsTrigger value="time" className="text-xs px-2">使用时长</TabsTrigger>
                 <TabsTrigger value="files" className="text-xs px-2">文件统计</TabsTrigger>
