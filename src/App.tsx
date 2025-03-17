@@ -62,7 +62,7 @@ function App() {
                   <Route path="/material/:id" element={<MaterialDetail />} />
                   <Route path="/discussion" element={<DiscussionCenter />} />
                   <Route path="/profile" element={<PersonalCenter />} />
-                  <Route path="/global-material-map" element={<GlobalMaterialMap />} />
+                  <Route path="/global-material-map" element={<Navigate to="/search?tab=mindmaps" replace />} />
                 </Route>
               </Route>
               

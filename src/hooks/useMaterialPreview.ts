@@ -1,23 +1,25 @@
 import { useState } from 'react';
+import { useToast } from '@/components/ui/use-toast';
 import { userFilesService } from '@/lib/storage';
-import { toast } from '@/components/ui/use-toast';
 
 export const useMaterialPreview = () => {
-  const [selectedMaterial, setSelectedMaterial] = useState(null);
-  const [previewDialogOpen, setPreviewDialogOpen] = useState(false);
-  const [materialsListByTag, setMaterialsListByTag] = useState([]);
-  const [materialListDialogOpen, setMaterialListDialogOpen] = useState(false);
-  const [selectedTagForList, setSelectedTagForList] = useState('');
-
-  // Handle material selection for previewing
-  const handleMaterialSelect = (material) => {
+  const { toast } = useToast();
+  const [selectedMaterial, setSelectedMaterial] = useState<any>(null);
+  const [previewOpen, setPreviewOpen] = useState(false);
+  
+  // 预览资料
+  const openPreview = (material) => {
     setSelectedMaterial(material);
-    setPreviewDialogOpen(true);
-    setMaterialListDialogOpen(false);
+    setPreviewOpen(true);
     userFilesService.incrementViews(material.id);
   };
-
-  // Handle material download
+  
+  // 关闭预览
+  const closePreview = () => {
+    setPreviewOpen(false);
+  };
+  
+  // 下载资料
   const downloadMaterial = (material) => {
     if (!material || !material.file || !material.file.dataUrl) {
       toast({
@@ -27,71 +29,29 @@ export const useMaterialPreview = () => {
       });
       return;
     }
-
-    // Create a temporary link element
+    
     const link = document.createElement('a');
     link.href = material.file.dataUrl;
     link.download = material.file.name;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
-
-    // Increment download count
+    
     userFilesService.incrementDownloads(material.id);
-
+    
     toast({
       title: "下载开始",
-      description: `正在下载 ${material.title || material.file.name}`
+      description: `正在下载 ${material.title}`
     });
   };
-
-  // Node click handler for mind map
-  const onNodeClick = (event, node, materialsData) => {
-    if (node.id.startsWith('material-') && node.data.materialId) {
-      const material = materialsData.find(m => m.id === node.data.materialId);
-      if (material) {
-        setSelectedMaterial(material);
-        setPreviewDialogOpen(true);
-        userFilesService.incrementViews(material.id);
-      }
-    } else if (node.data.isLastLevel && node.data.tagName) {
-      const tagName = node.data.tagName;
-      
-      const taggedMaterials = materialsData.filter(m => 
-        m.tags && m.tags.includes(tagName)
-      );
-      
-      if (taggedMaterials.length === 1) {
-        setSelectedMaterial(taggedMaterials[0]);
-        setPreviewDialogOpen(true);
-        userFilesService.incrementViews(taggedMaterials[0].id);
-      } else if (taggedMaterials.length > 1) {
-        setMaterialsListByTag(taggedMaterials);
-        setSelectedTagForList(tagName);
-        setMaterialListDialogOpen(true);
-      } else {
-        toast({
-          title: "没有找到相关资料",
-          description: `没有找到标签为 "${tagName}" 的资料`,
-          variant: "destructive"
-        });
-      }
-    }
-  };
-
+  
   return {
     selectedMaterial,
     setSelectedMaterial,
-    previewDialogOpen,
-    setPreviewDialogOpen,
-    materialsListByTag,
-    setMaterialsListByTag,
-    materialListDialogOpen,
-    setMaterialListDialogOpen,
-    selectedTagForList,
-    setSelectedTagForList,
-    handleMaterialSelect,
-    downloadMaterial,
-    onNodeClick
+    previewOpen,
+    setPreviewOpen,
+    openPreview,
+    closePreview,
+    downloadMaterial
   };
-};
+}; 

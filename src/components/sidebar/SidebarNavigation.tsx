@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { cn } from '@/lib/utils';
 import { 
@@ -38,12 +37,6 @@ const SidebarNavigation: React.FC = () => {
       title: '资料搜索',
       icon: <Search size="1.2rem" />,
       path: '/search',
-      roles: ['user', 'admin']
-    },
-    {
-      title: '全平台资料导图',
-      icon: <BookOpen size="1.2rem" />,
-      path: '/global-material-map',
       roles: ['user', 'admin']
     },
     {
