@@ -115,13 +115,13 @@ const ReflectionTab: React.FC<ReflectionTabProps> = ({ reflection, onSave }) => 
       <Card>
         <CardHeader className="pb-2">
           <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-2">
-              <div className="p-2 rounded-full bg-green-100 dark:bg-green-900/30">
-                <MessageSquare className="h-5 w-5 text-green-500" />
-              </div>
-              <div>
-                <CardTitle className="text-lg">学习反思</CardTitle>
-                <CardDescription>记录您的学习心得和总结</CardDescription>
+          <div className="flex items-center space-x-2">
+            <div className="p-2 rounded-full bg-green-100 dark:bg-green-900/30">
+              <MessageSquare className="h-5 w-5 text-green-500" />
+            </div>
+            <div>
+              <CardTitle className="text-lg">学习反思</CardTitle>
+              <CardDescription>记录您的学习心得和总结</CardDescription>
               </div>
             </div>
             <div className="flex items-center text-sm text-muted-foreground">
@@ -197,13 +197,13 @@ const ReflectionTab: React.FC<ReflectionTabProps> = ({ reflection, onSave }) => 
               animate={{ opacity: 1 }}
               transition={{ duration: 0.3 }}
             >
-              <Textarea
+          <Textarea
                 id="reflection-textarea"
                 value={content}
                 onChange={(e) => setContent(e.target.value)}
-                placeholder="在这里记录您的学习反思和总结..."
+            placeholder="在这里记录您的学习反思和总结..."
                 className="min-h-[220px] resize-none"
-              />
+          />
             </motion.div>
           )}
           

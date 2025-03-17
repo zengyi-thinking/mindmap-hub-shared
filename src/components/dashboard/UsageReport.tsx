@@ -125,7 +125,7 @@ const UsageReport: React.FC = () => {
     // 清理定时器
     return () => {
       if (intervalId) {
-        clearInterval(intervalId);
+      clearInterval(intervalId);
       }
       
       // 在组件卸载时记录不活动
@@ -167,10 +167,10 @@ const UsageReport: React.FC = () => {
       reflectionService.saveReflection(content);
       setReflection(reflectionService.getReflection());
       
-      toast({
-        title: "保存成功",
-        description: "您的反思已保存",
-      });
+    toast({
+      title: "保存成功",
+      description: "您的反思已保存",
+    });
     } catch (error) {
       console.error('保存反思失败:', error);
       toast({
@@ -180,7 +180,7 @@ const UsageReport: React.FC = () => {
       });
     }
   };
-  
+
   return (
     <motion.div 
       initial={{ opacity: 0, y: 20 }}
@@ -236,4 +236,4 @@ const UsageReport: React.FC = () => {
   );
 };
 
-export default UsageReport; 
+export default UsageReport;

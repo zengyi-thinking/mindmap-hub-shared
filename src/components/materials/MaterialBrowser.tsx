@@ -252,7 +252,7 @@ const MaterialBrowser: React.FC = () => {
       </div>
     );
   };
-  
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -273,14 +273,14 @@ const MaterialBrowser: React.FC = () => {
         <CardContent className="pt-6 space-y-6">
           <div className="flex gap-2">
             <div className="relative flex-1">
-              <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-              <Input
+        <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+        <Input
                 placeholder="搜索资料..."
-                value={searchQuery}
+          value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="pl-9"
-              />
-            </div>
+        />
+      </div>
             <Button variant="outline" className="border-primary/20 hover:bg-primary/10 hover:text-primary">
               <Filter className="h-4 w-4 mr-2" />
               筛选
@@ -441,9 +441,9 @@ const MaterialCard = ({ material, onPreview, onDownload }) => {
                 下载
               </Button>
             </div>
-          </div>
         </div>
-      </div>
+        </div>
+    </div>
     </Card>
   );
 };
