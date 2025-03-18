@@ -42,42 +42,46 @@ export const useMaterialMindMap = () => {
     const generatedNodes: Node[] = [];
     const generatedEdges: Edge[] = [];
     
-    // 添加根节点
+    // 添加根节点 - 横向布局，放在左侧中间
     generatedNodes.push({
       id: 'root',
       type: 'materialNode',
-      position: { x: 0, y: 0 },
+      position: { x: 50, y: 300 },
       data: {
         label: '资料总览',
-        icon: 'folder',
-        color: '#4361ee',
+        icon: 'Database',
         isRoot: true
       }
     });
     
-    // 递归生成节点和边
+    // 递归生成节点和边 - 横向布局
     const generateNodesAndEdges = (
       categories: typeof tagHierarchy,
       parentId: string,
       level: number,
       parentX: number,
       parentY: number,
-      index: number,
       totalSiblings: number
     ) => {
-      // 计算每个级别的子节点间距和位置
-      const xSpacing = level === 1 ? 250 : 200;
-      const ySpacing = level === 1 ? 120 : 80;
+      // 横向布局参数调整
+      const xSpacing = 250; // 水平间距
+      const levelHeight = 200; // 每个级别的子节点垂直分布高度
       
-      // 计算这个级别的总宽度
-      const totalWidth = (totalSiblings - 1) * xSpacing;
-      // 计算起始X位置，使子节点在父节点两侧均匀分布
-      const startX = parentX - totalWidth / 2;
+      // 计算子节点总高度
+      const totalHeight = categories.length <= 1 
+        ? 0 
+        : levelHeight * (categories.length - 1);
       
+      // 计算垂直起始位置，使子节点围绕父节点垂直居中
+      const startY = parentY - totalHeight / 2;
+      
+      // 为每个子节点创建节点和边
       categories.forEach((category, i) => {
         const nodeId = `${parentId}-${category.id}`;
-        const x = startX + i * xSpacing;
-        const y = parentY + (level === 1 ? 150 : 100);
+        const x = parentX + xSpacing; // 水平位置向右递增
+        const y = categories.length <= 1 
+          ? parentY // 只有一个子节点时居中
+          : startY + i * levelHeight; // 多个子节点时垂直分布
         
         // 创建当前节点
         generatedNodes.push({
@@ -86,8 +90,7 @@ export const useMaterialMindMap = () => {
           position: { x, y },
           data: {
             label: category.name,
-            icon: 'folder',
-            color: level === 1 ? '#4cc9f0' : '#4895ef',
+            icon: 'Folder',
             folderPath: nodeId.split('-').slice(1).map(id => {
               // 查找对应的名称
               const findName = (categories: typeof tagHierarchy, id: string): string => {
@@ -106,13 +109,17 @@ export const useMaterialMindMap = () => {
           }
         });
         
-        // 创建连接到父节点的边
+        // 创建连接到父节点的边 - 使用曲线类型提高可视性
         generatedEdges.push({
           id: `edge-${parentId}-${nodeId}`,
           source: parentId,
           target: nodeId,
           type: 'smoothstep',
-          style: { stroke: '#94a3b8' }
+          animated: level === 1, // 第一级动画效果更明显
+          style: { 
+            stroke: '#3b82f6',
+            strokeWidth: level === 1 ? 2 : 1.5,
+          }
         });
         
         // 如果有子类别，递归处理
@@ -123,7 +130,6 @@ export const useMaterialMindMap = () => {
             level + 1,
             x,
             y,
-            i,
             category.children.length
           );
         }
@@ -131,7 +137,7 @@ export const useMaterialMindMap = () => {
     };
     
     // 从根节点开始生成思维导图
-    generateNodesAndEdges(tagHierarchy, 'root', 1, 0, 0, 0, tagHierarchy.length);
+    generateNodesAndEdges(tagHierarchy, 'root', 1, 50, 300, tagHierarchy.length);
     
     setNodes(generatedNodes);
     setEdges(generatedEdges);
@@ -145,6 +151,10 @@ export const useMaterialMindMap = () => {
   // 初始化 ReactFlow
   const onInitReactFlow = useCallback((instance) => {
     setReactFlowInstance(instance);
+    // 适应视图
+    setTimeout(() => {
+      instance.fitView({ padding: 0.2 });
+    }, 100);
   }, []);
 
   return {

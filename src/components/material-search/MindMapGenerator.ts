@@ -1,4 +1,3 @@
-
 import { Node, Edge, MarkerType } from '@xyflow/react';
 import { findTagPath } from './utils/TagUtils';
 import { TagCategory } from '@/types/materials';
@@ -15,15 +14,18 @@ const createCentralNode = (searchQuery: string): Node => {
   return {
     id: 'central',
     type: 'input',
-    data: { label: searchQuery || '资料搜索' },
-    position: { x: 400, y: 300 },
+    data: { 
+      label: searchQuery || '资料搜索',
+      isRoot: true
+    },
+    position: { x: 100, y: 300 },
     style: {
-      background: 'hsl(var(--primary))',
-      color: 'hsl(var(--primary-foreground))',
+      background: 'linear-gradient(135deg, #3b82f6, #1d4ed8)',
+      color: 'white',
+      borderRadius: '12px',
       border: 'none',
-      borderRadius: '50%',
-      width: 120,
-      height: 120,
+      width: 130,
+      height: 80,
       display: 'flex',
       justifyContent: 'center',
       alignItems: 'center',
@@ -31,12 +33,12 @@ const createCentralNode = (searchQuery: string): Node => {
       fontWeight: 'bold',
       padding: '10px',
       textAlign: 'center',
-      boxShadow: '0 4px 20px rgba(0, 0, 0, 0.1)',
+      boxShadow: '0 4px 12px rgba(59, 130, 246, 0.5)',
     },
   };
 };
 
-// Calculate node position based on index and total count
+// 横向布局的节点位置计算
 const calculateNodePosition = (
   centerX: number,
   centerY: number,
@@ -44,9 +46,21 @@ const calculateNodePosition = (
   index: number,
   totalItems: number
 ) => {
+  // 如果只有一个元素，直接向右放置
+  if (totalItems === 1) {
+    return {
+      x: centerX + distance,
+      y: centerY
+    };
+  }
+  
+  // 多个元素时，计算垂直分布
+  const totalHeight = 150 * (totalItems - 1);
+  const startY = centerY - totalHeight / 2;
+  
   return {
-    x: centerX + distance * Math.cos(index * (2 * Math.PI / totalItems)),
-    y: centerY + distance * Math.sin(index * (2 * Math.PI / totalItems))
+    x: centerX + distance,
+    y: startY + index * 150
   };
 };
 

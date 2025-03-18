@@ -84,6 +84,7 @@ const MindMapVisualization: React.FC<MindMapVisualizationProps> = ({
             onNodeClick={onNodeClick}
             onInit={onInitReactFlow}
             fitView
+            fitViewOptions={{ padding: 0.2 }}
             attributionPosition="bottom-right"
             zoomOnScroll={true}
             panOnScroll={true}
@@ -91,6 +92,14 @@ const MindMapVisualization: React.FC<MindMapVisualizationProps> = ({
             elementsSelectable={true}
             proOptions={{ hideAttribution: true }}
             className="react-flow-custom"
+            defaultEdgeOptions={{
+              type: 'smoothstep',
+              animated: true,
+              style: {
+                strokeWidth: 2,
+                stroke: '#3b82f6'
+              }
+            }}
           >
             <Background 
               variant={"dots" as BackgroundVariant}
@@ -129,6 +138,11 @@ const MindMapVisualization: React.FC<MindMapVisualizationProps> = ({
                 <ZoomOut className="h-4 w-4" />
               </Button>
             </div>
+            
+            {/* 提示面板 */}
+            <Panel position="top-right" className="bg-background/90 backdrop-blur-sm p-2 rounded-md shadow-sm border text-xs">
+              提示: 滚轮缩放 | 拖拽平移 | 点击展开
+            </Panel>
             
             {/* 统计面板 */}
             {statistics && (
