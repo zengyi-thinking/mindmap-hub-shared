@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import styles from '@/pages/MaterialSearch.module.css';
 import { useAuth } from '@/lib/auth';
 import { tagHierarchy } from '@/data/tagHierarchy';
+import { popularTags, suggestedSearches } from '@/data/popularTags';
 
 // Import components
 import MaterialSearchHeader from '@/components/material-search/MaterialSearchHeader';
@@ -37,7 +38,8 @@ const MaterialSearchContainer: React.FC = () => {
     toggleTag,
     clearAllTags,
     handleSearch,
-    loadMaterials
+    loadMaterials,
+    isLoading
   } = materialSearch;
   
   const mindMap = useMindMap(materialsData, selectedTags, searchQuery, tagHierarchyRef.current);
@@ -55,7 +57,8 @@ const MaterialSearchContainer: React.FC = () => {
     mindMapDescription,
     setMindMapDescription,
     createMindMap,
-    saveMindMap
+    saveMindMap,
+    statistics
   } = mindMap;
   
   const materialPreview = useMaterialPreview();
@@ -107,7 +110,16 @@ const MaterialSearchContainer: React.FC = () => {
         tagHierarchy={tagHierarchyRef.current}
       />
       
-      {searchPerformed ? (
+      {isLoading && (
+        <div className="flex justify-center my-8">
+          <div className="flex flex-col items-center gap-2">
+            <div className="h-8 w-8 animate-spin rounded-full border-b-2 border-primary"></div>
+            <p className="text-sm text-muted-foreground">加载中...</p>
+          </div>
+        </div>
+      )}
+      
+      {!isLoading && searchPerformed ? (
         <MaterialSearchResults 
           nodes={nodes}
           edges={edges}
@@ -121,13 +133,14 @@ const MaterialSearchContainer: React.FC = () => {
           filteredMaterials={filteredMaterials}
           onMaterialSelect={handleMaterialSelect}
           onDownload={downloadMaterial}
+          statistics={statistics}
         />
-      ) : (
+      ) : !isLoading && (
         <motion.div 
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.2 }}
-          className="text-center py-16 my-12 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/30 dark:to-indigo-950/30 rounded-lg border border-primary/20 shadow-md"
+          className="text-center py-12 my-6 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/30 dark:to-indigo-950/30 rounded-lg border border-primary/20 shadow-md"
         >
           <div className="inline-flex justify-center items-center w-16 h-16 rounded-full bg-primary/10 mb-4 overflow-hidden">
             <svg className={`w-10 h-10 text-primary/70 ${styles.earthIcon}`} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -137,9 +150,48 @@ const MaterialSearchContainer: React.FC = () => {
             </svg>
           </div>
           <h2 className={`text-xl font-semibold mb-2 text-primary ${styles.mainTitle}`}>搜索以开始</h2>
-          <p className={`text-muted-foreground max-w-md mx-auto ${styles.hintText}`}>
+          <p className={`text-muted-foreground max-w-md mx-auto mb-8 ${styles.hintText}`}>
             输入关键词或选择标签来搜索相关资料，系统将自动生成资料的思维导图展示
           </p>
+          
+          {/* 热门标签 */}
+          <div className="max-w-2xl mx-auto mb-8">
+            <h3 className="text-sm font-medium text-muted-foreground mb-3">热门标签</h3>
+            <div className="flex flex-wrap justify-center gap-2">
+              {popularTags.slice(0, 8).map((tagItem, index) => (
+                <button
+                  key={index}
+                  className="inline-flex items-center px-3 py-1.5 rounded-full text-xs font-medium bg-primary/10 hover:bg-primary/20 transition-colors"
+                  onClick={() => {
+                    toggleTag(tagItem.tag);
+                    handleSearchAndCreateMindMap();
+                  }}
+                >
+                  {tagItem.tag}
+                  <span className="ml-1.5 text-[10px] text-muted-foreground">({tagItem.count})</span>
+                </button>
+              ))}
+            </div>
+          </div>
+          
+          {/* 推荐搜索 */}
+          <div className="max-w-2xl mx-auto">
+            <h3 className="text-sm font-medium text-muted-foreground mb-3">推荐搜索</h3>
+            <div className="flex flex-wrap justify-center gap-2">
+              {suggestedSearches.map((search, index) => (
+                <button
+                  key={index}
+                  className="px-3 py-1.5 rounded-full text-xs font-medium border border-primary/20 hover:bg-primary/5 transition-colors"
+                  onClick={() => {
+                    setSearchQuery(search);
+                    handleSearchAndCreateMindMap();
+                  }}
+                >
+                  {search}
+                </button>
+              ))}
+            </div>
+          </div>
         </motion.div>
       )}
 

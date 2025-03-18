@@ -96,27 +96,44 @@ const UsageReport: React.FC = () => {
     let intervalId: number | undefined;
     
     try {
-      if (isPageVisible) {
-        // 记录活动开始
+      // 组件加载时立即记录活动
+      if (typeof usageTimeService !== 'undefined') {
+        // 立即记录活动开始
         usageTimeService.recordActivity('active');
+        console.log('页面加载，记录活动开始');
         
-        // 定期更新使用时间 (每分钟检查一次)
+        // 初始化时立即获取最新数据
+        const initialTimeData = usageTimeService.getTimeData();
+        setTimeData(initialTimeData);
+        
+        const initialWeeklyData = usageTimeService.getWeeklyData();
+        setWeeklyData(initialWeeklyData);
+      }
+      
+      if (isPageVisible) {
+        // 更频繁地更新使用时间（每30秒检查一次）
         intervalId = window.setInterval(() => {
           try {
-            // 检索最新数据并更新状态
+            // 先记录当前活跃状态
+            usageTimeService.recordActivity('active');
+            
+            // 然后检索最新数据并更新状态
             const updatedTimeData = usageTimeService.getTimeData();
             setTimeData(updatedTimeData);
             
             // 更新周数据
             const updatedWeeklyData = usageTimeService.getWeeklyData();
             setWeeklyData(updatedWeeklyData);
+            
+            console.log('定时更新，当前今日使用时间:', updatedTimeData.todayTime);
           } catch (error) {
             console.error('更新时间数据失败:', error);
           }
-        }, 60000);
+        }, 30000); // 改为30秒
       } else if (typeof usageTimeService !== 'undefined') {
-        // 记录不活动
+        // 页面不可见时记录不活动
         usageTimeService.recordActivity('inactive');
+        console.log('页面不可见，记录活动结束');
       }
     } catch (error) {
       console.error('活动记录失败:', error);
@@ -125,13 +142,14 @@ const UsageReport: React.FC = () => {
     // 清理定时器
     return () => {
       if (intervalId) {
-      clearInterval(intervalId);
+        clearInterval(intervalId);
       }
       
       // 在组件卸载时记录不活动
       try {
         if (typeof usageTimeService !== 'undefined') {
           usageTimeService.recordActivity('inactive');
+          console.log('组件卸载，记录活动结束');
         }
       } catch (error) {
         console.error('记录不活动状态失败:', error);

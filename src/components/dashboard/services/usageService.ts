@@ -88,6 +88,16 @@ export const usageTimeService = {
    */
   updateUsageTime(additionalMinutes: number): void {
     try {
+      if (additionalMinutes <= 0) {
+        console.warn('忽略无效的时间增量:', additionalMinutes);
+        return;
+      }
+      
+      if (additionalMinutes > 60) {
+        console.warn('时间增量过大，已限制为60分钟');
+        additionalMinutes = 60; // 限制单次增加的时间
+      }
+      
       const timeData = this.getTimeData();
       
       // 更新时间
@@ -99,7 +109,15 @@ export const usageTimeService = {
       const dateKey = new Date().toISOString().split('T')[0];
       timeData.dailyRecords[dateKey] = (timeData.dailyRecords[dateKey] || 0) + additionalMinutes;
       
+      // 输出调试信息
+      console.log(`时间已更新: +${additionalMinutes}分钟, 今日总计: ${timeData.todayTime}分钟`);
+      
       this.saveTimeData(timeData);
+      
+      // 主动触发存储事件，以便其他标签页也能更新
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(new Event('storage'));
+      }
     } catch (error) {
       console.error('更新使用时间失败:', error);
     }
@@ -149,14 +167,34 @@ export const usageTimeService = {
         if (lastActiveStr) {
           const lastActive = new Date(lastActiveStr);
           const durationMinutes = calculateMinutes(lastActive, now);
-          if (durationMinutes > 0) {
+          
+          // 只有合理的持续时间才记录（超过0分钟且不超过60分钟）
+          if (durationMinutes > 0 && durationMinutes <= 60) {
+            console.log(`记录使用时间: ${durationMinutes}分钟`);
             activity.duration = durationMinutes;
             this.updateUsageTime(durationMinutes);
           }
         }
       } else if (type === 'active') {
+        // 检查最后活动时间，如果超过30分钟，视为新会话
+        const lastActiveStr = localStorage.getItem(STORAGE_KEYS.LAST_ACTIVE);
+        if (lastActiveStr) {
+          const lastActive = new Date(lastActiveStr);
+          const idleMinutes = calculateMinutes(lastActive, now);
+          
+          // 如果空闲超过30分钟，先处理为inactive，然后再开始新会话
+          if (idleMinutes > 30) {
+            this.recordActivity('inactive');
+          }
+        }
+        
         // 记录最后活动时间
         localStorage.setItem(STORAGE_KEYS.LAST_ACTIVE, now.toISOString());
+        
+        // 主动记录1分钟初始时间，确保即使短暂访问也有记录
+        if (!lastActiveStr) {
+          this.updateUsageTime(1);
+        }
       }
       
       // 存储活动记录

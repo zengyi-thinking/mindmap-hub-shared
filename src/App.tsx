@@ -26,6 +26,7 @@ import MindMapEditor from './pages/MindMapEditor';
 import MindMapView from './pages/MindMapView';
 import MindMapMaterials from './pages/MindMapMaterials';
 import GlobalMaterialMap from './pages/GlobalMaterialMap';
+import ActivityTracker from './components/global/ActivityTracker';
 
 const queryClient = new QueryClient();
 
@@ -44,6 +45,7 @@ function App() {
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
         <AuthProvider>
+          <ActivityTracker />
           <Toaster />
           <Sonner />
           <BrowserRouter basename={baseName}>

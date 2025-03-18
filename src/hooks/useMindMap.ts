@@ -1,5 +1,4 @@
-
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useMemo } from 'react';
 import { 
   useNodesState, 
   useEdgesState, 
@@ -18,6 +17,47 @@ export const useMindMap = (materialsData, selectedTags, searchQuery, tagHierarch
   const [saveDialogOpen, setSaveDialogOpen] = useState(false);
   const [mindMapTitle, setMindMapTitle] = useState('');
   const [mindMapDescription, setMindMapDescription] = useState('');
+  
+  // 计算统计信息
+  const statistics = useMemo(() => {
+    if (!nodes.length) return null;
+    
+    const tagNodes = nodes.filter(node => node.data.type === 'tag');
+    const materialNodes = nodes.filter(node => node.data.type === 'material');
+    
+    // 计算平均连接度
+    const avgConnections = edges.length > 0 && nodes.length > 1 
+      ? (edges.length / (nodes.length - 1)).toFixed(1) 
+      : 0;
+    
+    // 找出连接最多的节点
+    let mostConnectedNode = null;
+    let maxConnections = 0;
+    
+    nodes.forEach(node => {
+      const connections = edges.filter(
+        edge => edge.source === node.id || edge.target === node.id
+      ).length;
+      
+      if (connections > maxConnections) {
+        maxConnections = connections;
+        mostConnectedNode = node;
+      }
+    });
+    
+    return {
+      totalNodes: nodes.length,
+      tagCount: tagNodes.length,
+      materialCount: materialNodes.length,
+      connectionCount: edges.length,
+      avgConnections,
+      mostConnectedNode: mostConnectedNode ? {
+        label: mostConnectedNode.data.label,
+        connections: maxConnections,
+        type: mostConnectedNode.data.type
+      } : null
+    };
+  }, [nodes, edges]);
   
   // ReactFlow handlers
   const onConnect = useCallback((params) => {
@@ -100,6 +140,7 @@ export const useMindMap = (materialsData, selectedTags, searchQuery, tagHierarch
     mindMapDescription,
     setMindMapDescription,
     createMindMap,
-    saveMindMap
+    saveMindMap,
+    statistics
   };
 };
