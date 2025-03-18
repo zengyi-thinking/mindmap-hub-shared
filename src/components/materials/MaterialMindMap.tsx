@@ -4,6 +4,7 @@ import { ReactFlow, Background, Controls, BackgroundVariant, Panel } from '@xyfl
 import '@xyflow/react/dist/style.css';
 import { Maximize } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { useTheme } from '@/contexts/ThemeContext';
 
 interface MaterialMindMapProps {
   nodes: any[];
@@ -20,6 +21,8 @@ const MaterialMindMap: React.FC<MaterialMindMapProps> = ({
   handleNodeClick,
   onInitReactFlow
 }) => {
+  const { darkMode } = useTheme();
+
   return (
     <Card className="xl:col-span-3 h-[600px] flex flex-col shadow-lg border-blue-100 dark:border-blue-900/30">
       <CardHeader className="p-4 pb-2 border-b bg-gradient-to-r from-blue-50/60 to-indigo-50/60 dark:from-blue-950/20 dark:to-indigo-950/20">
@@ -58,7 +61,7 @@ const MaterialMindMap: React.FC<MaterialMindMapProps> = ({
             animated: true,
             style: {
               strokeWidth: 2,
-              stroke: '#3b82f6'
+              stroke: darkMode ? '#60a5fa' : '#3b82f6'
             }
           }}
         >
@@ -66,7 +69,7 @@ const MaterialMindMap: React.FC<MaterialMindMapProps> = ({
             variant={"dots" as BackgroundVariant}
             gap={20}
             size={1}
-            color="hsl(var(--muted-foreground) / 0.2)"
+            color={darkMode ? "rgba(156, 163, 175, 0.2)" : "rgba(107, 114, 128, 0.2)"}
           />
           <Controls
             showInteractive={false}
