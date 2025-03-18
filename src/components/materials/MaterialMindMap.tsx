@@ -24,7 +24,7 @@ const MaterialMindMap: React.FC<MaterialMindMapProps> = ({
         <CardTitle className="text-lg">资料导图</CardTitle>
         <CardDescription>点击节点浏览资料</CardDescription>
       </CardHeader>
-      
+
       <CardContent className="p-0 flex-grow relative">
         <ReactFlow
           nodes={nodes}
@@ -38,13 +38,13 @@ const MaterialMindMap: React.FC<MaterialMindMapProps> = ({
           elementsSelectable={true}
           onInit={onInitReactFlow}
         >
-          <Background 
+          <Background
             variant={"dots" as BackgroundVariant}
-            gap={20} 
-            size={1} 
+            gap={20}
+            size={1}
             color="hsl(var(--muted-foreground) / 0.3)"
           />
-          <Controls 
+          <Controls
             showInteractive={false}
             position="bottom-right"
             style={{

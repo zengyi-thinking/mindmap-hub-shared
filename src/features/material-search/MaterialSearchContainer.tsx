@@ -1,4 +1,3 @@
-
 import React, { useRef, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import styles from '@/pages/MaterialSearch.module.css';
@@ -62,8 +61,8 @@ const MaterialSearchContainer: React.FC = () => {
   const materialPreview = useMaterialPreview();
   const {
     selectedMaterial,
-    previewDialogOpen,
-    setPreviewDialogOpen,
+    previewOpen,
+    setPreviewOpen,
     materialsListByTag,
     materialListDialogOpen,
     setMaterialListDialogOpen,
@@ -156,8 +155,8 @@ const MaterialSearchContainer: React.FC = () => {
       />
 
       <MaterialPreviewDialog 
-        open={previewDialogOpen}
-        onOpenChange={setPreviewDialogOpen}
+        open={previewOpen}
+        onOpenChange={setPreviewOpen}
         material={selectedMaterial}
         onDownload={downloadMaterial}
         user={user}

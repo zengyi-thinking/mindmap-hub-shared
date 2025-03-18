@@ -1,4 +1,3 @@
-
 import React, { useEffect } from 'react';
 import { Outlet, useLocation } from 'react-router-dom';
 import Sidebar from '@/components/Sidebar';
@@ -73,7 +72,6 @@ const MainLayout: React.FC = () => {
             colorScheme="mixed"
             density="medium"
             speed="slow"
-            showAnimeCharacters={true}
           >
             <div className="container mx-auto p-4 backdrop-blur-sm bg-gradient-to-r from-primary/10 to-primary/5">
               <div className="flex items-center justify-between">
