@@ -8,10 +8,13 @@ import ParticleBackground from '@/components/ui/ParticleBackground';
 import { Shield, RefreshCw } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { ThemeToggleButtons } from '@/components/theme/ThemeSettings';
+import { useTheme } from '@/contexts/ThemeContext';
 
 const MainLayout: React.FC = () => {
   const location = useLocation();
   const { user } = useAuth();
+  const { focusMode } = useTheme();
 
   useEffect(() => {
     // 当路由变化时，滚动到页面顶部
@@ -21,10 +24,13 @@ const MainLayout: React.FC = () => {
   return (
     <div className="min-h-screen bg-background relative overflow-hidden">
       {/* 装饰性背景元素 */}
-      <div className="pointer-events-none absolute inset-0 overflow-hidden">
+      <div className={cn(
+        "pointer-events-none absolute inset-0 overflow-hidden decoration-element",
+        focusMode && "opacity-30"
+      )}>
         {/* 顶部渐变光效 */}
         <div 
-          className="absolute -top-[30%] -left-[10%] w-[120%] h-[50%] opacity-30 blur-3xl" 
+          className="absolute -top-[30%] -left-[10%] w-[120%] h-[50%] opacity-30 blur-3xl decoration-element" 
           style={{ 
             background: 'radial-gradient(circle, rgba(125, 211, 252, 0.4) 0%, rgba(125, 211, 252, 0.1) 35%, rgba(125, 211, 252, 0) 70%)'
           }}
@@ -32,7 +38,7 @@ const MainLayout: React.FC = () => {
         
         {/* 底部渐变光效 */}
         <div 
-          className="absolute -bottom-[30%] right-[10%] w-[100%] h-[50%] opacity-30 blur-3xl" 
+          className="absolute -bottom-[30%] right-[10%] w-[100%] h-[50%] opacity-30 blur-3xl decoration-element" 
           style={{ 
             background: 'radial-gradient(circle, rgba(192, 132, 252, 0.4) 0%, rgba(192, 132, 252, 0.1) 35%, rgba(192, 132, 252, 0) 70%)'
           }}
@@ -40,7 +46,7 @@ const MainLayout: React.FC = () => {
         
         {/* 中央装饰元素 */}
         <div
-          className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[80%] h-[80%] opacity-10 blur-3xl"
+          className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[80%] h-[80%] opacity-10 blur-3xl decoration-element"
           style={{ 
             background: 'radial-gradient(circle, rgba(129, 140, 248, 0.3) 0%, rgba(129, 140, 248, 0.05) 40%, rgba(129, 140, 248, 0) 60%)'
           }}
@@ -48,7 +54,7 @@ const MainLayout: React.FC = () => {
         
         {/* 装饰性网格线 */}
         <div 
-          className="absolute inset-0 opacity-[0.015]" 
+          className="absolute inset-0 opacity-[0.015] decoration-element" 
           style={{ 
             backgroundImage: 'linear-gradient(to right, gray 1px, transparent 1px), linear-gradient(to bottom, gray 1px, transparent 1px)',
             backgroundSize: '40px 40px' 
@@ -56,18 +62,23 @@ const MainLayout: React.FC = () => {
         />
         
         {/* 装饰性圆点 */}
-        <div className="absolute inset-0 opacity-[0.02]" style={{
+        <div className="absolute inset-0 opacity-[0.02] decoration-element" style={{
           backgroundImage: 'radial-gradient(circle, gray 1px, transparent 1px)',
           backgroundSize: '24px 24px'
         }} />
       </div>
 
       <div className="flex h-screen">
-        <Sidebar />
+        <div className={cn("sidebar-animation", focusMode && "opacity-80 hover:opacity-100 transition-opacity")}>
+          <Sidebar />
+        </div>
         <main className="flex-1 overflow-auto">
           {/* 顶部欢迎横幅 - 使用粒子背景 */}
           <ParticleBackground 
-            className="w-full border-b mb-2" 
+            className={cn(
+              "w-full border-b mb-2 main-content-header particle-background",
+              focusMode && "opacity-80 hover:opacity-100 transition-opacity"
+            )}
             particleCount={40}
             colorScheme="mixed"
             density="medium"
@@ -122,30 +133,35 @@ const MainLayout: React.FC = () => {
                   </motion.p>
                 </div>
                 
-                {/* 用户头像 */}
-                {user && (
-                  <motion.div
-                    initial={{ scale: 0.8, opacity: 0 }}
-                    animate={{ scale: 1, opacity: 1 }}
-                    transition={{ delay: 0.2 }}
-                  >
-                    <Avatar className="h-10 w-10 border-2 border-primary/20">
-                      {user.avatar ? (
-                        <AvatarImage src={user.avatar} alt={user.username} />
-                      ) : (
-                        <AvatarFallback>{user.username?.[0]?.toUpperCase()}</AvatarFallback>
-                      )}
-                      
-                      {/* 同步状态指示器 - 头像上的小标记 */}
-                      {user.syncStatus === 'syncing' && (
-                        <div className="absolute -top-1 -right-1 h-3 w-3 bg-blue-500 rounded-full animate-pulse" />
-                      )}
-                      {user.syncStatus === 'synced' && (
-                        <div className="absolute -top-1 -right-1 h-3 w-3 bg-green-500 rounded-full" />
-                      )}
-                    </Avatar>
-                  </motion.div>
-                )}
+                <div className="flex items-center gap-3">
+                  {/* 主题切换按钮 */}
+                  <ThemeToggleButtons />
+                  
+                  {/* 用户头像 */}
+                  {user && (
+                    <motion.div
+                      initial={{ scale: 0.8, opacity: 0 }}
+                      animate={{ scale: 1, opacity: 1 }}
+                      transition={{ delay: 0.2 }}
+                    >
+                      <Avatar className="h-10 w-10 border-2 border-primary/20">
+                        {user.avatar ? (
+                          <AvatarImage src={user.avatar} alt={user.username} />
+                        ) : (
+                          <AvatarFallback>{user.username?.[0]?.toUpperCase()}</AvatarFallback>
+                        )}
+                        
+                        {/* 同步状态指示器 - 头像上的小标记 */}
+                        {user.syncStatus === 'syncing' && (
+                          <div className="absolute -top-1 -right-1 h-3 w-3 bg-blue-500 rounded-full animate-pulse" />
+                        )}
+                        {user.syncStatus === 'synced' && (
+                          <div className="absolute -top-1 -right-1 h-3 w-3 bg-green-500 rounded-full" />
+                        )}
+                      </Avatar>
+                    </motion.div>
+                  )}
+                </div>
               </div>
             </div>
           </ParticleBackground>
@@ -166,7 +182,10 @@ const MainLayout: React.FC = () => {
           </div>
           
           {/* 页脚 */}
-          <footer className="bg-card border-t mt-auto p-4">
+          <footer className={cn(
+            "bg-card border-t mt-auto p-4 footer-container",
+            focusMode && "opacity-60 hover:opacity-100 transition-opacity"
+          )}>
             <div className="container mx-auto flex flex-col md:flex-row justify-between items-center gap-2">
               <div className="text-sm text-muted-foreground text-center md:text-left">
                 © 2023 MindMap Hub. All rights reserved.

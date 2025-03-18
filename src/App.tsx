@@ -7,6 +7,9 @@ import { AuthProvider } from "./lib/auth";
 import { initializeStorage } from "./lib/storage";
 import { initializeMindMapStorage } from "./lib/mindmapStorage";
 import { useEffect } from "react";
+import { ThemeProvider } from "./contexts/ThemeContext";
+import ThemeRoot from "./components/theme/ThemeRoot";
+import "./styles/theme.css";
 import ProtectedRoute from "./components/ProtectedRoute";
 import MainLayout from "./layouts/MainLayout";
 import Index from "./pages/Index";
@@ -43,57 +46,60 @@ function App() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <TooltipProvider>
-        <AuthProvider>
-          <ActivityTracker />
-          <Toaster />
-          <Sonner />
-          <BrowserRouter basename={baseName}>
-            <Routes>
-              <Route path="/" element={<Index />} />
-              <Route path="/login" element={<Login />} />
-              <Route path="/register" element={<Register />} />
-              
-              {/* 受保护的路由 - 需要用户登录 */}
-              <Route element={<ProtectedRoute />}>
-                <Route element={<MainLayout />}>
-                  <Route path="/dashboard" element={<Dashboard />} />
-                  <Route path="/mindmaps" element={<MyMindMaps />} />
-                  <Route path="/upload" element={<MaterialUpload />} />
-                  <Route path="/search" element={<MaterialSearch />} />
-                  <Route path="/material/:id" element={<MaterialDetail />} />
-                  <Route path="/discussion" element={<DiscussionCenter />} />
-                  <Route path="/profile" element={<PersonalCenter />} />
-                  <Route path="/global-material-map" element={<Navigate to="/search?tab=mindmaps" replace />} />
+      <ThemeProvider>
+        <ThemeRoot />
+        <TooltipProvider>
+          <AuthProvider>
+            <ActivityTracker />
+            <Toaster />
+            <Sonner />
+            <BrowserRouter basename={baseName}>
+              <Routes>
+                <Route path="/" element={<Index />} />
+                <Route path="/login" element={<Login />} />
+                <Route path="/register" element={<Register />} />
+                
+                {/* 受保护的路由 - 需要用户登录 */}
+                <Route element={<ProtectedRoute />}>
+                  <Route element={<MainLayout />}>
+                    <Route path="/dashboard" element={<Dashboard />} />
+                    <Route path="/mindmaps" element={<MyMindMaps />} />
+                    <Route path="/upload" element={<MaterialUpload />} />
+                    <Route path="/search" element={<MaterialSearch />} />
+                    <Route path="/material/:id" element={<MaterialDetail />} />
+                    <Route path="/discussion" element={<DiscussionCenter />} />
+                    <Route path="/profile" element={<PersonalCenter />} />
+                    <Route path="/global-material-map" element={<Navigate to="/search?tab=mindmaps" replace />} />
+                  </Route>
                 </Route>
-              </Route>
-              
-              {/* 受保护的路由 - 需要管理员权限 */}
-              <Route element={<ProtectedRoute requireAdmin={true} />}>
-                <Route element={<MainLayout />}>
-                  <Route path="/admin/materials" element={<MaterialManagement />} />
-                  <Route path="/admin/users" element={<UserManagement />} />
+                
+                {/* 受保护的路由 - 需要管理员权限 */}
+                <Route element={<ProtectedRoute requireAdmin={true} />}>
+                  <Route element={<MainLayout />}>
+                    <Route path="/admin/materials" element={<MaterialManagement />} />
+                    <Route path="/admin/users" element={<UserManagement />} />
+                  </Route>
                 </Route>
-              </Route>
-              
-              {/* 重定向从index到dashboard */}
-              <Route path="/app" element={<Navigate to="/dashboard" replace />} />
-              
-              {/* 新增的路由 */}
-              <Route path="/mindmap-editor/:id" element={
-                <ProtectedRoute>
-                  <MindMapEditor />
-                </ProtectedRoute>
-              } />
-              <Route path="/mindmap-view/:id" element={<MindMapView />} />
-              <Route path="/mindmap-materials/:mapId/:nodeId" element={<MindMapMaterials />} />
-              
-              {/* 捕获所有路由 */}
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-          </BrowserRouter>
-        </AuthProvider>
-      </TooltipProvider>
+                
+                {/* 重定向从index到dashboard */}
+                <Route path="/app" element={<Navigate to="/dashboard" replace />} />
+                
+                {/* 新增的路由 */}
+                <Route path="/mindmap-editor/:id" element={
+                  <ProtectedRoute>
+                    <MindMapEditor />
+                  </ProtectedRoute>
+                } />
+                <Route path="/mindmap-view/:id" element={<MindMapView />} />
+                <Route path="/mindmap-materials/:mapId/:nodeId" element={<MindMapMaterials />} />
+                
+                {/* 捕获所有路由 */}
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+            </BrowserRouter>
+          </AuthProvider>
+        </TooltipProvider>
+      </ThemeProvider>
     </QueryClientProvider>
   );
 }

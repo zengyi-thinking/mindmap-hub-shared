@@ -142,7 +142,7 @@ const UsageReport: React.FC = () => {
     // 清理定时器
     return () => {
       if (intervalId) {
-        clearInterval(intervalId);
+      clearInterval(intervalId);
       }
       
       // 在组件卸载时记录不活动

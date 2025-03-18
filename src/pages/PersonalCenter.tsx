@@ -1,4 +1,3 @@
-
 import React from 'react';
 import UserProfileForm from '@/components/profile/UserProfileForm';
 import UserActivityLogs from '@/components/profile/UserActivityLogs';
@@ -7,6 +6,7 @@ import { User, ActivityIcon, FileIcon, ShieldIcon } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useAuth } from '@/lib/auth';
 import styles from './PersonalCenter.module.css';
+import ThemeSettings from '@/components/theme/ThemeSettings';
 
 const PersonalCenter = () => {
   const { user } = useAuth();
@@ -38,6 +38,10 @@ const PersonalCenter = () => {
           <TabsTrigger value="security" className={`flex items-center gap-1.5 ${styles.tabTrigger} data-[state=active]:${styles.activeTab}`}>
             <ShieldIcon className="h-4 w-4" />
             数据隐私
+          </TabsTrigger>
+          <TabsTrigger value="appearance" className={`flex items-center gap-1.5 ${styles.tabTrigger} data-[state=active]:${styles.activeTab}`}>
+            <User className="h-4 w-4" />
+            界面设置
           </TabsTrigger>
         </TabsList>
 
@@ -96,6 +100,10 @@ const PersonalCenter = () => {
               </div>
             </div>
           </motion.div>
+        </TabsContent>
+
+        <TabsContent value="appearance" className={styles.contentFadeIn}>
+          <ThemeSettings />
         </TabsContent>
       </Tabs>
     </div>
