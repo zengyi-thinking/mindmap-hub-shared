@@ -1,4 +1,3 @@
-
 import { useState, useCallback } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useAuth } from '@/lib/auth';
@@ -42,7 +41,7 @@ export function useMindMapData() {
         description: "思维导图需要一个标题才能保存",
         variant: "destructive"
       });
-      return;
+      return false;
     }
     
     if (!user) {
@@ -51,39 +50,41 @@ export function useMindMapData() {
         description: "您需要登录后才能保存思维导图",
         variant: "destructive"
       });
-      return;
+      return false;
     }
     
-    const mindMapData: Partial<MindMap> = {
-      title,
-      description,
-      content: {
-        nodes,
-        edges,
-        version: "1.0"
-      },
-      tags,
-      updatedAt: new Date().toISOString(),
-      creator: user.username || 'Unknown',
-      starred: false,
-      shared: isPublic,
-      viewCount: 0
-    };
-    
-    if (isNew) {
-      const newMindMap = mindmapService.add(mindMapData);
-      toast({
-        title: "保存成功",
-        description: "思维导图已成功创建"
-      });
-      // Navigate to edit the newly created mindmap
-      navigate(`/mindmap-editor/${newMindMap.id}`);
-    } else if (id) {
-      mindmapService.update(parseInt(id), mindMapData);
-      toast({
-        title: "保存成功",
-        description: "思维导图已成功更新"
-      });
+    try {
+      const mindMapData: Partial<MindMap> = {
+        title,
+        description,
+        content: {
+          nodes,
+          edges,
+          version: "1.0"
+        },
+        tags,
+        updatedAt: new Date().toISOString(),
+        creator: user.username || 'Unknown',
+        starred: false,
+        shared: isPublic,
+        viewCount: 0
+      };
+      
+      if (isNew) {
+        const newMindMap = mindmapService.add(mindMapData);
+        
+        // Navigate to edit the newly created mindmap
+        navigate(`/mindmap-editor/${newMindMap.id}`);
+        return true;
+      } else if (id) {
+        mindmapService.update(parseInt(id), mindMapData);
+        return true;
+      }
+      
+      return false;
+    } catch (error) {
+      console.error("保存思维导图失败:", error);
+      return false;
     }
   }, [title, description, tags, isPublic, isNew, id, user, navigate]);
   

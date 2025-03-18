@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { mindmapService } from '@/lib/mindmapStorage';
@@ -70,8 +69,8 @@ export const useMyMindMaps = () => {
       description: `思维导图「${newMindMap.title}」已创建`,
     });
     
-    // 在实际应用中，这里应该导航到思维导图编辑器
-    // navigate(`/mindmap-editor/${newMindMap.id}`);
+    // 导航到思维导图编辑器
+    navigate(`/mindmap-editor/${newMindMap.id}`);
   };
   
   const toggleStarred = (id: number, e?: React.MouseEvent) => {
@@ -140,8 +139,8 @@ export const useMyMindMaps = () => {
   
   const handleEditMindMap = (id: number) => {
     console.log(`编辑思维导图: ${id}`);
-    // 在实际应用中，这里应该导航到思维导图编辑器
-    // navigate(`/mindmap-editor/${id}`);
+    // 导航到思维导图编辑器
+    navigate(`/mindmap-editor/${id}`);
   };
   
   const filteredMindMaps = mindMaps.filter(mindMap => 

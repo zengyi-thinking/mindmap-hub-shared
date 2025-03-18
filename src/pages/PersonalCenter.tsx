@@ -10,11 +10,11 @@ import ThemeSettings from '@/components/theme/ThemeSettings';
 
 const PersonalCenter = () => {
   const { user } = useAuth();
-
+  
   return (
     <div className={`space-y-6 ${styles.pageBackground}`}>
       <div className={styles.gradientOverlay}></div>
-      <motion.div
+      <motion.div 
         initial={{ opacity: 0, y: -10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.3 }}
@@ -24,7 +24,7 @@ const PersonalCenter = () => {
           管理您的个人资料和账户设置
         </p>
       </motion.div>
-
+      
       <Tabs defaultValue="profile" className={`w-full ${styles.tabsContainer}`}>
         <TabsList className={`grid grid-cols-3 mb-8 ${styles.tabsList}`}>
           <TabsTrigger value="profile" className={`flex items-center gap-1.5 ${styles.tabTrigger} data-[state=active]:${styles.activeTab}`}>
@@ -54,7 +54,7 @@ const PersonalCenter = () => {
         </TabsContent>
 
         <TabsContent value="security" className={styles.contentFadeIn}>
-          <motion.div
+        <motion.div 
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.3 }}
@@ -84,7 +84,7 @@ const PersonalCenter = () => {
                     <div className="bg-green-100 dark:bg-green-900 rounded-lg p-4">
                       <h4 className="font-medium mb-2 text-green-800 dark:text-green-300">实时同步保护</h4>
                       <p className="text-sm text-green-700 dark:text-green-400">您在一处所做的更改会安全地同步到您的所有设备，无需担心数据泄露。</p>
-                    </div>
+                  </div>
                     
                     <div className="bg-green-100 dark:bg-green-900 rounded-lg p-4">
                       <h4 className="font-medium mb-2 text-green-800 dark:text-green-300">完整的隐私保护</h4>
@@ -99,13 +99,13 @@ const PersonalCenter = () => {
                 </div>
               </div>
             </div>
-          </motion.div>
-        </TabsContent>
-
+        </motion.div>
+            </TabsContent>
+            
         <TabsContent value="appearance" className={styles.contentFadeIn}>
           <ThemeSettings />
-        </TabsContent>
-      </Tabs>
+            </TabsContent>
+          </Tabs>
     </div>
   );
 };
