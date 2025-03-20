@@ -44,6 +44,15 @@
     --sidebar-accent-foreground: 222.2 47.4% 11.2%;
     --sidebar-border: 210 40% 90%;
     --sidebar-ring: 210 100% 50%;
+
+    --color-primary: #3b82f6; /* 默认蓝色 */
+    --color-primary-dark: #1d4ed8;
+    --color-primary-light: #60a5fa;
+    --color-primary-bg: rgba(59, 130, 246, 0.1);
+    
+    /* 颜色过渡效果 */
+    --transition-color: color 0.3s ease, background-color 0.3s ease, border-color 0.3s ease, fill 0.3s ease, stroke 0.3s ease;
+    --transition-transform: transform 0.2s ease;
   }
 
   .dark {
@@ -443,4 +452,18 @@
 .data-preview {
   position: relative;
   z-index: 2;
+}
+
+/* 确保所有使用主题颜色的元素都应用过渡效果 */
+button, 
+.btn,
+.text-primary,
+.bg-primary,
+.border-primary,
+[class*="text-primary"],
+[class*="bg-primary"],
+[class*="border-primary"],
+[style*="color"],
+[style*="background-color"] {
+  transition: var(--transition-color);
 }

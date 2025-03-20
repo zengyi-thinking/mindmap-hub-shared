@@ -55,9 +55,9 @@ const ParticleBackground: React.FC<ParticleBackgroundProps> = ({
     switch (colorScheme) {
       case 'blue': return `rgba(125, 211, 252, ${Math.random() * 0.5 + 0.3})`;
       case 'purple': return `rgba(192, 132, 252, ${Math.random() * 0.5 + 0.3})`;
-      case 'mixed': 
-        return Math.random() > 0.5 
-          ? `rgba(125, 211, 252, ${Math.random() * 0.5 + 0.3})` 
+      case 'mixed':
+        return Math.random() > 0.5
+          ? `rgba(125, 211, 252, ${Math.random() * 0.5 + 0.3})`
           : `rgba(192, 132, 252, ${Math.random() * 0.5 + 0.3})`;
       default: return `rgba(125, 211, 252, ${Math.random() * 0.5 + 0.3})`;
     }
@@ -133,8 +133,8 @@ const ParticleBackground: React.FC<ParticleBackgroundProps> = ({
 
   return (
     <div className={cn("relative overflow-hidden", className)}>
-      <canvas 
-        ref={canvasRef} 
+      <canvas
+        ref={canvasRef}
         className="absolute inset-0 z-0"
       />
       <div className="relative z-10">

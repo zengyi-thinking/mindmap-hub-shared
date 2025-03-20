@@ -244,9 +244,192 @@
   opacity: 0.2;
 }
 
-/* 通用过渡效果 */
+/* 主题过渡效果 */
 .theme-transition {
-  transition-property: color, background-color, border-color, fill, stroke;
-  transition-duration: 200ms;
-  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition: background-color 0.3s ease,
+              color 0.3s ease,
+              border-color 0.3s ease,
+              box-shadow 0.3s ease;
+}
+
+/* 主题颜色类 */
+.theme-blue {
+  --color-primary: #3b82f6;
+  --color-primary-dark: #1d4ed8;
+  --color-primary-light: #60a5fa;
+  --color-primary-bg: rgba(59, 130, 246, 0.1);
+  --primary: 217 91% 60%;
+  --ring: 217 91% 60%;
+}
+
+.theme-purple {
+  --color-primary: #8b5cf6;
+  --color-primary-dark: #6d28d9;
+  --color-primary-light: #a78bfa;
+  --color-primary-bg: rgba(139, 92, 246, 0.1);
+  --primary: 270 76% 85%;
+  --ring: 270 76% 85%;
+}
+
+.theme-green {
+  --color-primary: #10b981;
+  --color-primary-dark: #059669;
+  --color-primary-light: #34d399;
+  --color-primary-bg: rgba(16, 185, 129, 0.1);
+  --primary: 153 72% 40%;
+  --ring: 153 72% 40%;
+}
+
+.theme-pink {
+  --color-primary: #ec4899;
+  --color-primary-dark: #db2777;
+  --color-primary-light: #f472b6;
+  --color-primary-bg: rgba(236, 72, 153, 0.1);
+  --primary: 327 73% 63%;
+  --ring: 327 73% 63%;
+}
+
+.theme-orange {
+  --color-primary: #f97316;
+  --color-primary-dark: #ea580c;
+  --color-primary-light: #fb923c;
+  --color-primary-bg: rgba(249, 115, 22, 0.1);
+  --primary: 27 96% 54%;
+  --ring: 27 96% 54%;
+}
+
+/* 暗色模式主题 */
+.dark.theme-blue {
+  --color-primary: #60a5fa;
+  --color-primary-dark: #3b82f6;
+  --color-primary-light: #93c5fd;
+  --color-primary-bg: rgba(59, 130, 246, 0.2);
+  --primary: 217 91% 68%;
+  --ring: 217 91% 68%;
+}
+
+.dark.theme-purple {
+  --color-primary: #a78bfa;
+  --color-primary-dark: #8b5cf6;
+  --color-primary-light: #c4b5fd;
+  --color-primary-bg: rgba(139, 92, 246, 0.2);
+  --primary: 270 76% 76%;
+  --ring: 270 76% 76%;
+}
+
+.dark.theme-green {
+  --color-primary: #34d399;
+  --color-primary-dark: #10b981;
+  --color-primary-light: #6ee7b7;
+  --color-primary-bg: rgba(16, 185, 129, 0.2);
+  --primary: 153 72% 52%;
+  --ring: 153 72% 52%;
+}
+
+.dark.theme-pink {
+  --color-primary: #f472b6;
+  --color-primary-dark: #ec4899;
+  --color-primary-light: #f9a8d4;
+  --color-primary-bg: rgba(236, 72, 153, 0.2);
+  --primary: 327 73% 70%;
+  --ring: 327 73% 70%;
+}
+
+.dark.theme-orange {
+  --color-primary: #fb923c;
+  --color-primary-dark: #f97316;
+  --color-primary-light: #fed7aa;
+  --color-primary-bg: rgba(249, 115, 22, 0.2);
+  --primary: 27 96% 61%;
+  --ring: 27 96% 61%;
+}
+
+/* 确保所有使用主题颜色的元素都应用过渡效果 */
+button, 
+.btn,
+.text-primary,
+.bg-primary,
+.border-primary,
+[class*="text-primary"],
+[class*="bg-primary"],
+[class*="border-primary"],
+[style*="color"],
+[style*="background-color"] {
+  transition: var(--transition-color, color 0.3s ease, background-color 0.3s ease, border-color 0.3s ease);
+}
+
+/* 添加按钮悬停效果增强 */
+.btn-primary,
+button[class*="primary"],
+[class*="btn"][class*="primary"] {
+  background-color: var(--color-primary, hsl(var(--primary)));
+  color: white;
+}
+
+.btn-primary:hover,
+button[class*="primary"]:hover,
+[class*="btn"][class*="primary"]:hover {
+  background-color: var(--color-primary-dark, hsl(var(--primary)));
+}
+
+/* 专注模式样式 */
+.focus-mode .decoration-element {
+  opacity: 0.3;
+}
+
+/* 主题相关的通用样式 */
+.text-primary {
+  color: var(--color-primary);
+}
+
+.bg-primary {
+  background-color: var(--color-primary);
+}
+
+.bg-primary-dark {
+  background-color: var(--color-primary-dark);
+}
+
+.bg-primary-light {
+  background-color: var(--color-primary-light);
+}
+
+.bg-primary-bg {
+  background-color: var(--color-primary-bg);
+}
+
+.border-primary {
+  border-color: var(--color-primary);
+}
+
+.hover\:bg-primary:hover {
+  background-color: var(--color-primary);
+}
+
+.hover\:text-primary:hover {
+  color: var(--color-primary);
+}
+
+.focus\:ring-primary:focus {
+  --tw-ring-color: var(--color-primary);
+}
+
+/* 主题相关的动画效果 */
+@keyframes theme-transition {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.theme-transition-enter {
+  animation: theme-transition 0.3s ease-out;
+}
+
+.theme-transition-exit {
+  animation: theme-transition 0.3s ease-in reverse;
 } 

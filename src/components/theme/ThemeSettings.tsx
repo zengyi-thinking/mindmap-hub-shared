@@ -6,8 +6,10 @@ import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useTheme, ThemeColor, FontStyle } from '@/contexts/ThemeContext';
-import { Check, Moon, Sun, Paintbrush, Type, Focus, X } from 'lucide-react';
+import { Check, Moon, Sun, Paintbrush, Type, Focus, X, Palette } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import ThemeSettingsDialog from './ThemeSettingsDialog';
 
 type ThemeButtonProps = {
   color: ThemeColor;
@@ -143,38 +145,60 @@ export const ThemeSettingsButton: React.FC = () => {
   );
 };
 
+/**
+ * 主题切换按钮组件
+ * 包含暗色模式切换和主题设置对话框触发器
+ */
 export const ThemeToggleButtons: React.FC = () => {
-  const { darkMode, toggleDarkMode, focusMode, toggleFocusMode } = useTheme();
+  const { darkMode, toggleDarkMode, themeColor } = useTheme();
   
   return (
-    <div className="flex gap-2">
-      <Button 
-        variant="ghost" 
-        size="icon" 
-        className={cn(
-          "h-9 w-9 rounded-full transition-colors",
-          darkMode ? "text-yellow-200 bg-blue-900/20" : "text-blue-900"
-        )}
-        onClick={toggleDarkMode}
-        title={darkMode ? "切换到亮色模式" : "切换到暗色模式"}
-      >
-        {darkMode ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
-      </Button>
-      
-      <Button 
-        variant="ghost" 
-        size="icon" 
-        className={cn(
-          "h-9 w-9 rounded-full transition-colors",
-          focusMode && "text-primary bg-primary/10"
-        )}
-        onClick={toggleFocusMode}
-        title={focusMode ? "退出专注模式" : "进入专注模式"}
-      >
-        <Focus className="h-4 w-4" />
-      </Button>
-      
-      <ThemeSettingsButton />
+    <div className="flex items-center gap-2">
+      <TooltipProvider>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={toggleDarkMode}
+              className="transition-colors"
+            >
+              {darkMode ? <Moon className="h-5 w-5" /> : <Sun className="h-5 w-5" />}
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent>
+            <p>{darkMode ? '切换亮色模式' : '切换暗色模式'}</p>
+          </TooltipContent>
+        </Tooltip>
+      </TooltipProvider>
+
+      <TooltipProvider>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <ThemeSettingsDialog 
+              trigger={
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="transition-colors relative"
+                >
+                  <Palette className="h-5 w-5" />
+                  <span 
+                    className="absolute bottom-1 right-1 h-2 w-2 rounded-full" 
+                    style={{ 
+                      backgroundColor: `var(--color-primary)`,
+                      boxShadow: '0 0 0 2px var(--background)' 
+                    }}
+                  />
+                </Button>
+              }
+            />
+          </TooltipTrigger>
+          <TooltipContent>
+            <p>主题设置</p>
+          </TooltipContent>
+        </Tooltip>
+      </TooltipProvider>
     </div>
   );
 };

@@ -1,196 +1,239 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 
-// 定义主题色彩选项
-export type ThemeColor = 'blue' | 'purple' | 'green' | 'pink' | 'orange';
+// 定义主题类型和颜色类型
+type ThemeColor = 'blue' | 'purple' | 'green' | 'pink' | 'orange';
 
-// 定义字体选项
-export type FontStyle = 'default' | 'rounded' | 'serif' | 'mono';
+// 主题颜色预设值
+export const themeColors = {
+  blue: {
+    primary: '#3b82f6',
+    primaryDark: '#1d4ed8',
+    primaryLight: '#60a5fa',
+    primaryBg: 'rgba(59, 130, 246, 0.1)',
+  },
+  purple: {
+    primary: '#8b5cf6',
+    primaryDark: '#6d28d9',
+    primaryLight: '#a78bfa',
+    primaryBg: 'rgba(139, 92, 246, 0.1)',
+  },
+  green: {
+    primary: '#10b981',
+    primaryDark: '#059669',
+    primaryLight: '#34d399',
+    primaryBg: 'rgba(16, 185, 129, 0.1)',
+  },
+  pink: {
+    primary: '#ec4899',
+    primaryDark: '#db2777',
+    primaryLight: '#f472b6',
+    primaryBg: 'rgba(236, 72, 153, 0.1)',
+  },
+  orange: {
+    primary: '#f97316',
+    primaryDark: '#ea580c',
+    primaryLight: '#fb923c',
+    primaryBg: 'rgba(249, 115, 22, 0.1)',
+  },
+};
 
 // 主题上下文类型
 interface ThemeContextType {
-  // 暗色/亮色模式
   darkMode: boolean;
   toggleDarkMode: () => void;
-  
-  // 专注模式
-  focusMode: boolean;
-  toggleFocusMode: () => void;
-  
-  // 主题色
   themeColor: ThemeColor;
   setThemeColor: (color: ThemeColor) => void;
-  
-  // 字体
-  fontStyle: FontStyle;
-  setFontStyle: (font: FontStyle) => void;
-  
-  // 获取当前主题CSS类
+  colors: typeof themeColors.blue;
   getThemeClasses: () => string;
+  focusMode: boolean;
+  toggleFocusMode?: () => void;
 }
 
 // 创建上下文
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
-// 主题色彩映射
-const themeColorClasses: Record<ThemeColor, { light: string, dark: string }> = {
-  blue: {
-    light: 'theme-blue-light',
-    dark: 'theme-blue-dark'
-  },
-  purple: {
-    light: 'theme-purple-light',
-    dark: 'theme-purple-dark'
-  },
-  green: {
-    light: 'theme-green-light', 
-    dark: 'theme-green-dark'
-  },
-  pink: {
-    light: 'theme-pink-light',
-    dark: 'theme-pink-dark'
-  },
-  orange: {
-    light: 'theme-orange-light',
-    dark: 'theme-orange-dark'
-  }
-};
+// 主题提供者属性
+interface ThemeProviderProps {
+  children: ReactNode;
+}
 
-// 字体样式映射
-const fontStyleClasses: Record<FontStyle, string> = {
-  default: 'font-default',
-  rounded: 'font-rounded',
-  serif: 'font-serif',
-  mono: 'font-mono'
-};
+// 主题提供者组件
+export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
+  // 从本地存储中获取暗色模式设置
+  const [darkMode, setDarkMode] = useState<boolean>(() => {
+    try {
+      const saved = localStorage.getItem('darkMode');
+      const initialValue = saved ? JSON.parse(saved) : false;
+      return initialValue || window.matchMedia('(prefers-color-scheme: dark)').matches;
+    } catch (error) {
+      console.error('Error reading darkMode from localStorage:', error);
+      return false;
+    }
+  });
 
-// 本地存储键
-const LOCAL_STORAGE_KEY = 'mindmap-hub-theme-settings';
+  // 从本地存储中获取主题颜色设置
+  const [themeColor, setThemeColor] = useState<ThemeColor>(() => {
+    try {
+      const savedColor = localStorage.getItem('themeColor');
+      return (savedColor as ThemeColor) || 'blue';
+    } catch (error) {
+      console.error('Error reading themeColor from localStorage:', error);
+      return 'blue';
+    }
+  });
+  
+  // 从本地存储中获取专注模式设置
+  const [focusMode, setFocusMode] = useState<boolean>(() => {
+    try {
+      const saved = localStorage.getItem('focusMode');
+      return saved ? JSON.parse(saved) : false;
+    } catch (error) {
+      console.error('Error reading focusMode from localStorage:', error);
+      return false;
+    }
+  });
 
-export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  // 从本地存储加载设置或使用默认值
-  const loadSettingsFromStorage = (): {
-    darkMode: boolean;
-    focusMode: boolean;
-    themeColor: ThemeColor;
-    fontStyle: FontStyle;
-  } => {
-    const savedSettings = localStorage.getItem(LOCAL_STORAGE_KEY);
-    
-    if (savedSettings) {
-      try {
-        return JSON.parse(savedSettings);
-      } catch (e) {
-        console.error('Failed to parse theme settings:', e);
-      }
-    }
-    
-    // 默认值
-    return {
-      darkMode: window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches,
-      focusMode: false,
-      themeColor: 'blue',
-      fontStyle: 'default'
-    };
-  };
-  
-  // 初始化状态
-  const [settings, setSettings] = useState(loadSettingsFromStorage);
-  const { darkMode, focusMode, themeColor, fontStyle } = settings;
-  
-  // 当设置变化时保存到本地存储
-  useEffect(() => {
-    localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(settings));
-    
-    // 设置文档根元素的类，适用于暗色模式
-    if (darkMode) {
-      document.documentElement.classList.add('dark');
-    } else {
-      document.documentElement.classList.remove('dark');
-    }
-    
-    // 设置文档根元素的类，适用于专注模式
-    if (focusMode) {
-      document.documentElement.classList.add('focus-mode');
-    } else {
-      document.documentElement.classList.remove('focus-mode');
-    }
-    
-    // 应用主题色彩类
-    document.documentElement.classList.forEach(cls => {
-      if (cls.startsWith('theme-')) {
-        document.documentElement.classList.remove(cls);
-      }
-    });
-    document.documentElement.classList.add(
-      darkMode ? themeColorClasses[themeColor].dark : themeColorClasses[themeColor].light
-    );
-    
-    // 应用字体样式类
-    document.documentElement.classList.forEach(cls => {
-      if (cls.startsWith('font-') && cls !== 'font-sans') {
-        document.documentElement.classList.remove(cls);
-      }
-    });
-    document.documentElement.classList.add(fontStyleClasses[fontStyle]);
-    
-  }, [settings]);
-  
+  // 获取当前主题颜色的值
+  const colors = themeColors[themeColor];
+
   // 切换暗色模式
   const toggleDarkMode = () => {
-    setSettings(prev => ({
-      ...prev,
-      darkMode: !prev.darkMode
-    }));
+    setDarkMode((prev) => !prev);
   };
   
   // 切换专注模式
   const toggleFocusMode = () => {
-    setSettings(prev => ({
-      ...prev,
-      focusMode: !prev.focusMode
-    }));
+    setFocusMode((prev) => !prev);
   };
-  
-  // 设置主题色
-  const setThemeColor = (color: ThemeColor) => {
-    setSettings(prev => ({
-      ...prev,
-      themeColor: color
-    }));
-  };
-  
-  // 设置字体
-  const setFontStyle = (font: FontStyle) => {
-    setSettings(prev => ({
-      ...prev,
-      fontStyle: font
-    }));
-  };
-  
-  // 获取当前主题的CSS类
+
+  // 获取主题类名
   const getThemeClasses = () => {
-    const colorClass = darkMode 
-      ? themeColorClasses[themeColor].dark 
-      : themeColorClasses[themeColor].light;
-    
-    const fontClass = fontStyleClasses[fontStyle];
-    const focusClass = focusMode ? 'focus-mode' : '';
-    
-    return [colorClass, fontClass, focusClass, darkMode ? 'dark' : ''].filter(Boolean).join(' ');
+    const classes = [];
+    if (darkMode) {
+      classes.push('dark');
+    }
+    classes.push(`theme-${themeColor}`);
+    if (focusMode) {
+      classes.push('focus-mode');
+    }
+    return classes.join(' ');
+  };
+
+  // 应用主题颜色到CSS变量
+  const applyThemeColors = () => {
+    try {
+      if (!colors) return;
+      
+      // 设置我们自定义的CSS变量
+      document.documentElement.style.setProperty('--color-primary', colors.primary);
+      document.documentElement.style.setProperty('--color-primary-dark', colors.primaryDark);
+      document.documentElement.style.setProperty('--color-primary-light', colors.primaryLight);
+      document.documentElement.style.setProperty('--color-primary-bg', colors.primaryBg);
+      
+      // 同时更新Tailwind HSL变量，确保按钮等元素也使用主题色
+      // 转换十六进制到HSL的简单方法
+      document.documentElement.style.setProperty('--primary', toHsl(colors.primary));
+      document.documentElement.style.setProperty('--ring', toHsl(colors.primary));
+    } catch (error) {
+      console.error('Error applying theme colors:', error);
+    }
   };
   
+  // 简单的十六进制转HSL函数
+  const toHsl = (hex: string): string => {
+    // 移除#前缀如果存在
+    hex = hex.replace('#', '');
+    
+    // 转换十六进制到RGB
+    const r = parseInt(hex.substring(0, 2), 16) / 255;
+    const g = parseInt(hex.substring(2, 4), 16) / 255;
+    const b = parseInt(hex.substring(4, 6), 16) / 255;
+    
+    // 找出最大和最小RGB值
+    const max = Math.max(r, g, b);
+    const min = Math.min(r, g, b);
+    
+    // 计算亮度
+    let l = (max + min) / 2;
+    
+    let h = 0, s = 0;
+    
+    if (max !== min) {
+      // 计算饱和度
+      s = l > 0.5 ? (max - min) / (2 - max - min) : (max - min) / (max + min);
+      
+      // 计算色相
+      if (max === r) {
+        h = (g - b) / (max - min) + (g < b ? 6 : 0);
+      } else if (max === g) {
+        h = (b - r) / (max - min) + 2;
+      } else {
+        h = (r - g) / (max - min) + 4;
+      }
+      h *= 60;
+    }
+    
+    // 转换为百分比值
+    s = Math.round(s * 100);
+    l = Math.round(l * 100);
+    h = Math.round(h);
+    
+    return `${h} ${s}% ${l}%`;
+  };
+
+  // 当暗色模式或主题颜色改变时更新本地存储和应用主题
+  useEffect(() => {
+    try {
+      // 防止路由问题：使用requestAnimationFrame确保DOM更新不会干扰路由
+      requestAnimationFrame(() => {
+        // 设置深色模式类
+        document.documentElement.classList.toggle('dark', darkMode);
+        
+        // 设置专注模式类
+        document.documentElement.classList.toggle('focus-mode', focusMode);
+        
+        // 移除所有主题类
+        document.documentElement.className.split(' ')
+          .filter(cls => cls.startsWith('theme-'))
+          .forEach(cls => document.documentElement.classList.remove(cls));
+        
+        // 添加当前主题类
+        document.documentElement.classList.add(`theme-${themeColor}`);
+        
+        // 应用主题颜色
+        applyThemeColors();
+        
+        // 保存设置到本地存储
+        localStorage.setItem('darkMode', JSON.stringify(darkMode));
+        localStorage.setItem('themeColor', themeColor);
+        localStorage.setItem('focusMode', JSON.stringify(focusMode));
+      });
+    } catch (error) {
+      console.error('Error updating theme:', error);
+    }
+  }, [darkMode, themeColor, focusMode, colors]);
+
+  // 设置主题颜色
+  const handleSetThemeColor = (color: ThemeColor) => {
+    try {
+      setThemeColor(color);
+    } catch (error) {
+      console.error('Error setting theme color:', error);
+    }
+  };
+
+  // 提供上下文值
   const value = {
     darkMode,
     toggleDarkMode,
+    themeColor, 
+    setThemeColor: handleSetThemeColor,
+    colors,
+    getThemeClasses,
     focusMode,
-    toggleFocusMode,
-    themeColor,
-    setThemeColor,
-    fontStyle,
-    setFontStyle,
-    getThemeClasses
+    toggleFocusMode
   };
-  
+
   return (
     <ThemeContext.Provider value={value}>
       {children}
@@ -198,8 +241,8 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   );
 };
 
-// 自定义hook，方便使用主题上下文
-export const useTheme = () => {
+// 使用主题的自定义钩子
+export const useTheme = (): ThemeContextType => {
   const context = useContext(ThemeContext);
   if (context === undefined) {
     throw new Error('useTheme must be used within a ThemeProvider');

@@ -19,7 +19,7 @@ const SidebarNavigation: React.FC = () => {
   const { expanded } = useSidebar();
   const { user } = useAuth();
 
-  // 侧边栏导航项
+  // 侧边栏导航项 - 修正路径与App.tsx中的路由匹配
   const navItems = [
     {
       title: '仪表盘',
@@ -30,19 +30,19 @@ const SidebarNavigation: React.FC = () => {
     {
       title: '思维导图管理',
       icon: <BrainCircuit size="1.2rem" />,
-      path: '/mindmaps',
+      path: '/my-mindmaps',
       roles: ['user', 'admin']
     },
     {
       title: '资料搜索',
       icon: <Search size="1.2rem" />,
-      path: '/search',
+      path: '/material-search',
       roles: ['user', 'admin']
     },
     {
       title: '上传资料',
       icon: <FileUp size="1.2rem" />,
-      path: '/upload',
+      path: '/material-upload',
       roles: ['user', 'admin']
     },
     {
@@ -54,19 +54,19 @@ const SidebarNavigation: React.FC = () => {
     {
       title: '个人中心',
       icon: <User size="1.2rem" />,
-      path: '/profile',
+      path: '/personal',
       roles: ['user', 'admin']
     },
     {
       title: '管理资料',
       icon: <LayoutGrid size="1.2rem" />,
-      path: '/admin/materials',
+      path: '/material-management',
       roles: ['admin']
     },
     {
       title: '用户管理',
       icon: <Users size="1.2rem" />,
-      path: '/admin/users',
+      path: '/user-management',
       roles: ['admin']
     }
   ];
