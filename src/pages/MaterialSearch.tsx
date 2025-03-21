@@ -28,10 +28,11 @@ import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { mindmapService } from '@/lib/mindmapStorage';
 import { MindMap } from '@/types/mindmap';
+import MaterialMindMapViewer from '@/features/material-search/MaterialMindMapViewer';
 import { motion } from 'framer-motion';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Input } from '@/components/ui/input';
-import { ReactFlow, Background, Controls, BackgroundVariant, Node, Edge } from '@xyflow/react';
+import { Node, Edge } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 import { useToast } from '@/components/ui/use-toast';
 import { userFilesService } from '@/lib/storage';
@@ -769,34 +770,23 @@ const MaterialSearch: React.FC = () => {
                   </CardHeader>
                   
                   <CardContent className="p-0 flex-grow relative">
-                    <ReactFlow
-                      nodes={nodes}
-                      edges={edges}
-                      nodeTypes={nodeTypes}
-                      onNodeClick={handleNodeClick}
-                      fitView
-                      attributionPosition="bottom-right"
-                      zoomOnScroll={true}
-                      panOnScroll={true}
-                      elementsSelectable={true}
-                      onInit={onInitReactFlow}
-                    >
-                      <Background 
-                        variant={"dots" as BackgroundVariant}
-                        gap={20} 
-                        size={1} 
-                        color="hsl(var(--muted-foreground) / 0.3)"
-                      />
-                      <Controls 
-                        showInteractive={false}
-                        position="bottom-right"
-                        style={{
-                          borderRadius: '8px',
-                          backgroundColor: 'hsl(var(--background))',
-                          border: '1px solid hsl(var(--border))'
-                        }}
-                      />
-                    </ReactFlow>
+                    <MaterialMindMapViewer 
+                      onNodeClick={(nodeId, nodeData) => {
+                        // 获取节点标签
+                        const label = nodeData.label;
+                        
+                        // 更新导航路径
+                        setCurrentPath([...currentPath, label]);
+                        
+                        // 获取该标签的材料
+                        const materials = nodeData.materials 
+                          ? nodeData.materials.map((id) => userFilesService.getById(id)).filter(Boolean)
+                          : userFilesService.getByTag(label);
+                        
+                        setFolderMaterials(materials);
+                        setSelectedMaterial(null);
+                      }}
+                    />
                   </CardContent>
                 </Card>
               </div>
