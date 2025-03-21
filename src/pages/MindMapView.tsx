@@ -229,6 +229,15 @@ const MindMapView: React.FC = () => {
         </div>
         
         <div className="flex items-center gap-2">
+          {user && (
+            <Button 
+              variant="default" 
+              onClick={() => navigate(`/mindmap/${id}/edit`)}
+              className="mr-2"
+            >
+              编辑思维导图
+            </Button>
+          )}
           <Avatar className="h-8 w-8">
             <AvatarFallback>
               {mindMap.creator?.substring(0, 2) || 'UN'}

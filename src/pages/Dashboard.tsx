@@ -1,4 +1,3 @@
-
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import { useDashboardData } from "@/components/dashboard/hooks/useDashboardData";
@@ -24,7 +23,7 @@ const Dashboard = () => {
   } = useDashboardData();
 
   const createMindMap = () => {
-    navigate("/mindmap-editor/new");
+    navigate("/my-mindmaps", { state: { openCreateDialog: true } });
   };
 
   const uploadMaterial = () => {

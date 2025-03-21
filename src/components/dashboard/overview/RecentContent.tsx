@@ -36,7 +36,7 @@ const RecentContent: React.FC<RecentContentProps> = ({
   const navigate = useNavigate();
 
   const createMindMap = () => {
-    navigate("/mindmap/new/edit");
+    navigate("/my-mindmaps", { state: { openCreateDialog: true } });
   };
 
   const toggleStarred = (item: ContentItem, e: React.MouseEvent) => {

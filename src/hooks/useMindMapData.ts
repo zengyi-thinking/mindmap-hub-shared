@@ -74,7 +74,7 @@ export function useMindMapData() {
         const newMindMap = mindmapService.add(mindMapData);
         
         // Navigate to edit the newly created mindmap
-        navigate(`/mindmap-editor/${newMindMap.id}`);
+        navigate(`/mindmap/${newMindMap.id}/edit`);
         return true;
       } else if (id) {
         mindmapService.update(parseInt(id), mindMapData);

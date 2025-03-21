@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -47,7 +46,7 @@ const MindMapMaterials: React.FC = () => {
         <Button 
           variant="ghost" 
           size="icon" 
-          onClick={() => navigate(`/mindmap-editor/${mapId}`)}
+          onClick={() => navigate(`/mindmap/${mapId}/edit`)}
         >
           <ArrowLeft className="h-5 w-5" />
         </Button>
@@ -129,7 +128,7 @@ const MindMapMaterials: React.FC = () => {
           </p>
           <Button 
             className="mt-4"
-            onClick={() => navigate(`/mindmap-editor/${mapId}`)}
+            onClick={() => navigate(`/mindmap/${mapId}/edit`)}
           >
             返回编辑
           </Button>

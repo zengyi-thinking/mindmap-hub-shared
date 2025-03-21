@@ -70,7 +70,7 @@ export const useMyMindMaps = () => {
     });
     
     // 导航到思维导图编辑器
-    navigate(`/mindmap-editor/${newMindMap.id}`);
+    navigate(`/mindmap/${newMindMap.id}/edit`);
   };
   
   const toggleStarred = (id: number, e?: React.MouseEvent) => {
@@ -140,7 +140,7 @@ export const useMyMindMaps = () => {
   const handleEditMindMap = (id: number) => {
     console.log(`编辑思维导图: ${id}`);
     // 导航到思维导图编辑器
-    navigate(`/mindmap-editor/${id}`);
+    navigate(`/mindmap/${id}/edit`);
   };
   
   const filteredMindMaps = mindMaps.filter(mindMap => 
