@@ -30,6 +30,7 @@ import MindMapView from './pages/MindMapView';
 import MindMapMaterials from './pages/MindMapMaterials';
 import GlobalMaterialMap from './pages/GlobalMaterialMap';
 import ActivityTracker from './components/global/ActivityTracker';
+import AIFloatingBall from './components/ai/AIFloatingBall';
 
 const queryClient = new QueryClient();
 
@@ -78,6 +79,7 @@ function App() {
         <Toaster />
         <Sonner />
         <ActivityTracker />
+        <AIFloatingBall />
       </ThemeProvider>
     </QueryClientProvider>
   );

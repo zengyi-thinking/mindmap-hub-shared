@@ -1,0 +1,116 @@
+/* AI浮球样式 */
+.floatingBall {
+  position: relative;
+}
+
+.floatingBall::before {
+  content: '';
+  position: absolute;
+  inset: -4px;
+  background: conic-gradient(from 0deg, #6C63FF, #FF6B6B, #6C63FF);
+  border-radius: 50%;
+  z-index: -1;
+  animation: rotateGradient 3s linear infinite;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.floatingBall:hover::before {
+  opacity: 1;
+}
+
+@keyframes rotateGradient {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.pulseAnimation {
+  animation: pulse 2s infinite ease-in-out;
+}
+
+@keyframes pulse {
+  0% { box-shadow: 0 0 0 0 rgba(108, 99, 255, 0.4); }
+  70% { box-shadow: 0 0 0 10px rgba(108, 99, 255, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(108, 99, 255, 0); }
+}
+
+.chatWindow {
+  backdrop-filter: blur(8px);
+}
+
+.messageIn {
+  animation: fadeIn 0.3s ease forwards;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.typingIndicator {
+  display: flex;
+  align-items: center;
+}
+
+.typingDot {
+  width: 6px;
+  height: 6px;
+  margin: 0 1px;
+  background-color: currentColor;
+  border-radius: 50%;
+}
+
+.typingDot:nth-child(1) {
+  animation: bounce 1s infinite 0.1s;
+}
+
+.typingDot:nth-child(2) {
+  animation: bounce 1s infinite 0.2s;
+}
+
+.typingDot:nth-child(3) {
+  animation: bounce 1s infinite 0.3s;
+}
+
+@keyframes bounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-4px); }
+}
+
+.sendButton {
+  transform-origin: center;
+  transition: transform 0.2s ease;
+}
+
+.sendButton:hover {
+  transform: scale(1.1);
+}
+
+.sendButton:active {
+  transform: scale(0.9);
+}
+
+.botIcon {
+  position: relative;
+}
+
+.botIcon::after {
+  content: '';
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  bottom: 0;
+  right: 0;
+  background-color: #10B981;
+  border-radius: 50%;
+  border: 2px solid white;
+}
+
+.glowEffect {
+  box-shadow: 0 0 20px rgba(108, 99, 255, 0.3);
+  transition: box-shadow 0.3s ease;
+}
+
+.glowEffect:hover {
+  box-shadow: 0 0 30px rgba(108, 99, 255, 0.5);
+} 
