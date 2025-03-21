@@ -51,7 +51,7 @@ const nodeTypes: NodeTypes = {
     
     // 在暗黑模式下添加特殊的背景样式
     const darkModeStyle = isDarkMode ? {
-      background: 'linear-gradient(135deg, rgba(30, 32, 40, 0.95) 0%, rgba(25, 27, 35, 0.95) 100%)',
+      background: 'linear-gradient(135deg, rgba(180, 185, 210, 0.95) 0%, rgba(160, 165, 190, 0.95) 100%)',
     } : {};
     
     return (
@@ -62,17 +62,17 @@ const nodeTypes: NodeTypes = {
       >
         <div className={`${styles.materialNodeContent}`}>
           <div 
-            className="font-bold text-primary dark:text-white mb-1" 
+            className="font-bold text-primary dark:text-slate-900 mb-1" 
             style={{
-              textShadow: isDarkMode ? '0 1px 3px rgba(0,0,0,0.9)' : 'none',
+              textShadow: isDarkMode ? '0 1px 3px rgba(255,255,255,0.3)' : 'none',
               letterSpacing: '0.01em'
             }}
           >
             {data.label}
           </div>
           {data.count !== undefined && (
-            <div className="text-xs bg-primary/15 dark:bg-primary/30 text-primary-foreground dark:text-white dark:font-medium px-2 py-1 rounded-full inline-block" style={{
-              textShadow: isDarkMode ? '0 1px 2px rgba(0,0,0,0.7)' : 'none'
+            <div className="text-xs bg-primary/15 dark:bg-primary/30 text-primary-foreground dark:text-slate-900 dark:font-medium px-2 py-1 rounded-full inline-block" style={{
+              textShadow: isDarkMode ? '0 1px 2px rgba(255,255,255,0.3)' : 'none'
             }}>
               {data.count} 项
             </div>

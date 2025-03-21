@@ -306,10 +306,10 @@
 
 /* 暗色主题下的节点样式 */
 :global(.dark) .materialCard {
-  background-color: rgba(18, 20, 25, 0.95);
+  background-color: rgba(180, 185, 210, 0.95);
   border-color: rgba(108, 99, 255, 0.7);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5), 
-              0 0 0 1px rgba(255, 255, 255, 0.15),
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4), 
+              0 0 0 1px rgba(0, 0, 0, 0.1),
               0 0 15px rgba(108, 99, 255, 0.2);
 }
 
@@ -322,8 +322,8 @@
   right: -1px;
   bottom: -1px;
   border-radius: inherit;
-  border: 1px solid rgba(108, 99, 255, 0.5);
-  box-shadow: 0 0 8px 1px rgba(108, 99, 255, 0.3);
+  border: 1px solid rgba(108, 99, 255, 0.7);
+  box-shadow: 0 0 8px 1px rgba(108, 99, 255, 0.4);
   pointer-events: none;
 }
 
@@ -356,9 +356,9 @@
 }
 
 :global(.dark) .materialCard:hover {
-  background-color: rgba(18, 20, 25, 0.95);
+  background-color: rgba(190, 195, 220, 0.98);
   border-color: rgba(108, 99, 255, 1);
-  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.6), 
-              0 0 0 1px rgba(108, 99, 255, 0.4),
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4), 
+              0 0 0 1px rgba(108, 99, 255, 0.6),
               0 0 25px rgba(108, 99, 255, 0.35);
 }
