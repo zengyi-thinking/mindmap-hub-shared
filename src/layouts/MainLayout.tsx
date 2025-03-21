@@ -10,6 +10,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { ThemeToggleButtons } from '@/components/theme/ThemeSettings';
 import { useTheme } from '@/contexts/ThemeContext';
+import AiChatBubble from '@/components/ai/AiChatBubble';
 
 const MainLayout: React.FC = () => {
   const location = useLocation();
@@ -215,6 +216,9 @@ const MainLayout: React.FC = () => {
           </footer>
         </main>
       </div>
+      
+      {/* AI助手浮球 */}
+      <AiChatBubble />
     </div>
   );
 };
