@@ -1,11 +1,11 @@
 import React, { useState, useCallback, CSSProperties } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
-  ReactFlow, 
-  Background, 
-  Controls, 
+  ReactFlow,
+  Background,
+  Controls,
   MiniMap, 
-  Panel, 
+  Panel,
   Edge,
   Node,
   NodeMouseHandler,
@@ -127,15 +127,15 @@ const FlowContent: React.FC<MindMapWorkspaceProps> = ({
         background: getBackgroundColor()
       }}
     >
-      <ReactFlow
-        nodes={nodes}
-        edges={edges}
-        onNodesChange={onNodesChange}
-        onEdgesChange={onEdgesChange}
-        onConnect={onConnect}
+    <ReactFlow
+      nodes={nodes}
+      edges={edges}
+      onNodesChange={onNodesChange}
+      onEdgesChange={onEdgesChange}
+      onConnect={onConnect}
         nodeTypes={nodeTypes}
         edgeTypes={edgeTypes}
-        onNodeClick={onNodeClick}
+      onNodeClick={onNodeClick}
         onInit={onInit}
         fitView
         defaultEdgeOptions={{
@@ -145,16 +145,16 @@ const FlowContent: React.FC<MindMapWorkspaceProps> = ({
         }}
         proOptions={{ hideAttribution: true }}
         className="transition-colors duration-300"
-      >
-        <Background 
+    >
+      <Background 
           variant={BackgroundVariant.Dots} 
           gap={16} 
-          size={1} 
+        size={1} 
           color={darkMode ? 'rgba(255, 255, 255, 0.07)' : 'rgba(0, 0, 0, 0.05)'} 
           className="transition-colors duration-300"
-        />
+      />
         
-        <Controls 
+      <Controls 
           className={`rounded-md shadow-lg ${darkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} border p-1 transition-colors duration-300`}
           showInteractive={false}
         />
@@ -166,18 +166,18 @@ const FlowContent: React.FC<MindMapWorkspaceProps> = ({
         />
         
         <Panel position="top-right" className="flex flex-col gap-2">
-          <Button 
+          <Button
             size="sm" 
-            variant="outline" 
+            variant="outline"
             className={`shadow-md ${darkMode ? 'bg-gray-800 hover:bg-gray-700 border-gray-700' : 'bg-white hover:bg-gray-50 border-gray-200'} transition-colors duration-200`}
             onClick={toggleFullScreen}
           >
             <Maximize2 className="h-4 w-4" />
           </Button>
           
-          <Button 
+          <Button
             size="sm" 
-            variant="outline" 
+            variant="outline"
             className={`shadow-md ${darkMode ? 'bg-gray-800 hover:bg-gray-700 border-gray-700' : 'bg-white hover:bg-gray-50 border-gray-200'} transition-colors duration-200`}
             onClick={onAutoLayout}
           >
@@ -195,7 +195,7 @@ const FlowContent: React.FC<MindMapWorkspaceProps> = ({
             <Save className="h-4 w-4 mr-1" /> 保存
           </Button>
           
-          <Button 
+          <Button
             onClick={handleAddNode}
             variant="default"
             size="sm"
@@ -203,8 +203,8 @@ const FlowContent: React.FC<MindMapWorkspaceProps> = ({
           >
             <PlusCircle className="h-4 w-4 mr-1" /> 添加节点
           </Button>
-        </Panel>
-      </ReactFlow>
+      </Panel>
+    </ReactFlow>
     </div>
   );
 };

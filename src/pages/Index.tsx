@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
@@ -48,7 +47,7 @@ const Index = () => {
           <span className="ml-2 text-xl font-bold">思维导图中心</span>
         </Link>
         <nav className="ml-auto flex gap-4 sm:gap-6">
-          <Link to="/app" className="text-sm font-medium hover:underline underline-offset-4">
+          <Link to="/dashboard" className="text-sm font-medium hover:underline underline-offset-4">
             进入应用
           </Link>
           <Link to="#features" className="text-sm font-medium hover:underline underline-offset-4">
@@ -82,7 +81,7 @@ const Index = () => {
                 transition={{ delay: 0.3, duration: 0.5 }}
                 className="flex flex-col gap-2 min-[400px]:flex-row"
               >
-                <Link to="/app">
+                <Link to="/dashboard">
                   <Button size="lg" className="gap-1">
                     立即开始
                     <ArrowRight className="h-4 w-4" />
@@ -163,7 +162,7 @@ const Index = () => {
                 <p className="mx-auto max-w-[600px] text-gray-500 md:text-xl dark:text-gray-400 mb-8">
                   加入我们的平台，创建思维导图，分享学习资料，与学习社区交流互动
                 </p>
-                <Link to="/app">
+                <Link to="/dashboard">
                   <Button size="lg" className="gap-1">
                     立即开始
                     <ArrowRight className="h-4 w-4" />

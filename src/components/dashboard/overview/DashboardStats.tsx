@@ -1,4 +1,3 @@
-
 import React from "react";
 import { motion } from "framer-motion";
 import { Card, CardContent } from "@/components/ui/card";
@@ -38,7 +37,7 @@ const DashboardStats: React.FC<DashboardStatsProps> = ({
       value: String(mindmapCount),
       description: "个人创建",
       color: "bg-blue-500",
-      onClick: () => navigate("/mindmaps"),
+      onClick: () => navigate("/my-mindmaps"),
     },
     {
       title: "学习资料",
@@ -46,7 +45,7 @@ const DashboardStats: React.FC<DashboardStatsProps> = ({
       value: String(materialCount),
       description: "已上传",
       color: "bg-emerald-500",
-      onClick: () => navigate("/search"),
+      onClick: () => navigate("/material-search"),
     },
     {
       title: "收藏内容",
@@ -54,7 +53,7 @@ const DashboardStats: React.FC<DashboardStatsProps> = ({
       value: String(starredCount),
       description: "思维导图和资料",
       color: "bg-amber-500",
-      onClick: () => navigate("/search?filter=starred"),
+      onClick: () => navigate("/material-search?filter=starred"),
     },
     {
       title: "讨论参与",

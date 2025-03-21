@@ -175,7 +175,11 @@ const MaterialSearch: React.FC = () => {
   // 切换tab时更新URL
   const handleTabChange = (value: string) => {
     setActiveTab(value);
-    navigate(`/search?tab=${value}`, { replace: true });
+    if (value === 'mindmaps') {
+      navigate(`/global-material-map`, { replace: true });
+    } else {
+      navigate(`/material-search?tab=${value}`, { replace: true });
+    }
   };
   
   // 生成思维导图节点和边

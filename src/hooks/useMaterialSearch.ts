@@ -44,33 +44,33 @@ export const useMaterialSearch = () => {
   const handleSearch = () => {
     setIsLoading(true);
     setSearchPerformed(true);
-    
+
     // 模拟网络延迟，实际项目中可以移除这个延时
     setTimeout(() => {
       let filtered = materialsData;
-      
+
       if (searchQuery || selectedTags.length > 0) {
         if (selectedTags.length > 0) {
-          filtered = filtered.filter(material => 
+          filtered = filtered.filter(material =>
             material.tags && selectedTags.some(tag => material.tags.includes(tag))
           );
         }
-        
+
         if (searchQuery) {
           const query = searchQuery.toLowerCase();
-          filtered = filtered.filter(material => 
+          filtered = filtered.filter(material =>
             (material.title && material.title.toLowerCase().includes(query)) ||
             (material.description && material.description.toLowerCase().includes(query)) ||
             (material.file && material.file.name.toLowerCase().includes(query)) ||
             (material.tags && material.tags.some(tag => tag.toLowerCase().includes(query)))
           );
         }
-        
+
         setMaterialsData(filtered);
       } else {
         loadMaterials();
       }
-      
+
       if (selectedTags.length > 0) {
         const firstTag = selectedTags[0];
         const tagPath = findTagPath(tagHierarchyRef.current, firstTag);
@@ -78,7 +78,7 @@ export const useMaterialSearch = () => {
       } else if (filtered.length > 0 && filtered[0]?.tags) {
         setSelectedTagPath([filtered[0].tags[0]]);
       }
-      
+
       setIsLoading(false);
       return filtered;
     }, 500);

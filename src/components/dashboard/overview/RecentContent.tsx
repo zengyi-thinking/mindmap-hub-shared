@@ -1,4 +1,3 @@
-
 import React from "react";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
@@ -37,7 +36,7 @@ const RecentContent: React.FC<RecentContentProps> = ({
   const navigate = useNavigate();
 
   const createMindMap = () => {
-    navigate("/mindmap-editor/new");
+    navigate("/mindmap/new/edit");
   };
 
   const toggleStarred = (item: ContentItem, e: React.MouseEvent) => {
@@ -68,6 +67,14 @@ const RecentContent: React.FC<RecentContentProps> = ({
     }
   };
 
+  const handleItemClick = (item: ContentItem) => {
+    if (item.type === "思维导图") {
+      navigate(`/mindmap/${item.id}/edit`);
+    } else if (item.type === "学习资料") {
+      navigate(`/material/${item.id}`);
+    }
+  };
+
   const renderContentItems = (items: ContentItem[]) => {
     return items.map((item) => (
       <motion.div
@@ -75,13 +82,7 @@ const RecentContent: React.FC<RecentContentProps> = ({
         whileHover={{ scale: 1.02 }}
         whileTap={{ scale: 0.98 }}
         className="cursor-pointer"
-        onClick={() => {
-          if (item.type === "思维导图") {
-            navigate(`/mindmap-editor/${item.id}`);
-          } else if (item.type === "学习资料") {
-            navigate(`/material/${item.id}`);
-          }
-        }}
+        onClick={() => handleItemClick(item)}
       >
         <Card className="mb-3 hover:border-primary/50 transition-colors">
           <CardContent className="p-4 flex justify-between items-center">
@@ -171,10 +172,10 @@ const RecentContent: React.FC<RecentContentProps> = ({
           <div className="absolute -bottom-6 -right-6 w-32 h-32 bg-blue-500/5 rounded-full blur-xl"></div>
         </CardContent>
         <CardFooter className="bg-gradient-to-r from-blue-50/30 to-indigo-50/30 dark:from-blue-950/10 dark:to-indigo-950/10 border-t border-primary/10">
-          <Button 
-            variant="ghost" 
+          <Button
+            variant="ghost"
             className="w-full gap-1 btn-effect"
-            onClick={() => navigate('/search')}
+            onClick={() => navigate('/material-search')}
           >
             查看全部历史记录
             <ChevronRight className="h-4 w-4" />

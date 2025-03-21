@@ -1,4 +1,3 @@
-
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import {
@@ -21,30 +20,30 @@ const QuickAccess: React.FC = () => {
         <CardDescription>常用功能入口</CardDescription>
       </CardHeader>
       <CardContent className="space-y-2 relative">
-        <Button 
-          variant="ghost" 
+        <Button
+          variant="ghost"
           className="w-full justify-start gap-3 btn-effect group"
-          onClick={() => navigate('/mindmaps')}
+          onClick={() => navigate('/my-mindmaps')}
         >
           <div className="p-1.5 rounded-full bg-blue-100 dark:bg-blue-900/30 group-hover:scale-110 transition-transform duration-300">
             <Brain className="h-4 w-4 text-blue-500" />
           </div>
-          <span className="font-medium">我的思维导图</span>
+          <span>思维导图</span>
         </Button>
-        <Button 
-          variant="ghost" 
+        <Button
+          variant="ghost"
           className="w-full justify-start gap-3 btn-effect group"
-          onClick={() => navigate('/search')}
+          onClick={() => navigate('/material-search')}
         >
           <div className="p-1.5 rounded-full bg-emerald-100 dark:bg-emerald-900/30 group-hover:scale-110 transition-transform duration-300">
             <BookOpen className="h-4 w-4 text-emerald-500" />
           </div>
-          <span className="font-medium">资料搜索</span>
+          <span>学习资料</span>
         </Button>
-        <Button 
-          variant="ghost" 
+        <Button
+          variant="ghost"
           className="w-full justify-start gap-3 btn-effect group"
-          onClick={() => navigate('/profile')}
+          onClick={() => navigate('/personal')}
         >
           <div className="p-1.5 rounded-full bg-purple-100 dark:bg-purple-900/30 group-hover:scale-110 transition-transform duration-300">
             <UserCircle2 className="h-4 w-4 text-purple-500" />
