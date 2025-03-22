@@ -1,94 +1,235 @@
 import { v4 as uuidv4 } from 'uuid';
+import { 
+  getAiConfig, 
+  getApiKey, 
+  ApiProvider, 
+  apiProviders 
+} from './aiConfig';
 
+// 消息类型定义
 export interface Message {
   id: string;
   content: string;
-  role: 'user' | 'assistant';
+  role: 'user' | 'assistant' | 'system';
   timestamp: Date;
 }
 
-class AiService {
-  private readonly defaultResponses = [
-    '思维导图可以帮助你组织思路，尝试在核心节点周围添加相关子主题。',
-    '你可以使用不同颜色对不同类别的节点进行分类，这样可以提高可读性。',
-    '对于复杂的主题，建议采用层次结构，从大的概念向下分解为更小的子概念。',
-    '如果节点太多，可以考虑使用折叠功能来隐藏一些细节，保持画面整洁。',
-    '记得定期保存你的思维导图，以免丢失重要内容。',
-    '你可以使用关键词而不是长句子来表示节点，这样思维导图会更简洁。',
-    '在创建思维导图时，从中心主题开始，然后向外扩展相关的子主题和概念。',
-    '完成思维导图后，可以尝试分享给他人，获取反馈来完善你的想法。',
-    '思维导图不仅适用于学习，也适用于项目规划、会议记录等多种场景。',
-    '定期回顾和修改你的思维导图，随着知识的增长不断完善它。'
-  ];
-  
-  private readonly specificResponses: Record<string, string[]> = {
-    '如何': [
-      '要开始使用思维导图，首先点击创建按钮，然后输入中心主题，再通过添加按钮创建分支节点。',
-      '要改变节点颜色，选中节点后点击颜色选择器，然后选择你喜欢的颜色即可。',
-      '要导出思维导图，点击右上角菜单中的导出选项，然后选择你需要的格式。'
-    ],
-    '有什么': [
-      '思维导图的优点包括可视化信息结构、提高记忆效率、促进创意思考等。',
-      '本平台提供的功能包括节点自定义、自动布局、多人协作、导入导出等。',
-      '我们支持多种思维导图模板，包括头脑风暴、项目规划、学习笔记等。'
-    ],
-    '为什么': [
-      '使用思维导图可以帮助大脑更自然地工作，因为它模拟了人类的放射性思维方式。',
-      '思维导图比线性笔记更有效，因为它可以同时展示整体结构和细节内容。',
-      '定期创建思维导图可以锻炼你的创造力和分析能力，提高思维效率。'
-    ]
-  };
-  
-  private readonly keywords = [
-    '思维导图', '节点', '分支', '中心主题', '颜色', '布局', '导出',
-    '模板', '保存', '分享', '协作', '编辑', '删除', '创建', '修改'
-  ];
+// API请求接口
+interface ApiRequest {
+  model: string;
+  messages: {
+    role: string;
+    content: string;
+  }[];
+  stream?: boolean;
+  temperature?: number;
+  max_tokens?: number;
+}
 
-  /**
-   * 获取AI响应
-   * @param message 用户输入的消息
-   * @returns AI助手的响应
-   */
-  async getResponse(message: string): Promise<Message> {
-    // 模拟API调用延迟
-    await new Promise(resolve => setTimeout(resolve, 500 + Math.random() * 1000));
-    
+// 简单AI回复生成器（当未设置API密钥时使用）
+const simpleResponses = [
+  '思维导图是一种可视化思考工具，帮助你组织和理解信息。',
+  '你可以使用思维导图来进行头脑风暴、做笔记、项目规划等。',
+  '思维导图的中心节点代表主题，分支节点代表相关概念。',
+  '创建思维导图时，可以使用不同的颜色和图标来增强视觉效果。',
+  '思维导图的结构可以帮助你更好地记住和理解复杂的信息。',
+  '在学习新概念时，思维导图可以帮助你将新知识与已有知识联系起来。',
+  '思维导图可以帮助你识别不同概念之间的联系和模式。',
+  '你可以在我们的应用中创建各种风格的思维导图，包括辐射型、树状和有机型。',
+];
+
+// 初始化历史会话消息
+let conversationHistory: { role: string; content: string }[] = [];
+
+// AI服务实现
+class AIService {
+  constructor() {
+    this.resetConversation(); // 初始化对话历史
+  }
+  
+  // 获取当前配置
+  private getConfig() {
+    return getAiConfig();
+  }
+  
+  // 获取当前API提供商信息
+  private getCurrentProviderInfo() {
+    const config = this.getConfig();
+    return apiProviders[config.apiProvider];
+  }
+  
+  // 重置对话历史
+  public resetConversation(): void {
+    const config = this.getConfig();
+    conversationHistory = [
+      {
+        role: 'system',
+        content: config.systemPrompt
+      }
+    ];
+  }
+  
+  // 获取初始问候消息
+  public getInitialGreeting(): Message {
+    const config = this.getConfig();
     return {
-      id: uuidv4(),
-      content: this.generateResponse(message),
+      id: '1',
+      content: config.defaultGreeting,
       role: 'assistant',
       timestamp: new Date()
     };
   }
   
-  /**
-   * 根据用户输入生成响应
-   * 这里实现了一个简单的响应逻辑，可以替换为实际API调用
-   */
-  private generateResponse(message: string): string {
-    const lowerMessage = message.toLowerCase();
+  // 生成简单回复（用于本地模式或API调用失败时）
+  private generateSimpleResponse(prompt: string): Message {
+    // 根据问题生成简单回复
+    let response: string;
     
-    // 尝试匹配特定问题类型
-    for (const [prefix, responses] of Object.entries(this.specificResponses)) {
-      if (lowerMessage.includes(prefix)) {
-        return responses[Math.floor(Math.random() * responses.length)];
+    if (prompt.includes('怎么') || prompt.includes('如何') || prompt.includes('创建')) {
+      response = '创建思维导图时，先确定中心主题，然后添加相关的主要分支，再逐步扩展次级分支。你可以在我们的应用中通过点击"+"按钮来添加新节点，拖拽节点来调整位置。';
+    } else if (prompt.includes('优点') || prompt.includes('好处')) {
+      response = '思维导图的主要优点包括：可视化信息、促进创造性思考、帮助记忆、增强理解力、简化复杂概念，以及提高学习和工作效率。';
+    } else if (prompt.includes('导出') || prompt.includes('分享')) {
+      response = '你可以通过点击应用右上角的"导出"按钮，将思维导图导出为PNG、PDF或SVG格式，或者点击"分享"按钮生成可分享的链接。';
+    } else {
+      // 随机选择一个通用回复
+      const randomIndex = Math.floor(Math.random() * simpleResponses.length);
+      response = simpleResponses[randomIndex];
+    }
+    
+    return {
+      id: uuidv4(),
+      content: response,
+      role: 'assistant',
+      timestamp: new Date()
+    };
+  }
+  
+  // 调用API
+  private async callApi(messages: { role: string; content: string }[]): Promise<string> {
+    const config = this.getConfig();
+    const provider = config.apiProvider;
+    
+    // 如果是本地模式，直接返回简单回复
+    if (provider === 'local') {
+      // 使用兼容性更好的方式查找最后一条用户消息
+      const userMessages = messages.filter(m => m.role === 'user');
+      const lastUserMessage = userMessages.length > 0 
+        ? userMessages[userMessages.length - 1].content 
+        : '';
+      return this.generateSimpleResponse(lastUserMessage).content;
+    }
+    
+    const apiKey = getApiKey(provider);
+    if (!apiKey) {
+      throw new Error(`未设置${apiProviders[provider].name}的API密钥`);
+    }
+    
+    const providerInfo = this.getCurrentProviderInfo();
+    const apiUrl = providerInfo.apiUrl;
+    
+    const requestBody: ApiRequest = {
+      model: config.modelId,
+      messages,
+      temperature: 0.7,
+      max_tokens: 1000
+    };
+    
+    try {
+      const response = await fetch(apiUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${apiKey}`
+        },
+        body: JSON.stringify(requestBody)
+      });
+      
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(`${providerInfo.name} API错误: ${errorData.error?.message || response.statusText}`);
       }
+      
+      const data = await response.json();
+      
+      // 不同API可能有不同的响应格式，需要适配
+      let content = '';
+      if (provider === 'openai') {
+        content = data.choices[0].message.content;
+      } else if (provider === 'deepseek') {
+        content = data.choices[0].message.content;
+      } else if (provider === 'doubao') {
+        content = data.data.choices[0].message.content;
+      } else {
+        content = data.choices?.[0]?.message?.content || '获取回复失败';
+      }
+      
+      return content;
+    } catch (error) {
+      console.error(`${providerInfo.name} API调用失败:`, error);
+      throw error;
     }
-    
-    // 检查是否包含关键词
-    const foundKeywords = this.keywords.filter(keyword => 
-      lowerMessage.includes(keyword.toLowerCase())
-    );
-    
-    if (foundKeywords.length > 0) {
-      const keyword = foundKeywords[Math.floor(Math.random() * foundKeywords.length)];
-      return `关于"${keyword}"，${this.defaultResponses[Math.floor(Math.random() * this.defaultResponses.length)]}`;
+  }
+  
+  // 获取AI响应
+  public async getResponse(userPrompt: string): Promise<Message> {
+    try {
+      // 添加用户消息到历史
+      conversationHistory.push({
+        role: 'user',
+        content: userPrompt
+      });
+      
+      let responseContent: string;
+      const config = this.getConfig();
+      
+      try {
+        // 调用选定的API获取响应
+        responseContent = await this.callApi(conversationHistory);
+      } catch (error) {
+        console.error('API调用失败，使用本地回复:', error);
+        // 如果API调用失败，回退到简单回复
+        if (config.apiProvider !== 'local') {
+          const simpleResponse = this.generateSimpleResponse(userPrompt);
+          responseContent = simpleResponse.content;
+        } else {
+          throw error; // 如果是本地模式出错，继续抛出异常
+        }
+      }
+      
+      // 添加到历史对话中
+      conversationHistory.push({
+        role: 'assistant',
+        content: responseContent
+      });
+      
+      return {
+        id: uuidv4(),
+        content: responseContent,
+        role: 'assistant',
+        timestamp: new Date()
+      };
+    } catch (error) {
+      console.error('获取AI响应失败:', error);
+      throw error;
     }
-    
-    // 默认响应
-    return this.defaultResponses[Math.floor(Math.random() * this.defaultResponses.length)];
+  }
+  
+  // 获取所有支持的API提供商
+  public getProviders() {
+    return apiProviders;
+  }
+  
+  // 获取当前API提供商
+  public getCurrentProvider(): ApiProvider {
+    return this.getConfig().apiProvider;
+  }
+  
+  // 获取当前选择的模型ID
+  public getCurrentModelId(): string {
+    return this.getConfig().modelId;
   }
 }
 
-export const aiService = new AiService();
+export const aiService = new AIService();
 export default aiService; 
