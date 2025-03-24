@@ -77,7 +77,7 @@ const MaterialSearch: React.FC = () => {
   
   // 关闭上传对话框
   const closeUploadDialog = () => {
-      setShowUploadForm(false);
+    setShowUploadForm(false);
   };
   
   // 处理上传成功
@@ -112,7 +112,7 @@ const MaterialSearch: React.FC = () => {
           >
             <TabsContent value="search" className="mt-0">
               <MaterialSearchContainer />
-        </TabsContent>
+            </TabsContent>
             
             <TabsContent value="mindmaps" className="mt-0">
               <div className="grid grid-cols-1 gap-6">
@@ -131,8 +131,8 @@ const MaterialSearch: React.FC = () => {
               </div>
             </TabsContent>
           </MaterialSearchTabs>
-              </div>
-              
+        </div>
+        
         {/* 上传对话框 */}
         <MaterialUploadDialog
           open={showUploadForm}
@@ -145,10 +145,10 @@ const MaterialSearch: React.FC = () => {
           open={previewOpen}
           onClose={closePreviewDialog}
           material={selectedMaterial}
-              />
-            </div>
+        />
+      </div>
     </ErrorBoundary>
   );
 };
 
-export default MaterialSearch;
+export default MaterialSearch; 
