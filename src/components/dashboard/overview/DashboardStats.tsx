@@ -9,7 +9,7 @@ interface StatItem {
   icon: React.ElementType;
   value: string;
   description: string;
-  color: string;
+  colorClass: string;
   onClick: () => void;
 }
 
@@ -36,7 +36,7 @@ const DashboardStats: React.FC<DashboardStatsProps> = ({
       icon: Brain,
       value: String(mindmapCount),
       description: "个人创建",
-      color: "bg-blue-500",
+      colorClass: "bg-primary text-primary-foreground",
       onClick: () => navigate("/my-mindmaps"),
     },
     {
@@ -44,7 +44,7 @@ const DashboardStats: React.FC<DashboardStatsProps> = ({
       icon: FileText,
       value: String(materialCount),
       description: "已上传",
-      color: "bg-emerald-500",
+      colorClass: "bg-primary text-primary-foreground",
       onClick: () => navigate("/material-search"),
     },
     {
@@ -52,7 +52,7 @@ const DashboardStats: React.FC<DashboardStatsProps> = ({
       icon: Star,
       value: String(starredCount),
       description: "思维导图和资料",
-      color: "bg-amber-500",
+      colorClass: "bg-primary text-primary-foreground",
       onClick: () => navigate("/material-search?filter=starred"),
     },
     {
@@ -60,7 +60,7 @@ const DashboardStats: React.FC<DashboardStatsProps> = ({
       icon: MessageSquare,
       value: "24",
       description: "话题和回复",
-      color: "bg-purple-500",
+      colorClass: "bg-primary text-primary-foreground",
       onClick: () => navigate("/discussion"),
     },
   ];
@@ -104,7 +104,7 @@ const DashboardStats: React.FC<DashboardStatsProps> = ({
                       strokeWidth="3"
                       strokeDasharray="94.2"
                       strokeDashoffset={94.2 - (94.2 * (index + 1) * 20) / 100}
-                      style={{ color: `var(--${stat.color.replace('bg-', '')})` }}
+                      style={{ color: 'hsl(var(--primary))' }}
                     />
                     <circle 
                       cx="20" 
@@ -114,10 +114,10 @@ const DashboardStats: React.FC<DashboardStatsProps> = ({
                       stroke="currentColor"
                       strokeWidth="3"
                       strokeOpacity="0.2"
-                      style={{ color: `var(--${stat.color.replace('bg-', '')})` }}
+                      style={{ color: 'hsl(var(--primary))' }}
                     />
                   </svg>
-                  <div className={`absolute inset-0 flex items-center justify-center ${stat.color} text-white rounded-full scale-75`}>
+                  <div className={`absolute inset-0 flex items-center justify-center ${stat.colorClass} rounded-full scale-75`}>
                     <stat.icon className="h-5 w-5" />
                   </div>
                 </div>

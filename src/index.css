@@ -329,7 +329,7 @@
 
 /* Gradient backgrounds */
 .bg-gradient-primary {
-  background: linear-gradient(45deg, #4caf50, #2196f3);
+  background: linear-gradient(45deg, hsl(var(--primary)), hsl(var(--primary)/0.7));
 }
 
 .bg-gradient-secondary {
@@ -466,4 +466,34 @@ button,
 [style*="color"],
 [style*="background-color"] {
   transition: var(--transition-color);
+}
+
+/* 添加自定义CSS以确保ReactFlow边缘连接线可见 */
+.react-flow__edge {
+  z-index: 1000 !important;
+  pointer-events: all !important;
+}
+
+.react-flow__edge-path {
+  stroke-width: 8px !important;
+  stroke: #FF3366 !important;
+}
+
+.react-flow__edge-text {
+  z-index: 1001 !important;
+}
+
+/* 禁用边缘透明度 */
+.react-flow__edge-path {
+  opacity: 1 !important;
+}
+
+/* 确保边缘在节点上方 */
+.react-flow__node {
+  z-index: 1 !important;
+}
+
+.react-flow-custom {
+  --edge-stroke: #FF3366;
+  --edge-width: 8px;
 }

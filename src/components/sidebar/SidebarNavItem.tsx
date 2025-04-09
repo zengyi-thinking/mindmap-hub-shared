@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { cn } from '@/lib/utils';
@@ -21,14 +20,15 @@ const SidebarNavItem: React.FC<SidebarNavItemProps> = ({ title, icon, path }) =>
     <TooltipProvider delayDuration={300}>
       <Tooltip>
         <TooltipTrigger asChild>
-          <Link to={path} className="block">
+          <Link to={path} className={cn("block", !expanded && "flex justify-center")}>
             <motion.div
               className={cn(
-                "group flex items-center gap-x-3 px-3 py-2.5 rounded-lg transition-all my-1 relative",
+                "group flex items-center transition-all my-1 relative",
+                expanded ? "px-3 py-2.5 gap-x-3 rounded-lg" : "p-2.5 justify-center w-10 h-10 mx-auto rounded-lg",
                 isActive ? "bg-primary text-primary-foreground" : "hover:bg-primary/10 text-foreground"
               )}
               initial={false}
-              whileHover={{ x: 5 }}
+              whileHover={{ x: expanded ? 5 : 0 }}
             >
               {isActive && (
                 <motion.div
@@ -43,7 +43,7 @@ const SidebarNavItem: React.FC<SidebarNavItemProps> = ({ title, icon, path }) =>
                 />
               )}
               <div className={cn(
-                "relative rounded-md p-1.5 transition-colors",
+                "relative flex items-center justify-center transition-colors",
                 isActive ? "text-primary-foreground" : "text-muted-foreground group-hover:text-foreground"
               )}>
                 {icon}

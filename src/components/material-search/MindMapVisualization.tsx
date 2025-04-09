@@ -26,6 +26,38 @@ interface MindMapVisualizationProps {
   statistics?: any;
 }
 
+// 自定义节点组件 - 添加不同类型节点的不同样式和交互
+const CustomNode = ({ data }: { data: any }) => {
+  const getNodeStyle = () => {
+    if (data.isRoot) {
+      // 中心节点 - 使用主题色渐变背景
+      return "bg-gradient-primary text-white font-bold p-4 rounded-lg text-center min-w-[180px] shadow-xl border-b-4 border-primary/80";
+    } else if (data.type === 'tag') {
+      if (data.level === 1) {
+        // 一级节点 - 主题色变体
+        return "bg-gradient-to-r from-primary to-primary/90 text-white p-3 rounded-xl font-medium text-center min-w-[150px] shadow-lg border-b-3 border-primary/80";
+      } else if (data.isLastLevel) {
+        // 最终标签节点 - 主题色次级变体
+        return "bg-gradient-to-r from-primary/90 to-primary/80 text-white p-3 rounded-xl font-medium text-center min-w-[130px] shadow-lg border-b-3 border-primary/70";
+      } else {
+        // 其他标签节点 - 主题色浅变体
+        return "bg-gradient-to-r from-primary/80 to-primary/70 text-white p-3 rounded-xl font-medium text-center min-w-[130px] shadow-lg border-b-3 border-primary/60";
+      }
+    } else if (data.type === 'material') {
+      // 资料节点 - 白色背景带主题色边框
+      return "bg-white border-2 border-primary/40 p-3 rounded-xl text-sm text-primary font-medium shadow-md min-w-[150px] text-center hover:shadow-lg transition-shadow";
+    }
+    // 默认节点样式
+    return "bg-gray-50 border border-gray-200 p-3 rounded-xl font-normal min-w-[120px] text-center shadow-sm";
+  };
+
+  return (
+    <div className={getNodeStyle()}>
+      {data.label}
+    </div>
+  );
+};
+
 const MindMapVisualization: React.FC<MindMapVisualizationProps> = ({
   nodes,
   edges,
@@ -37,6 +69,24 @@ const MindMapVisualization: React.FC<MindMapVisualizationProps> = ({
   reactFlowInstance,
   statistics
 }) => {
+  // 增强的节点点击处理函数
+  const handleNodeClick = (event: any, node: any) => {
+    console.log('Node clicked:', node);
+    // 根据节点类型执行不同操作
+    if (node.data.type === 'tag' && node.data.isLastLevel) {
+      // 如果是最终标签节点，调用外部传入的点击处理函数
+      onNodeClick(event, node);
+    } else if (node.data.type === 'material') {
+      // 如果是资料节点，直接调用外部传入的点击处理函数
+      onNodeClick(event, node);
+    }
+  };
+
+  // 节点类型映射
+  const nodeTypes = {
+    default: CustomNode,
+  };
+
   return (
     <Card className={`overflow-hidden border border-primary/20 shadow-lg mb-8 ${styles.cardShadow}`}>
       <CardHeader className="p-4 pb-3 border-b bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/30 dark:to-indigo-950/30 border-primary/10">
@@ -81,10 +131,10 @@ const MindMapVisualization: React.FC<MindMapVisualizationProps> = ({
             edges={edges}
             onNodesChange={onNodesChange}
             onEdgesChange={onEdgesChange}
-            onNodeClick={onNodeClick}
+            onNodeClick={handleNodeClick}
             onInit={onInitReactFlow}
             fitView
-            fitViewOptions={{ padding: 0.2 }}
+            fitViewOptions={{ padding: 0.3 }}
             attributionPosition="bottom-right"
             zoomOnScroll={true}
             panOnScroll={true}
@@ -92,13 +142,22 @@ const MindMapVisualization: React.FC<MindMapVisualizationProps> = ({
             elementsSelectable={true}
             proOptions={{ hideAttribution: true }}
             className="react-flow-custom"
+            nodeTypes={nodeTypes}
+            elevateEdgesOnSelect={true}
+            edgesFocusable={true}
+            edgesUpdatable={true}
+            selectNodesOnDrag={false}
+            defaultViewport={{ x: 0, y: 0, zoom: 1 }}
+            minZoom={0.1}
+            maxZoom={2}
             defaultEdgeOptions={{
               type: 'smoothstep',
               animated: true,
               style: {
-                strokeWidth: 2,
-                stroke: '#3b82f6'
-              }
+                strokeWidth: 5,
+                stroke: 'hsl(var(--primary))',
+              },
+              zIndex: 1000
             }}
           >
             <Background 
@@ -141,7 +200,7 @@ const MindMapVisualization: React.FC<MindMapVisualizationProps> = ({
             
             {/* 提示面板 */}
             <Panel position="top-right" className="bg-background/90 backdrop-blur-sm p-2 rounded-md shadow-sm border text-xs">
-              提示: 滚轮缩放 | 拖拽平移 | 点击展开
+              提示: 滚轮缩放 | 拖拽平移 | 点击标签查看资料
             </Panel>
             
             {/* 统计面板 */}

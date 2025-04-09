@@ -50,7 +50,45 @@ export const useMaterialPreview = () => {
   
   // 处理节点点击
   const onNodeClick = (event, node, materialsData) => {
-    if (node.type === 'materialNode') {
+    console.log('Node clicked in preview hook:', node);
+    
+    // 新节点结构处理
+    if (node.data && node.data.type) {
+      // 如果是标签节点且是最终层级
+      if (node.data.type === 'tag' && node.data.isLastLevel) {
+        // 查找与该标签相关的资料
+        const materialsWithTag = materialsData.filter(m => 
+          m.tags && m.tags.includes(node.data.label)
+        );
+        
+        if (materialsWithTag.length > 0) {
+          // 如果只有一个资料，直接打开预览
+          if (materialsWithTag.length === 1) {
+            openPreview(materialsWithTag[0]);
+          } else {
+            // 如果有多个资料，显示资料列表
+            setMaterialsListByTag(materialsWithTag);
+            setSelectedTagForList(node.data.label);
+            setMaterialListDialogOpen(true);
+          }
+        }
+      } 
+      // 如果是资料节点
+      else if (node.data.type === 'material') {
+        if (node.data.material) {
+          // 直接使用节点中的资料数据
+          openPreview(node.data.material);
+        } else if (node.data.materialId) {
+          // 通过ID查找资料数据
+          const material = materialsData.find(m => m.id === node.data.materialId);
+          if (material) {
+            openPreview(material);
+          }
+        }
+      }
+    }
+    // 兼容旧节点结构
+    else if (node.type === 'materialNode') {
       if (node.data.type === 'tag') {
         // 如果是标签节点，打开标签相关的材料列表
         const materialsWithTag = materialsData.filter(m => 

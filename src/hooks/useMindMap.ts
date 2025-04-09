@@ -3,17 +3,31 @@ import {
   useNodesState, 
   useEdgesState, 
   addEdge,
+  ReactFlowInstance
 } from '@xyflow/react';
 import { mindMapsService } from '@/lib/storage';
 import { toast } from '@/components/ui/use-toast';
 import { generateMindMap } from '@/components/material-search/MindMapGenerator';
 import { useAuth } from '@/lib/auth';
+import { TagCategory } from '@/types/materials';
 
-export const useMindMap = (materialsData, selectedTags, searchQuery, tagHierarchy) => {
+interface MindMapOptions {
+  materialsData: any[];
+  selectedTags: string[];
+  searchQuery: string;
+  tagHierarchy: TagCategory[];
+}
+
+export const useMindMap = (
+  materialsData: any[], 
+  selectedTags: string[], 
+  searchQuery: string, 
+  tagHierarchy: TagCategory[]
+) => {
   const { user } = useAuth();
   const [nodes, setNodes, onNodesChange] = useNodesState([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState([]);
-  const [reactFlowInstance, setReactFlowInstance] = useState(null);
+  const [reactFlowInstance, setReactFlowInstance] = useState<ReactFlowInstance | null>(null);
   const [saveDialogOpen, setSaveDialogOpen] = useState(false);
   const [mindMapTitle, setMindMapTitle] = useState('');
   const [mindMapDescription, setMindMapDescription] = useState('');
@@ -64,8 +78,11 @@ export const useMindMap = (materialsData, selectedTags, searchQuery, tagHierarch
     setEdges((eds) => addEdge(params, eds));
   }, [setEdges]);
 
-  // Create mindmap
-  const createMindMap = () => {
+  // Create mindmap - 更新后的思维导图生成函数
+  const createMindMap = useCallback(() => {
+    if (!materialsData || !tagHierarchy) return;
+    
+    // 使用修改后的MindMapGenerator生成节点和边
     const { nodes: newNodes, edges: newEdges } = generateMindMap({
       searchQuery,
       selectedTags,
@@ -73,9 +90,17 @@ export const useMindMap = (materialsData, selectedTags, searchQuery, tagHierarch
       tagHierarchy
     });
     
+    // 设置节点和边
     setNodes(newNodes);
     setEdges(newEdges);
-  };
+    
+    // 如果有ReactFlow实例，自动调整视图
+    if (reactFlowInstance) {
+      setTimeout(() => {
+        reactFlowInstance.fitView({ padding: 0.2 });
+      }, 100);
+    }
+  }, [searchQuery, selectedTags, materialsData, tagHierarchy, setNodes, setEdges, reactFlowInstance]);
 
   // Save mindmap
   const saveMindMap = () => {
