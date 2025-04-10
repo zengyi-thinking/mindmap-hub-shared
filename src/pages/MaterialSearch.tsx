@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { TabsContent } from '@/components/ui/tabs';
 import { useToast } from '@/components/ui/use-toast';
@@ -7,6 +7,7 @@ import { mindmapService } from '@/lib/mindmapStorage';
 import styles from './MaterialSearch.module.css';
 import ParticleBackground from '@/components/ui/ParticleBackground';
 import { MindMap } from '@/types/mindmap';
+import { generateHierarchicalMindMap } from '@/components/material-search/mindmap-generator/hierarchicalMindMap';
 
 // 导入拆分后的组件
 import MaterialSearchContainer from '@/features/material-search/MaterialSearchContainer';
@@ -33,6 +34,11 @@ const MaterialSearch: React.FC = () => {
   const [showUploadForm, setShowUploadForm] = useState(false);
   const [selectedMaterial, setSelectedMaterial] = useState<any>(null);
   const [previewOpen, setPreviewOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [materialsData, setMaterialsData] = useState([]);
+  const [selectedTags, setSelectedTags] = useState([]);
+  const [nodes, setNodes] = useState([]);
+  const [edges, setEdges] = useState([]);
   
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -98,6 +104,22 @@ const MaterialSearch: React.FC = () => {
   const closePreviewDialog = () => {
     setPreviewOpen(false);
   };
+  
+  useEffect(() => {
+    if (searchQuery && materialsData) {
+      // Generate hierarchical mind map directly for file searches
+      const mindMapData = generateHierarchicalMindMap({
+        searchQuery,
+        selectedTags: selectedTags || [],
+        materialsData: materialsData || [],
+        tagHierarchy: {} // This will be converted inside the function
+      });
+      
+      // Set the nodes and edges
+      setNodes(mindMapData.nodes);
+      setEdges(mindMapData.edges);
+    }
+  }, [searchQuery, materialsData, selectedTags]);
   
   return (
     <ErrorBoundary fallback={ErrorFallback}>

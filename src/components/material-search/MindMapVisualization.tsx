@@ -107,7 +107,12 @@ const MindMapVisualization: React.FC<MindMapVisualizationProps> = ({
             onNodeClick={handleNodeClick}
             onInit={onInitReactFlow}
             fitView
-            fitViewOptions={{ padding: 0.3 }}
+            fitViewOptions={{ 
+              padding: 0.5, 
+              includeHiddenNodes: false,
+              minZoom: 0.5,
+              maxZoom: 1.5
+            }}
             attributionPosition="bottom-right"
             zoomOnScroll={true}
             panOnScroll={true}
@@ -118,10 +123,9 @@ const MindMapVisualization: React.FC<MindMapVisualizationProps> = ({
             nodeTypes={nodeTypes}
             elevateEdgesOnSelect={true}
             edgesFocusable={true}
-            edgesUpdatable={true}
             selectNodesOnDrag={false}
-            defaultViewport={{ x: 0, y: 0, zoom: 1 }}
-            minZoom={0.1}
+            defaultViewport={{ x: 0, y: 0, zoom: 0.85 }}
+            minZoom={0.3}
             maxZoom={2}
             defaultEdgeOptions={{
               type: 'smoothstep',
@@ -137,7 +141,7 @@ const MindMapVisualization: React.FC<MindMapVisualizationProps> = ({
               variant={"dots" as BackgroundVariant}
               gap={20} 
               size={1} 
-              color="hsl(var(--primary) / 0.2)"
+              color="hsl(var(--primary) / 0.15)"
             />
             <Controls 
               showInteractive={false}
@@ -149,7 +153,8 @@ const MindMapVisualization: React.FC<MindMapVisualizationProps> = ({
                 display: 'flex',
                 flexDirection: 'column',
                 gap: '4px',
-                padding: '4px'
+                padding: '4px',
+                boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)'
               }}
             />
             <div className="absolute top-4 right-4 bg-white dark:bg-slate-800 p-2 rounded-md shadow-md border border-primary/20 flex gap-2">
