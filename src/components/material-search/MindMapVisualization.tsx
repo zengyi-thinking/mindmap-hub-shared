@@ -10,9 +10,11 @@ import {
   Node, 
   Edge, 
   BackgroundVariant,
-  Panel
+  Panel,
+  NodeTypes
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
+import MindMapNode from './MindMapNode';
 
 interface MindMapVisualizationProps {
   nodes: Node[];
@@ -26,36 +28,9 @@ interface MindMapVisualizationProps {
   statistics?: any;
 }
 
-// 自定义节点组件 - 添加不同类型节点的不同样式和交互
-const CustomNode = ({ data }: { data: any }) => {
-  const getNodeStyle = () => {
-    if (data.isRoot) {
-      // 中心节点 - 使用主题色渐变背景
-      return "bg-gradient-primary text-white font-bold p-4 rounded-lg text-center min-w-[180px] shadow-xl border-b-4 border-primary/80";
-    } else if (data.type === 'tag') {
-      if (data.level === 1) {
-        // 一级节点 - 主题色变体
-        return "bg-gradient-to-r from-primary to-primary/90 text-white p-3 rounded-xl font-medium text-center min-w-[150px] shadow-lg border-b-3 border-primary/80";
-      } else if (data.isLastLevel) {
-        // 最终标签节点 - 主题色次级变体
-        return "bg-gradient-to-r from-primary/90 to-primary/80 text-white p-3 rounded-xl font-medium text-center min-w-[130px] shadow-lg border-b-3 border-primary/70";
-      } else {
-        // 其他标签节点 - 主题色浅变体
-        return "bg-gradient-to-r from-primary/80 to-primary/70 text-white p-3 rounded-xl font-medium text-center min-w-[130px] shadow-lg border-b-3 border-primary/60";
-      }
-    } else if (data.type === 'material') {
-      // 资料节点 - 白色背景带主题色边框
-      return "bg-white border-2 border-primary/40 p-3 rounded-xl text-sm text-primary font-medium shadow-md min-w-[150px] text-center hover:shadow-lg transition-shadow";
-    }
-    // 默认节点样式
-    return "bg-gray-50 border border-gray-200 p-3 rounded-xl font-normal min-w-[120px] text-center shadow-sm";
-  };
-
-  return (
-    <div className={getNodeStyle()}>
-      {data.label}
-    </div>
-  );
+// 节点类型映射
+const nodeTypes: NodeTypes = {
+  mindmapNode: MindMapNode
 };
 
 const MindMapVisualization: React.FC<MindMapVisualizationProps> = ({
@@ -79,12 +54,10 @@ const MindMapVisualization: React.FC<MindMapVisualizationProps> = ({
     } else if (node.data.type === 'material') {
       // 如果是资料节点，直接调用外部传入的点击处理函数
       onNodeClick(event, node);
+    } else {
+      // 其他类型节点也可以点击
+      onNodeClick(event, node);
     }
-  };
-
-  // 节点类型映射
-  const nodeTypes = {
-    default: CustomNode,
   };
 
   return (
@@ -116,7 +89,7 @@ const MindMapVisualization: React.FC<MindMapVisualizationProps> = ({
         <CardDescription className="text-xs flex gap-2 items-center mt-1">
           <div className="flex items-center gap-1.5">
             <Circle className="h-2 w-2 fill-primary stroke-none" />
-            点击最终标签节点可以查看相关资料
+            点击标签节点可以查看相关资料
           </div>
           <div className="flex items-center gap-1.5">
             <Circle className="h-2 w-2 fill-accent stroke-none" />
@@ -155,7 +128,7 @@ const MindMapVisualization: React.FC<MindMapVisualizationProps> = ({
               animated: true,
               style: {
                 strokeWidth: 5,
-                stroke: 'hsl(var(--primary))',
+                stroke: '#FF3366',
               },
               zIndex: 1000
             }}
