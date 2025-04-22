@@ -3,7 +3,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Download, Calendar, User, Eye, ThumbsUp } from 'lucide-react';
-import FilePreview from '@/components/materials/FilePreview';
+import FilePreview from '@/modules/materials/components/FilePreview';
 import { useNavigate } from 'react-router-dom';
 import { userFilesService } from '@/lib/storage';
 

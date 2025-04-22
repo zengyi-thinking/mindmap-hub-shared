@@ -8,7 +8,7 @@ import {
 } from '@xyflow/react';
 import { generateMindMap } from './MindMapGenerator';
 import MindMapVisualization from './MindMapVisualization';
-import { useMaterialPreview } from '@/hooks/useMaterialPreview';
+import { useMaterialPreview } from '@/modules/materials/hooks/useMaterialPreview';
 import { useToast } from '@/components/ui/use-toast';
 
 interface TagMindMapProps {

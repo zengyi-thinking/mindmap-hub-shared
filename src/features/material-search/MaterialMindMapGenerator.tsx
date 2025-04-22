@@ -5,7 +5,7 @@ import { FolderOpen, Folder, ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { tagHierarchy } from '@/data/tagHierarchy';
 import { userFilesService } from '@/lib/storage';
-import MaterialNode from '@/components/mindmap/MaterialNode';
+import MaterialNode from '@/modules/mindmap/components/MaterialNode';
 import { ScrollArea } from '@/components/ui/scroll-area';
 
 // 注册自定义节点类型

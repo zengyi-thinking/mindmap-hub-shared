@@ -1,6 +1,5 @@
-
 import React from 'react';
-import styles from '@/pages/MaterialSearch.module.css';
+import styles from '@/pages/material-search/MaterialSearch.module.css';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';

@@ -5,7 +5,7 @@ import {
   ApiProvider, 
   apiProviders 
 } from './aiConfig';
-import { Material, Comment } from '@/types/materials';
+import { Material, Comment } from '@/modules/materials/types/materials';
 
 // 消息类型定义
 export interface Message {

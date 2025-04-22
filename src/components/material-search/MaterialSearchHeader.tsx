@@ -1,7 +1,6 @@
-
 import React from 'react';
 import { motion } from 'framer-motion';
-import styles from '@/pages/MaterialSearch.module.css';
+import styles from '@/pages/material-search/MaterialSearch.module.css';
 
 interface MaterialSearchHeaderProps {
   title: string;

@@ -1,8 +1,6 @@
 import { Node, Edge, MarkerType } from '@xyflow/react';
 import { findTagPath } from './utils/TagUtils';
-import { TagCategory } from '@/types/materials';
-import { generateHierarchicalMindMap } from './mindmap-generator/hierarchicalMindMap';
-import { MindMapGeneratorOptions as NewMindMapOptions, TagsHierarchy } from './mindmap-generator/types';
+import { TagCategory } from '@/modules/materials/types/materials';
 
 interface MindMapGeneratorOptions {
   searchQuery: string;
@@ -199,29 +197,6 @@ const createMaterialNode = (
   };
 };
 
-// 查找与搜索条件匹配的材料
-export const findMatchingMaterials = (
-  searchQuery: string,
-  materialsData: any[]
-): any[] => {
-  if (!searchQuery || !materialsData?.length) {
-    return [];
-  }
-  
-  const lowerQuery = searchQuery.toLowerCase();
-  
-  return materialsData.filter(material => 
-    // 标题匹配
-    (material.title && material.title.toLowerCase().includes(lowerQuery)) || 
-    // 文件名匹配
-    (material.file && material.file.name && material.file.name.toLowerCase().includes(lowerQuery)) ||
-    // 标签匹配
-    (material.tags && material.tags.some(tag => tag.toLowerCase().includes(lowerQuery))) ||
-    // 描述匹配
-    (material.description && material.description.toLowerCase().includes(lowerQuery))
-  );
-};
-
 // Main function to generate the mindmap
 export const generateMindMap = (options: MindMapGeneratorOptions): { nodes: Node[], edges: Edge[] } => {
   const { searchQuery, selectedTags, materialsData, tagHierarchy } = options;
@@ -240,17 +215,6 @@ export const generateMindMap = (options: MindMapGeneratorOptions): { nodes: Node
           tag.toLowerCase().includes(searchQuery.toLowerCase())
         ))
       );
-
-      // 如果找到了匹配的材料并且是文件名匹配，总是使用层级思维导图
-      const hasFileMatch = relatedMaterials.some(material => 
-        material.file?.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        material.title?.toLowerCase().includes(searchQuery.toLowerCase())
-      );
-
-      if (hasFileMatch) {
-        // 使用层级结构生成丰富的思维导图
-        return generateHierarchicalMindMap(materialsData, tagHierarchy, searchQuery);
-      }
     } else if (selectedTags.length > 0) {
       // 如果是按标签搜索
       relatedMaterials = materialsData.filter(material => 
@@ -266,32 +230,17 @@ export const generateMindMap = (options: MindMapGeneratorOptions): { nodes: Node
   return generateHierarchicalMindMap(materialsData, tagHierarchy, '');
 };
 
-// When searching for specific files, we should always generate a hierarchical mind map
+// 生成以标签为中心的思维导图
 export const generateTagBasedMindMap = (
   materials: any[],
   tagHierarchy: TagCategory[],
   searchQuery: string = '',
   selectedTags: string[] = []
 ): { nodes: Node[], edges: Edge[] } => {
-  // If we're searching for a file, we should use the hierarchical mind map generator
-  if (searchQuery) {
-    // Look for exact file matches
-    const fileMatches = materials.filter(material => 
-      material.file?.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      material.title?.toLowerCase().includes(searchQuery.toLowerCase())
-    );
-    
-    // If we have file matches, we should create a hierarchical mind map
-    if (fileMatches.length > 0) {
-      return generateHierarchicalMindMap(materials, tagHierarchy, searchQuery);
-    }
-  }
-  
-  // Original implementation follows
   const nodes: Node[] = [];
   const edges: Edge[] = [];
   
-  // From materials, extract all tags
+  // 从材料中提取所有标签
   const allTagsMap = new Map<string, number>();
   materials.forEach(material => {
     if (material.tags) {
@@ -302,14 +251,14 @@ export const generateTagBasedMindMap = (
     }
   });
   
-  // Determine central node label
+  // 确定中心节点标签
   let centralNodeLabel = searchQuery || '标签导图';
   
-  // If there are selected tags, use the first one as the central node
+  // 如果有选中的标签，优先使用第一个选中的标签作为中心
   if (selectedTags.length > 0) {
     centralNodeLabel = selectedTags[0];
   } 
-  // If there's a search query but no matching tag, try to find a match in the tag hierarchy
+  // 如果有搜索词但没有匹配到标签，尝试在标签层次结构中查找匹配项
   else if (searchQuery) {
     let foundInHierarchy = false;
     
@@ -333,7 +282,7 @@ export const generateTagBasedMindMap = (
       foundInHierarchy = true;
     }
     
-    // If not found in hierarchy but there are materials with matching tags, use the most frequent
+    // 如果没有在层次结构中找到匹配项，但有材料标签匹配，使用出现频率最高的标签
     if (!foundInHierarchy) {
       const matchingTags = Array.from(allTagsMap.entries())
         .filter(([tag]) => tag.toLowerCase().includes(searchQuery.toLowerCase()))
@@ -345,24 +294,24 @@ export const generateTagBasedMindMap = (
     }
   }
   
-  // Create central node
+  // 创建中心节点
   const centralNode = createCentralNode(centralNodeLabel);
   nodes.push(centralNode);
   
-  // Sort tags by frequency
+  // 排序标签按频率
   const sortedTags = Array.from(allTagsMap.entries())
-    .sort((a, b) => b[1] - a[1]) // Sort by frequency descending
-    .slice(0, 12); // Limit to 12 tags
+    .sort((a, b) => b[1] - a[1]) // 按频率降序
+    .slice(0, 12); // 限制最多显示12个标签
   
-  // Radial layout for tag nodes
+  // 放射状布局标签节点
   const tagCount = sortedTags.length;
   sortedTags.forEach(([tag, count], index) => {
-    // Skip if the tag is the central node
+    // 如果标签是中心节点，跳过
     if (tag === centralNodeLabel) return;
     
-    // Calculate angle (0 to 2π)
+    // 计算角度 (0 到 2π)
     const angle = (Math.PI * 2 * index) / tagCount;
-    const radius = 250; // Distance from center
+    const radius = 250; // 到中心的距离
     
     const position = {
       x: centralNode.position.x + Math.cos(angle) * radius,
@@ -381,20 +330,20 @@ export const generateTagBasedMindMap = (
       1
     );
     
-    // Store the related materials list
+    // 存储相关的材料列表
     node.data.materials = tagMaterials;
     
     nodes.push(node);
     
-    // Connect center to tag node
+    // 连接中心到标签节点
     edges.push(createEdge('central', nodeId, false, true, 1));
     
-    // If the tag has few related materials, display them directly
+    // 如果该标签关联的材料较少，直接显示材料节点
     if (tagMaterials.length > 0 && tagMaterials.length <= 3) {
       tagMaterials.forEach((material, matIndex) => {
-        // Calculate material node position
-        const matAngle = angle + (Math.PI * (matIndex - 1) / 6); // Slightly adjust angle to spread materials
-        const matRadius = 150; // Distance from tag node to material node
+        // 计算材料节点位置
+        const matAngle = angle + (Math.PI * (matIndex - 1) / 6); // 微调角度，使材料分散
+        const matRadius = 150; // 材料节点到标签节点的距离
         
         const matPosition = {
           x: position.x + Math.cos(matAngle) * matRadius,
@@ -405,7 +354,7 @@ export const generateTagBasedMindMap = (
         const matNode = createMaterialNode(matNodeId, material, matPosition);
         nodes.push(matNode);
         
-        // Connect tag to material node
+        // 连接标签到材料节点
         edges.push(createEdge(nodeId, matNodeId, false, false, 2));
       });
     }
@@ -650,3 +599,4 @@ function getAllTagsInCategory(category: TagCategory): string[] {
   
   return tags;
 }
+

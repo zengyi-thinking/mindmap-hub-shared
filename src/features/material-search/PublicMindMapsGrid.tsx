@@ -5,7 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { motion } from 'framer-motion';
 import { Brain, TrendingUp, Users, Eye, Calendar } from 'lucide-react';
-import { MindMap } from '@/types/mindmap';
+import { MindMap } from '@/modules/mindmap/types/mindmap';
 
 interface PublicMindMapsGridProps {
   mindMaps: MindMap[];

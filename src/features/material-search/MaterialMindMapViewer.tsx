@@ -16,12 +16,12 @@ import {
 import '@xyflow/react/dist/style.css';
 import { Button } from '@/components/ui/button';
 import { Edit, ZoomIn } from 'lucide-react';
-import styles from '@/pages/MaterialSearch.module.css';
+import styles from '@/pages/material-search/MaterialSearch.module.css';
 import { tagHierarchy } from '@/data/tagHierarchy';
 import { mindmapService } from '@/lib/mindmapStorage';
 import { useToast } from '@/components/ui/use-toast';
-import { TagCategory } from '@/types/materials';
-import { MindMap, MindMapNode, MindMapEdge } from '@/types/mindmap';
+import { TagCategory } from '@/modules/materials/types/materials';
+import { MindMap, MindMapNode, MindMapEdge } from '@/modules/mindmap/types/mindmap';
 
 // 扩展TagCategory类型
 interface EnhancedTagCategory extends TagCategory {

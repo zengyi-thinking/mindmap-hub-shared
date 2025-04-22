@@ -1,6 +1,6 @@
 import React, { useRef, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import styles from '@/pages/MaterialSearch.module.css';
+import styles from '@/pages/material-search/MaterialSearch.module.css';
 import { useAuth } from '@/lib/auth';
 import { tagHierarchy } from '@/data/tagHierarchy';
 import { popularTags, suggestedSearches } from '@/data/popularTags';
@@ -14,9 +14,9 @@ import MaterialPreviewDialog from '@/components/material-search/dialogs/Material
 import MaterialListDialog from '@/components/material-search/dialogs/MaterialListDialog';
 
 // Import custom hooks
-import { useMaterialSearch } from '@/hooks/useMaterialSearch';
-import { useMindMap } from '@/hooks/useMindMap';
-import { useMaterialPreview } from '@/hooks/useMaterialPreview';
+import { useMaterialSearch } from '@/modules/materials/hooks/useMaterialSearch';
+import { useMindMap } from '@/modules/mindmap/hooks/useMindMap';
+import { useMaterialPreview } from '@/modules/materials/hooks/useMaterialPreview';
 
 /**
  * 材料搜索容器组件
@@ -226,3 +226,4 @@ const MaterialSearchContainer: React.FC = () => {
 };
 
 export default MaterialSearchContainer;
+

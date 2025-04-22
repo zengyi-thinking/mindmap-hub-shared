@@ -6,7 +6,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { X, Plus, Tag as TagIcon } from 'lucide-react';
-import FileUploader from '@/components/materials/FileUploader';
+import FileUploader from '@/modules/materials/components/FileUploader';
 import { useAuth } from '@/lib/auth';
 import { userFilesService } from '@/lib/storage';
 import { useToast } from '@/components/ui/use-toast';
@@ -287,3 +287,4 @@ const MaterialUploadDialog: React.FC<MaterialUploadDialogProps> = ({
 };
 
 export default MaterialUploadDialog;
+
