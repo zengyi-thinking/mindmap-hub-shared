@@ -21,7 +21,7 @@ import { tagHierarchy } from '@/data/tagHierarchy';
 import { mindmapService } from '@/lib/mindmapStorage';
 import { useToast } from '@/components/ui/use-toast';
 import { TagCategory } from '@/modules/materials/types/materials';
-import { MindMap, MindMapNode, MindMapEdge } from '@/modules/mindmap/types/mindmap';
+import { MindMap, MindMapNode, MindMapEdge } from '@/modules/mindmap/bridges/types';
 
 // 扩展TagCategory类型
 interface EnhancedTagCategory extends TagCategory {
@@ -329,3 +329,4 @@ export const MaterialMindMapViewer: React.FC<MaterialMindMapViewerProps> = ({
 };
 
 export default MaterialMindMapViewer; 
+

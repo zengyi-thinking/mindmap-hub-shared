@@ -201,44 +201,54 @@ const NodeUploadForm: React.FC<NodeUploadFormProps> = ({
           
           {isUploading && (
             <div className="space-y-2">
-              <div className="flex justify-between text-sm">
-                <span>上传进度</span>
-                <span>{uploadProgress}%</span>
-              </div>
-              <div className="w-full bg-slate-200 dark:bg-slate-700 rounded-full h-2">
+              <Label>上传进度</Label>
+              <div className="w-full bg-slate-200 dark:bg-slate-800 rounded-full h-2.5">
                 <div 
-                  className="bg-primary h-2 rounded-full transition-all duration-300"
+                  className="bg-primary h-2.5 rounded-full transition-all duration-300"
                   style={{ width: `${uploadProgress}%` }}
-                ></div>
+                />
               </div>
+              <div className="text-right text-sm text-muted-foreground">{uploadProgress}%</div>
             </div>
           )}
+          
+          <div className="flex justify-between gap-2 pt-4">
+            <div>
+              {selectedFile && (
+                <div className="text-sm text-muted-foreground">
+                  已选择文件: <span className="font-medium">{selectedFile.name}</span> 
+                  <span className="ml-2">({Math.round(selectedFile.size / 1024)} KB)</span>
+                </div>
+              )}
+            </div>
+          </div>
         </div>
         
         <DialogFooter>
-          <Button 
-            variant="outline" 
-            onClick={handleClose}
-            disabled={isUploading}
-          >
+          <Button variant="outline" onClick={handleClose} disabled={isUploading}>
             取消
           </Button>
           <Button 
             type="submit" 
-            onClick={handleUpload}
+            onClick={handleUpload} 
             disabled={isUploading}
-            className="bg-primary hover:bg-primary/90"
+            className="flex items-center gap-1"
           >
             {isUploading ? (
-              <div className="flex items-center gap-2">
-                <span>上传中</span>
-                <span>({uploadProgress}%)</span>
-              </div>
+              <>
+                <div className="animate-spin w-4 h-4 border-2 border-current border-t-transparent rounded-full mr-1" />
+                上传中...
+              </>
+            ) : uploadProgress === 100 ? (
+              <>
+                <Check className="w-4 h-4 mr-1" />
+                已完成
+              </>
             ) : (
-              <div className="flex items-center gap-2">
-                <Upload className="h-4 w-4" />
-                <span>上传文件</span>
-              </div>
+              <>
+                <Upload className="w-4 h-4 mr-1" />
+                上传文件
+              </>
             )}
           </Button>
         </DialogFooter>

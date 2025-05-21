@@ -15,7 +15,7 @@ import MaterialListDialog from '@/components/material-search/dialogs/MaterialLis
 
 // Import custom hooks
 import { useMaterialSearch } from '@/modules/materials/hooks/useMaterialSearch';
-import { useMindMap } from '@/modules/mindmap/hooks/useMindMap';
+import { useMindMap } from '@/modules/mindmap/bridges/hooks';
 import { useMaterialPreview } from '@/modules/materials/hooks/useMaterialPreview';
 
 /**
@@ -226,4 +226,5 @@ const MaterialSearchContainer: React.FC = () => {
 };
 
 export default MaterialSearchContainer;
+
 

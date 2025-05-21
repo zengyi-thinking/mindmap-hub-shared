@@ -1,4 +1,4 @@
-import { SharedMindMap, MindMapComment } from "@/modules/mindmap/types/mindmap";
+import { SharedMindMap, MindMapComment } from '@/modules/mindmap/bridges/types';
 // Don't import DiscussionTopic and DiscussionComment to avoid conflicts
 // import { DiscussionTopic, DiscussionComment } from "@/types/discussion";
 
@@ -695,4 +695,5 @@ export const mindMapsService = {
     return true;
   },
 };
+
 

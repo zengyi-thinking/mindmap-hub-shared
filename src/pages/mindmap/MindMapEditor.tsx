@@ -1,14 +1,15 @@
 import React, { useEffect, useRef } from 'react';
-import '@xyflow/react/dist/style.css';
 import { Textarea } from '@/components/ui/textarea';
 import { useParams } from 'react-router-dom';
-import MindMapHeader from '@/modules/mindmap/components/MindMapHeader';
-import MindMapTags from '@/modules/mindmap/components/MindMapTags';
-import NodeEditDialog from '@/modules/mindmap/components/NodeEditDialog';
-import MindMapWorkspace from '@/modules/mindmap/components/MindMapWorkspace';
-import AttachMaterialDialog from '@/modules/mindmap/components/AttachMaterialDialog';
-import NodeIconDialog from '@/modules/mindmap/components/NodeIconDialog';
-import { useMindMapEditor } from '@/modules/mindmap/hooks/useMindMapEditor';
+import {
+  MindMapHeader,
+  MindMapTags,
+  NodeEditDialog,
+  MindMapWorkspace,
+  NodeIconDialog,
+  AttachMaterialDialog
+} from '@/modules/mindmap/bridges/components';
+import { useMindMapEditor } from '@/modules/mindmap/bridges/hooks';
 import { toast } from '@/components/ui/use-toast';
 import { Button } from '@/components/ui/button';
 import { PlusCircle } from 'lucide-react';
@@ -194,4 +195,5 @@ const MindMapEditor: React.FC = () => {
 };
 
 export default MindMapEditor;
+
 

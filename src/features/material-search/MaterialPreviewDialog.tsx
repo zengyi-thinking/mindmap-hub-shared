@@ -81,7 +81,7 @@ const MaterialPreviewDialog: React.FC<MaterialPreviewDialogProps> = ({
         )}
         
         <div className="mt-6 min-h-[300px] border rounded-md overflow-hidden">
-          <FilePreview fileData={material} />
+          <FilePreview file={material} />
         </div>
         
         <div className="flex justify-between mt-4">

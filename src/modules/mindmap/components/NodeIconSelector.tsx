@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { 
   Brain, 
@@ -109,4 +108,4 @@ const NodeIconSelector: React.FC<NodeIconSelectorProps> = ({ onSelect }) => {
   );
 };
 
-export default NodeIconSelector;
+export default NodeIconSelector; 

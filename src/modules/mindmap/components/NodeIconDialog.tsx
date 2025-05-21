@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -38,5 +37,4 @@ const NodeIconDialog: React.FC<NodeIconDialogProps> = ({
   );
 };
 
-export default NodeIconDialog;
-
+export default NodeIconDialog; 

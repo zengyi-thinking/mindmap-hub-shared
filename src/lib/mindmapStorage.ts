@@ -1,5 +1,4 @@
-
-import { MindMap } from '../types/mindmap';
+import { MindMap } from '@/modules/mindmap/bridges/types';
 
 // 本地存储键名
 const STORAGE_KEY = 'mindmap_hub_mindmaps';

@@ -17,6 +17,7 @@ import Dashboard from "./pages/dashboard/Dashboard";
 import MyMindMaps from "./pages/mindmap/MyMindMaps";
 import MaterialUpload from "./pages/material/MaterialUpload";
 import MaterialSearch from "./pages/material-search/MaterialSearch";
+import MermaidMapTest from "./pages/material-search/MermaidMapTest";
 import MaterialDetail from "./pages/material/MaterialDetail";
 import DiscussionCenter from "./pages/discussions/DiscussionCenter";
 import PersonalCenter from "./pages/profile/PersonalCenter";
@@ -61,6 +62,7 @@ function App() {
                   <Route path="/my-mindmaps" element={<MyMindMaps />} />
                   <Route path="/material-upload" element={<MaterialUpload />} />
                   <Route path="/material-search" element={<MaterialSearch />} />
+                  <Route path="/material-search/mermaid-test" element={<MermaidMapTest />} />
                   <Route path="/material/:id" element={<MaterialDetail />} />
                   <Route path="/discussion" element={<DiscussionCenter />} />
                   <Route path="/personal" element={<PersonalCenter />} />

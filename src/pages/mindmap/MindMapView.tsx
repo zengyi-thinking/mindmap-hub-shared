@@ -9,18 +9,18 @@ import {
   Background,
   Controls,
   BackgroundVariant
-} from '@xyflow/react';
-import '@xyflow/react/dist/style.css';
+} from '@/components/ui/react-flow-mock';
+// import '@xyflow/react/dist/style.css';
 import { mindmapService } from '@/lib/mindmapStorage';
 import { userFilesService } from '@/lib/storage';
 import { useAuth } from '@/lib/auth';
-import { MindMap } from '@/modules/mindmap/types/mindmap';
-import MaterialNode from '@/modules/mindmap/components/MaterialNode';
+import { MindMap } from '@/modules/mindmap/bridges/types';
+import { MaterialNode } from '@/modules/mindmap/bridges/components';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Material } from '@/modules/materials/types/materials';
-import NodeUploadForm from '@/modules/mindmap/components/NodeUploadForm';
+import { NodeUploadForm } from '@/modules/mindmap/bridges/components';
 import { toast } from '@/components/ui/use-toast';
 
 // Register custom node types
@@ -410,4 +410,5 @@ const MindMapView: React.FC = () => {
 };
 
 export default MindMapView;
+
 

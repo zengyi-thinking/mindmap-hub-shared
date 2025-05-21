@@ -1,5 +1,4 @@
-
-import { TagCategory } from "../types/materials";
+import { TagCategory } from "@/modules/materials/types/materials";
 
 export const tagHierarchy: TagCategory[] = [
   {
