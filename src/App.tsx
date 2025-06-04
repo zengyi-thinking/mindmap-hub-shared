@@ -31,7 +31,6 @@ import MindMapView from './pages/mindmap/MindMapView';
 import MindMapMaterials from './pages/mindmap/MindMapMaterials';
 import GlobalMaterialMap from './pages/material-search/GlobalMaterialMap';
 import ActivityTracker from './components/global/ActivityTracker';
-import AiAssistant from './components/ai/AiAssistant';
 
 const queryClient = new QueryClient();
 
@@ -81,7 +80,6 @@ function App() {
         <Toaster />
         <Sonner />
         <ActivityTracker />
-        <AiAssistant />
       </ThemeProvider>
     </QueryClientProvider>
   );

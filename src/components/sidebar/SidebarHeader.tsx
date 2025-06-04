@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { ChevronRight, BrainCircuit } from 'lucide-react';
@@ -23,7 +22,7 @@ const SidebarHeader: React.FC = () => {
               transition={{ duration: 0.2 }}
               className="overflow-hidden"
             >
-              <span className="font-bold text-xl overflow-hidden whitespace-nowrap text-primary">MindMap</span>
+              <span className="font-bold text-xl overflow-hidden whitespace-nowrap text-primary">FileMap</span>
             </motion.div>
           )}
         </AnimatePresence>
